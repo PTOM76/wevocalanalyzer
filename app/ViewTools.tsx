@@ -1,7 +1,7 @@
 import { Divider, IconButton, Tooltip } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { faAnglesRight, faChartArea, faCircleDot, faExpand, faMagnifyingGlassMinus, faMagnifyingGlassPlus, faMusic, faVolumeHigh, faWaveSquare } from '@fortawesome/free-solid-svg-icons'
+import { faAnglesRight, faBars, faChartArea, faCircleDot, faExpand, faMagnifyingGlassMinus, faMagnifyingGlassPlus, faMusic, faVolumeHigh, faWaveSquare } from '@fortawesome/free-solid-svg-icons'
 import type { WheelZoom } from 'wevocal-lib/react'
 import { useT, type MessageKey } from './i18n'
 import { LANES, type Lane, type LaneFlags } from './layout'
@@ -35,6 +35,8 @@ interface Props {
   onLaneToggle: (lane: Lane) => void
   showFormants: boolean
   onShowFormantsChange: (v: boolean) => void
+  showHarmonics: boolean
+  onShowHarmonicsChange: (v: boolean) => void
 }
 
 /** 帯ごとの名前とアイコン */
@@ -61,6 +63,7 @@ export default function ViewTools(p: Props) {
         <SmallButton key={l} title={t(LANE_INFO[l].label)} icon={LANE_INFO[l].icon} pressed={p.lanes[l]} disabled={off || (p.lanes[l] && LANES.filter((x) => p.lanes[x]).length === 1)} onClick={() => p.onLaneToggle(l)} />
       ))}
       <SmallButton title={t('analysis.showFormants')} icon={faCircleDot} pressed={p.showFormants} disabled={off || !p.lanes.spec} onClick={() => p.onShowFormantsChange(!p.showFormants)} />
+      <SmallButton title={t('analysis.harmonics')} icon={faBars} pressed={p.showHarmonics} disabled={off || !p.lanes.spec} onClick={() => p.onShowHarmonicsChange(!p.showHarmonics)} />
     </>
   )
 }

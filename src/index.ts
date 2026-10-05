@@ -3,9 +3,9 @@
  * WeVocalSynth からは追加機能として使う（今のところスペクトログラムだけ。docs/PLAN.md）
  */
 import type { Clip } from 'wevocal-lib'
-import type { AnalyzeOptions, AnalyzeRequest, Formants, Pitch, Spectrogram, WorkerMessage } from './types'
+import type { AnalyzeOptions, AnalyzeRequest, FormantOptions, Formants, Pitch, PitchOptions, Spectrogram, SpectrogramOptions, WorkerMessage } from './types'
 
-export type { AnalyzeOptions, Formants, Level, Pitch, Spectrogram } from './types'
+export type { AnalyzeOptions, FormantOptions, Formants, Level, Pitch, PitchOptions, Spectrogram, SpectrogramOptions } from './types'
 export { analyzeLevel, LEVEL_FLOOR_DB } from './level'
 export { renderSpectrogram } from './spectrogram'
 
@@ -63,30 +63,30 @@ function mixDown(channels: Float32Array[]): Float32Array {
 }
 
 /** Worker で `kind` の解析をする（チャンネルは平均してから） */
-async function request(kind: AnalyzeRequest['kind'], clip: Clip, opts: AnalyzeOptions) {
+async function request(kind: AnalyzeRequest['kind'], clip: Clip, opts: AnalyzeOptions, params: Pick<AnalyzeRequest, 'window' | 'minHz' | 'maxHz' | 'ceiling'> = {}) {
   opts.signal?.throwIfAborted()
   const id = nextId++
   const samples = mixDown(clip.channels)
   return new Promise<Uint8Array | Float32Array>((resolve, reject) => {
     pending.set(id, { resolve, reject, onProgress: opts.onProgress })
     opts.signal?.addEventListener('abort', () => abortAll(opts.signal?.reason), { once: true })
-    const req: AnalyzeRequest = { id, kind, samples, sampleRate: clip.sampleRate }
+    const req: AnalyzeRequest = { id, kind, samples, sampleRate: clip.sampleRate, ...params }
     getWorker().postMessage(req, [samples.buffer])
   })
 }
 
 /** スペクトログラム（表示用。STFT 2048 / 256、対数周波数 128 段、1 バイト） */
-export async function analyzeSpectrogram(clip: Clip, opts: AnalyzeOptions = {}): Promise<Spectrogram> {
-  const data = (await request('spec', clip, opts)) as Uint8Array
+export async function analyzeSpectrogram(clip: Clip, opts: SpectrogramOptions = {}): Promise<Spectrogram> {
+  const data = (await request('spec', clip, opts, { window: opts.window })) as Uint8Array
   return { data, frames: data.length / SPEC_ROWS, rows: SPEC_ROWS, hopSec: SPEC_HOP / clip.sampleRate, minHz: SPEC_MIN_HZ, maxHz: clip.sampleRate / 2 }
 }
 
 /** F0（ピッチ。YIN、10ms 間隔。wevocal-lib の F0 推定と同じもの） */
-export async function analyzePitch(clip: Clip, opts: AnalyzeOptions = {}): Promise<Pitch> {
-  return { data: (await request('f0', clip, opts)) as Float32Array, hopSec: HOP_SEC }
+export async function analyzePitch(clip: Clip, opts: PitchOptions = {}): Promise<Pitch> {
+  return { data: (await request('f0', clip, opts, { minHz: opts.minHz, maxHz: opts.maxHz })) as Float32Array, hopSec: HOP_SEC }
 }
 
 /** フォルマント F1〜F3（LPC、10ms 間隔）。無声区間にも値が入るので、表示するときは F0 で隠す */
-export async function analyzeFormants(clip: Clip, opts: AnalyzeOptions = {}): Promise<Formants> {
-  return { data: (await request('formant', clip, opts)) as Float32Array, count: FORMANT_COUNT, hopSec: HOP_SEC }
+export async function analyzeFormants(clip: Clip, opts: FormantOptions = {}): Promise<Formants> {
+  return { data: (await request('formant', clip, opts, { ceiling: opts.ceiling })) as Float32Array, count: FORMANT_COUNT, hopSec: HOP_SEC }
 }

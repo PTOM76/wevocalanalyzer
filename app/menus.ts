@@ -19,6 +19,7 @@ export interface MenuActions {
   lanes: LaneFlags
   freqZoomed: boolean
   showFormants: boolean
+  showHarmonics: boolean
   open: () => void
   /** 解析の結果（F0 など）があるか。CSV に書き出せるか */
   hasResults: boolean
@@ -29,6 +30,7 @@ export interface MenuActions {
   freqZoomOut: () => void
   freqZoomReset: () => void
   toggleFormants: () => void
+  toggleHarmonics: () => void
   zoomIn: () => void
   zoomOut: () => void
   showAll: () => void
@@ -89,6 +91,7 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       entries: [
         ...LANES.map((l) => ({ label: t(LANE_INFO[l].label), checked: a.lanes[l], disabled: !a.hasClip || (a.lanes[l] && LANES.filter((x) => a.lanes[x]).length === 1), onClick: () => a.toggleLane(l) })),
         { label: t('analysis.formants'), checked: a.showFormants, disabled: !a.hasClip || !a.lanes.spec, onClick: a.toggleFormants },
+        { label: t('analysis.harmonics'), checked: a.showHarmonics, disabled: !a.hasClip || !a.lanes.spec, onClick: a.toggleHarmonics },
         { divider: true },
         { label: t('wave.zoomIn'), shortcut: a.wheelZoom === 'wheel' ? 'Wheel' : 'Ctrl+Wheel', disabled: !a.hasClip || !a.canZoomIn, onClick: a.zoomIn },
         { label: t('wave.zoomOut'), disabled: !a.hasClip || !a.zoomed, onClick: a.zoomOut },

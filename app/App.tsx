@@ -61,28 +61,31 @@ export default function App() {
   const view = useWaveformView(player.duration, player.livePosition, player.playing, settings.follow, '', settings.wheelZoom)
   const keymap = resolveKeymap(settings.keymap)
 
-  // 開いたら、スペクトログラム、F0、フォルマントの順に計算する（Worker で。別のファイルを開いたら中止する）。
+  // 別のファイルを開いたら、選択と縦の拡大を戻し、強さを計算する（軽いのでその場で）
+  useEffect(() => {
+    setSelection(null)
+    setFreqRange(null)
+    setLevel(clip ? analyzeLevel(clip) : null)
+  }, [clip])
+  // スペクトログラム、F0、フォルマントの順に計算する（Worker で。別のファイルを開くか解析の設定を変えたら中止して計算し直す）。
   // 進み具合は 1 本のゲージにまとめる（重さの目安で 4 : 3 : 3 に割る）
   useEffect(() => {
     setSpec(null)
     setPitch(null)
     setFormants(null)
-    setSelection(null)
-    setFreqRange(null)
-    setLevel(clip ? analyzeLevel(clip) : null)
     if (!clip) return
     const ac = new AbortController()
     const job = startJob('analyze', t('job.kind.analyze'), () => ac.abort())
     const part = (from: number, span: number) => ({ signal: ac.signal, onProgress: (p: number) => job.update(from + p * span) })
     void (async () => {
-      setSpec(await analyzeSpectrogram(clip, part(0, 0.4)))
-      setPitch(await analyzePitch(clip, part(0.4, 0.3)))
-      setFormants(await analyzeFormants(clip, part(0.7, 0.3)))
+      setSpec(await analyzeSpectrogram(clip, { ...part(0, 0.4), window: settings.specWindow }))
+      setPitch(await analyzePitch(clip, { ...part(0.4, 0.3), minHz: settings.f0Min, maxHz: settings.f0Max }))
+      setFormants(await analyzeFormants(clip, { ...part(0.7, 0.3), ceiling: settings.formantCeiling }))
     })()
       .catch((e) => !ac.signal.aborted && setError(String(e)))
       .finally(job.end)
     return () => ac.abort()
-  }, [clip])
+  }, [clip, settings.specWindow, settings.f0Min, settings.f0Max, settings.formantCeiling])
 
   const open = async (file: File) => {
     try {
@@ -108,7 +111,7 @@ export default function App() {
   const center = view.view.start + view.view.dur / 2
   const zoomIn = () => view.zoomAround(ZOOM_STEP, center)
   const zoomOut = () => view.zoomAround(1 / ZOOM_STEP, center)
-  const toggleSet = (k: 'follow' | 'showFormants') => updateSettings({ [k]: !settings[k] })
+  const toggleSet = (k: 'follow' | 'showFormants' | 'showHarmonics') => updateSettings({ [k]: !settings[k] })
   // 帯の表示の切り替え（1 つは必ず残す）
   const toggleLane = (lane: Lane) => {
     const next = { ...settings.lanes, [lane]: !settings.lanes[lane] }
@@ -153,8 +156,8 @@ export default function App() {
   const menus = appMenus(
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
-      follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants,
-      open: picker.open, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'),
+      follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
+      open: picker.open, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -185,6 +188,8 @@ export default function App() {
       onLaneToggle={toggleLane}
       showFormants={settings.showFormants}
       onShowFormantsChange={(showFormants) => updateSettings({ showFormants })}
+      showHarmonics={settings.showHarmonics}
+      onShowHarmonicsChange={(showHarmonics) => updateSettings({ showHarmonics })}
     />
   )
   const editor = clip ? (
@@ -198,6 +203,7 @@ export default function App() {
       weights={settings.laneWeights}
       onWeightsChange={(laneWeights) => updateSettings({ laneWeights })}
       showFormants={settings.showFormants}
+      showHarmonics={settings.showHarmonics}
       freqRange={freqRange}
       onFreqZoom={(hz, factor) => freqZoom(hz, factor)}
       onHover={setHover}

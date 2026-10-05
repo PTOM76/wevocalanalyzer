@@ -266,3 +266,32 @@ export function meanLevel(start: number, end: number, level: Level | null) {
   for (let k = k0; k <= k1; k++, n++) sum += 10 ** (level.data[k] / 10)
   return n ? Math.max(LEVEL_FLOOR_DB, 10 * Math.log10(sum / n)) : null
 }
+
+/** 調波の線を引く数（F0 の何倍まで） */
+const HARMONICS = 10
+
+/** F0 の倍音（調波）の線をスペクトログラムに重ねる（2 倍〜）。スペクトログラムの縞と F0 の推定がそろっているかを見るため。無声区間は途切れる */
+export function drawHarmonics(b: LaneBox, spec: Spectrogram, pitch: Pitch) {
+  const { g, width, view } = b
+  const k0 = Math.max(0, Math.floor(view.start / pitch.hopSec))
+  const k1 = Math.min(pitch.data.length - 1, Math.ceil((view.start + view.dur) / pitch.hopSec))
+  g.strokeStyle = 'rgba(255, 255, 255, 0.55)'
+  g.lineWidth = 1
+  for (let n = 2; n <= HARMONICS; n++) {
+    g.beginPath()
+    let drawing = false
+    for (let k = k0; k <= k1; k++) {
+      const hz = pitch.data[k] * n
+      if (pitch.data[k] <= 0 || hz <= spec.minHz || hz >= spec.maxHz) {
+        drawing = false
+        continue
+      }
+      const px = timeToX(width, view, k * pitch.hopSec)
+      const py = specY(spec, b.top, b.h, hz)
+      if (drawing) g.lineTo(px, py)
+      else g.moveTo(px, py)
+      drawing = true
+    }
+    g.stroke()
+  }
+}

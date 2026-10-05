@@ -22,15 +22,21 @@ export interface Settings {
   /** 出す帯（初めは波形とスペクトログラムだけ）と、帯の高さの比（境目のドラッグで変える） */
   lanes: LaneFlags
   laneWeights: LaneWeights
-  /** フォルマントをスペクトログラムに重ねる */
+  /** フォルマントをスペクトログラムに重ねる、F0 の倍音（調波）の線を重ねる */
   showFormants: boolean
+  showHarmonics: boolean
+  /** 解析の設定: F0 を探す範囲（Hz）、フォルマントの最高周波数（Hz）、スペクトログラムの窓の長さ（サンプル） */
+  f0Min: number
+  f0Max: number
+  formantCeiling: number
+  specWindow: number
   /** ダイアログの出し方。auto は PWA かつ Chromium 系ならポップアップ、ほかはダイアログ。別窓を開けなければダイアログ */
   dialogWindow: WindowMode | 'auto'
   /** 開発版の更新（バージョンが同じでコミットだけ違う版）も知らせる */
   devUpdates: boolean
 }
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2 }, showFormants: true, dialogWindow: 'auto', devUpdates: false }
+export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2 }, showFormants: true, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, dialogWindow: 'auto', devUpdates: false }
 
 const KEY = 'wevocalanalyzer.settings'
 

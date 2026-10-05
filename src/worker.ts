@@ -8,9 +8,9 @@ interface DspExports {
   memory: WebAssembly.Memory
   alloc_f32(len: number): number
   free_f32(ptr: number, len: number): void
-  analyze_spectrogram(input: number, frames: number, sampleRate: number): number
-  analyze_f0(input: number, frames: number, sampleRate: number): number
-  analyze_formants(input: number, frames: number, sampleRate: number): number
+  analyze_spectrogram(input: number, frames: number, sampleRate: number, window: number): number
+  analyze_f0(input: number, frames: number, sampleRate: number, minHz: number, maxHz: number): number
+  analyze_formants(input: number, frames: number, sampleRate: number, ceiling: number): number
   output_u8_ptr(): number
   output_ptr(): number
 }
@@ -34,10 +34,10 @@ function analyze(dsp: DspExports, req: AnalyzeRequest): Uint8Array | Float32Arra
     new Float32Array(dsp.memory.buffer, input, n).set(req.samples)
     // wasm の呼び出しの中でメモリが増えうるので、view は呼び出しのあとで作る
     if (req.kind === 'spec') {
-      const frames = dsp.analyze_spectrogram(input, n, req.sampleRate)
+      const frames = dsp.analyze_spectrogram(input, n, req.sampleRate, req.window ?? 2048)
       return new Uint8Array(dsp.memory.buffer, dsp.output_u8_ptr(), frames * SPEC_ROWS).slice()
     }
-    const count = req.kind === 'f0' ? dsp.analyze_f0(input, n, req.sampleRate) : dsp.analyze_formants(input, n, req.sampleRate)
+    const count = req.kind === 'f0' ? dsp.analyze_f0(input, n, req.sampleRate, req.minHz ?? 60, req.maxHz ?? 1000) : dsp.analyze_formants(input, n, req.sampleRate, req.ceiling ?? 5500)
     return new Float32Array(dsp.memory.buffer, dsp.output_ptr(), count).slice()
   } finally {
     dsp.free_f32(input, n)

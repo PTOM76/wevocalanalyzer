@@ -10,19 +10,19 @@ use wevocal_lib::window::hann;
 pub const ROWS: usize = 128;
 /// 最低周波数（Hz）。最高はナイキスト周波数。
 pub const MIN_HZ: f32 = 50.0;
-/// フレーム長とホップ（サンプル）。
-const FRAME: usize = 2048;
+/// 既定のフレーム長（窓の長さ）とホップ（サンプル）。フレーム長は設定で変えられる（短いと広帯域、長いと狭帯域）。
+pub const FRAME: usize = 2048;
 pub const HOP: usize = 256;
 /// 表示する dB の範囲（これより小さい値は 0 になる）。
 const RANGE_DB: f32 = 90.0;
 
 /// モノラル信号 `x` のスペクトログラムを返す。フレーム k の段 r（0 が最低周波数）は
-/// `out[k * ROWS + r]`。フレーム k の中心は時刻 k × HOP（サンプル）。
-pub fn compute(x: &[f32], sample_rate: f32, progress: &mut dyn FnMut(f64)) -> Vec<u8> {
+/// `out[k * ROWS + r]`。フレーム k の中心は時刻 k × HOP（サンプル）。`frame` は窓の長さ（2 のべき乗）。
+pub fn compute(x: &[f32], sample_rate: f32, frame: usize, progress: &mut dyn FnMut(f64)) -> Vec<u8> {
     if x.is_empty() {
         return Vec::new();
     }
-    let n = FRAME;
+    let n = frame.next_power_of_two().max(256);
     let bins = n / 2 + 1;
     let fft = Fft::new(n);
     let window: Vec<f32> = hann(n);

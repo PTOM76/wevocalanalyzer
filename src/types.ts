@@ -29,6 +29,25 @@ export interface Level {
   hopSec: number
 }
 
+/** スペクトログラムの設定 */
+export interface SpectrogramOptions extends AnalyzeOptions {
+  /** 窓の長さ（サンプル、2 のべき乗）。短いと時間の細かさ（広帯域）、長いと周波数の細かさ（狭帯域）。既定は 2048 */
+  window?: number
+}
+
+/** F0 の設定 */
+export interface PitchOptions extends AnalyzeOptions {
+  /** 探す範囲（Hz）。既定は 60〜1000 */
+  minHz?: number
+  maxHz?: number
+}
+
+/** フォルマントの設定 */
+export interface FormantOptions extends AnalyzeOptions {
+  /** 最高周波数（Hz）。男声 5000、女声 5500 が目安。既定は 5500 */
+  ceiling?: number
+}
+
 /** 解析の共通の指定 */
 export interface AnalyzeOptions {
   /** 進み具合（0〜1） */
@@ -41,6 +60,11 @@ export interface AnalyzeOptions {
 export interface AnalyzeRequest {
   id: number
   kind: 'spec' | 'f0' | 'formant'
+  /** 解析の設定（スペクトログラムの窓の長さ、F0 を探す範囲、フォルマントの最高周波数） */
+  window?: number
+  minHz?: number
+  maxHz?: number
+  ceiling?: number
   samples: Float32Array
   sampleRate: number
 }

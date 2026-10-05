@@ -1,6 +1,6 @@
 //! フォルマント（F1〜F3）の推定（表示用）。
 //!
-//! 約 11kHz に間引き、プリエンファシスと窓を掛けたフレームの LPC（自己相関法、Levinson-Durbin）から
+//! 最高周波数（男声 5000Hz、女声 5500Hz が目安）の 2 倍に間引き、プリエンファシスと窓を掛けたフレームの LPC（自己相関法、Levinson-Durbin）から
 //! スペクトル包絡を求め、その山を低い方から `COUNT` 個取る。間隔は F0 と同じ `HOP_SEC`。
 //! 有声か無声かは見ないので、表示する側が F0（無声は 0）で隠す。
 
@@ -10,39 +10,40 @@ use wevocal_lib::window::hann;
 
 /// 取るフォルマントの数（F1〜F3）。
 pub const COUNT: usize = 3;
-/// 間引いたあとのサンプルレート（Hz）。F3 まで（約 3.5kHz）を含められる高さ。
-const RATE: f32 = 11025.0;
 /// フレーム長（秒）。
 const FRAME_SEC: f32 = 0.025;
-/// LPC の次数（間引いたサンプルレートの kHz ＋ 2 が目安）。
-const ORDER: usize = 13;
+/// 既定の最高周波数（Hz）。
+pub const DEFAULT_CEILING: f32 = 5500.0;
 /// 包絡を調べる周波数の点の数（0〜ナイキスト）。
 const GRID: usize = 512;
 /// これより低い山はフォルマントとみなさない（Hz）。
 const MIN_HZ: f32 = 150.0;
 
 /// モノラル信号 `x` のフォルマントを返す。フレーム k の F(i+1) は `out[k * COUNT + i]`（Hz、見つからなければ 0）。
-/// フレーム k の中心は時刻 k × HOP_SEC。
-pub fn estimate(x: &[f32], sample_rate: f32, progress: &mut dyn FnMut(f64)) -> Vec<f32> {
+/// フレーム k の中心は時刻 k × HOP_SEC。`ceiling` は最高周波数（Hz。この 2 倍に間引く）。
+pub fn estimate(x: &[f32], sample_rate: f32, ceiling: f32, progress: &mut dyn FnMut(f64)) -> Vec<f32> {
     if x.is_empty() {
         return Vec::new();
     }
-    let ratio = (sample_rate / RATE) as f64;
+    let rate = (ceiling * 2.0).clamp(4000.0, sample_rate);
+    // LPC の次数（間引いたサンプルレートの kHz ＋ 2 が目安）
+    let order = (rate / 1000.0).round() as usize + 2;
+    let ratio = (sample_rate / rate) as f64;
     let y = if ratio > 1.0 {
         resample(x, ratio, (x.len() as f64 / ratio) as usize)
     } else {
         x.to_vec()
     };
-    let sr = if ratio > 1.0 { RATE } else { sample_rate };
+    let sr = if ratio > 1.0 { rate } else { sample_rate };
     let n = (FRAME_SEC * sr) as usize;
     let hop = HOP_SEC * sr;
     let window = hann(n);
     let frames = (x.len() as f32 / sample_rate / HOP_SEC) as usize + 1;
     let mut out = vec![0.0f32; frames * COUNT];
     // 包絡を調べる点ごとの cos / sin（e^{-jωk}）を先に作る
-    let (cos, sin): (Vec<f32>, Vec<f32>) = (0..GRID * (ORDER + 1))
+    let (cos, sin): (Vec<f32>, Vec<f32>) = (0..GRID * (order + 1))
         .map(|i| {
-            let (g, k) = (i / (ORDER + 1), i % (ORDER + 1));
+            let (g, k) = (i / (order + 1), i % (order + 1));
             let w = std::f32::consts::PI * g as f32 / (GRID - 1) as f32 * k as f32;
             (w.cos(), w.sin())
         })
@@ -62,13 +63,13 @@ pub fn estimate(x: &[f32], sample_rate: f32, progress: &mut dyn FnMut(f64)) -> V
             frame[i] = (v - 0.97 * prev) * window[i];
             prev = v;
         }
-        let Some(a) = lpc(&frame) else { continue };
+        let Some(a) = lpc(&frame, order) else { continue };
         // 包絡 1 / |A(e^{jω})|²（山の位置だけを見るので、大きさはそろえない）
         for (g, e) in env.iter_mut().enumerate() {
             let (mut re, mut im) = (0.0f32, 0.0f32);
             for (j, &c) in a.iter().enumerate() {
-                re += c * cos[g * (ORDER + 1) + j];
-                im -= c * sin[g * (ORDER + 1) + j];
+                re += c * cos[g * (order + 1) + j];
+                im -= c * sin[g * (order + 1) + j];
             }
             *e = 1.0 / (re * re + im * im + 1e-12);
         }
@@ -94,23 +95,20 @@ pub fn estimate(x: &[f32], sample_rate: f32, progress: &mut dyn FnMut(f64)) -> V
     out
 }
 
-/// 自己相関法の LPC 係数 a[0..=ORDER]（a[0] = 1）。無音などで求まらなければ None。
-fn lpc(x: &[f32]) -> Option<Vec<f32>> {
-    let mut r = [0.0f64; ORDER + 1];
-    for (lag, v) in r.iter_mut().enumerate() {
-        *v = x[lag..].iter().zip(x).map(|(&a, &b)| a as f64 * b as f64).sum();
-    }
+/// 自己相関法の LPC 係数 a[0..=order]（a[0] = 1）。無音などで求まらなければ None。
+fn lpc(x: &[f32], order: usize) -> Option<Vec<f32>> {
+    let r: Vec<f64> = (0..=order).map(|lag| x[lag..].iter().zip(x).map(|(&a, &b)| a as f64 * b as f64).sum()).collect();
     if r[0] < 1e-10 {
         return None;
     }
     // Levinson-Durbin
-    let mut a = [0.0f64; ORDER + 1];
+    let mut a = vec![0.0f64; order + 1];
     a[0] = 1.0;
     let mut err = r[0];
-    for i in 1..=ORDER {
+    for i in 1..=order {
         let acc: f64 = (1..i).map(|j| a[j] * r[i - j]).sum();
         let k = -(r[i] + acc) / err;
-        let prev = a;
+        let prev = a.clone();
         for j in 1..i {
             a[j] = prev[j] + k * prev[i - j];
         }
@@ -147,7 +145,7 @@ mod tests {
         }
         let peak = x.iter().fold(0.0f32, |m, v| m.max(v.abs()));
         x.iter_mut().for_each(|v| *v /= peak);
-        let out = estimate(&x, sr, &mut |_| {});
+        let out = estimate(&x, sr, DEFAULT_CEILING, &mut |_| {});
         let k = 25;
         let f = &out[k * COUNT..(k + 1) * COUNT];
         for (got, want) in f.iter().zip([700.0f32, 1200.0, 2600.0]) {

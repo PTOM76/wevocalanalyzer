@@ -5,7 +5,7 @@ import { computePeaks, drawPlayhead, drawRuler, drawSelection, drawWave, prepare
 import { Minimap, useEdgeScroll, useRangeEdges, useTouchGestures, type EdgeDrag, type useWaveformView } from 'wevocal-lib/react'
 import type { Formants, Level, Pitch, Spectrogram } from '../src/index'
 import { useT } from './i18n'
-import { cropSpec, drawFormants, drawLevel, drawPitch, drawSpec, pitchHzAt, pitchRange, specHzAt, type FreqRange } from './lanes'
+import { cropSpec, drawFormants, drawHarmonics, drawLevel, drawPitch, drawSpec, pitchHzAt, pitchRange, specHzAt, type FreqRange } from './lanes'
 import { dividerAt, dragDivider, laneAt, layoutLanes, type LaneFlags, type LaneRect, type LaneWeights } from './layout'
 
 /** カーソルの下の時刻と、スペクトログラムか F0 の帯の上ならその高さの周波数（Hz） */
@@ -25,8 +25,9 @@ interface Props {
   lanes: LaneFlags
   weights: LaneWeights
   onWeightsChange: (w: LaneWeights) => void
-  /** フォルマントをスペクトログラムに重ねるか */
+  /** フォルマント、F0 の倍音（調波）の線をスペクトログラムに重ねるか */
   showFormants: boolean
+  showHarmonics: boolean
   /** スペクトログラムで見る周波数の範囲（縦の拡大。null なら全体）。Alt+ホイールで `onFreqZoom` を呼ぶ */
   freqRange: FreqRange | null
   onFreqZoom: (centerHz: number, factor: number) => void
@@ -113,11 +114,12 @@ export default function WaveView(p: Props) {
       if (r.lane === 'wave') drawWave({ g, width: size.w, view: v.view, colors, waveH: r.h }, peaks)
       else if (r.lane === 'spec') {
         drawSpec(box, spec, colors.divider, colors.textSecondary, analyzing)
+        if (p.showHarmonics && spec && p.pitch) drawHarmonics(box, spec, p.pitch)
         if (p.showFormants && spec && p.formants && p.pitch) drawFormants(box, spec, p.formants, p.pitch)
       } else if (r.lane === 'f0') drawPitch(box, p.pitch, range, pal.secondary.main, colors.divider, colors.textSecondary, analyzing)
       else drawLevel(box, p.level, pal.primary.main, colors.divider, colors.textSecondary)
     }
-  }, [peaks, spec, p.pitch, p.formants, p.level, range, p.showFormants, rects, size, v.view, colors, pal, font, t])
+  }, [peaks, spec, p.pitch, p.formants, p.level, range, p.showFormants, p.showHarmonics, rects, size, v.view, colors, pal, font, t])
 
   // 選択範囲と再生位置の線。重ねた別の Canvas に描き、再生中は毎フレーム動かす（帯を描き直さない）
   useEffect(() => {

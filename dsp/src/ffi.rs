@@ -49,9 +49,9 @@ pub unsafe extern "C" fn free_f32(ptr: *mut f32, len: usize) {
 /// # Safety
 /// `input` は `frames` 個の有効な f32 を指していること。
 #[no_mangle]
-pub unsafe extern "C" fn analyze_spectrogram(input: *const f32, frames: usize, sample_rate: f32) -> usize {
+pub unsafe extern "C" fn analyze_spectrogram(input: *const f32, frames: usize, sample_rate: f32, window: usize) -> usize {
     let x = std::slice::from_raw_parts(input, frames);
-    let out = spec::compute(x, sample_rate, &mut host_progress);
+    let out = spec::compute(x, sample_rate, window, &mut host_progress);
     let n = out.len() / spec::ROWS;
     OUTPUT_U8.with(|o| *o.borrow_mut() = out);
     n
@@ -62,9 +62,10 @@ pub unsafe extern "C" fn analyze_spectrogram(input: *const f32, frames: usize, s
 /// # Safety
 /// `input` は `frames` 個の有効な f32 を指していること。
 #[no_mangle]
-pub unsafe extern "C" fn analyze_f0(input: *const f32, frames: usize, sample_rate: f32) -> usize {
+pub unsafe extern "C" fn analyze_f0(input: *const f32, frames: usize, sample_rate: f32, min_hz: f32, max_hz: f32) -> usize {
     let x = std::slice::from_raw_parts(input, frames);
-    let out = f0::estimate(x, sample_rate, &mut host_progress);
+    let params = f0::Params { min_hz, max_hz, ..Default::default() };
+    let out = f0::estimate_with(x, sample_rate, &params, &mut host_progress);
     let n = out.len();
     OUTPUT.with(|o| *o.borrow_mut() = out);
     n
@@ -75,9 +76,9 @@ pub unsafe extern "C" fn analyze_f0(input: *const f32, frames: usize, sample_rat
 /// # Safety
 /// `input` は `frames` 個の有効な f32 を指していること。
 #[no_mangle]
-pub unsafe extern "C" fn analyze_formants(input: *const f32, frames: usize, sample_rate: f32) -> usize {
+pub unsafe extern "C" fn analyze_formants(input: *const f32, frames: usize, sample_rate: f32, ceiling: f32) -> usize {
     let x = std::slice::from_raw_parts(input, frames);
-    let out = formant::estimate(x, sample_rate, &mut host_progress);
+    let out = formant::estimate(x, sample_rate, ceiling, &mut host_progress);
     let n = out.len();
     OUTPUT.with(|o| *o.borrow_mut() = out);
     n
