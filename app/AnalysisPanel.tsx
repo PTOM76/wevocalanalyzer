@@ -1,10 +1,13 @@
 import { Box, Stack, Typography } from '@mui/material'
 import type { Range } from 'wevocal-lib'
-import type { Formants, Level, Pitch } from '../src/index'
+import { useMemo } from 'react'
+import type { Formants, Level, Pitch, Spectrogram } from '../src/index'
+import SpectrumPlot, { spectrumOf } from './SpectrumPlot'
 import { useT } from './i18n'
 import { FORMANT_COLORS, levelAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
 
 interface Props {
+  spec: Spectrogram | null
   pitch: Pitch | null
   formants: Formants | null
   level: Level | null
@@ -39,6 +42,9 @@ export default function AnalysisPanel(p: Props) {
   const r = p.selection ? rangeStats(p.selection.start, p.selection.end, p.pitch, p.formants) : null
   const db = (x: number | null) => (x === null ? '—' : `${x.toFixed(1)} dB`)
   const lv = levelAt(p.time, p.level)
+  // スペクトル: 選択範囲があればその平均、なければその時点
+  const [s0, s1] = p.selection ? [p.selection.start, p.selection.end] : [p.time, p.time]
+  const spectrum = useMemo(() => (p.spec ? spectrumOf(p.spec, s0, s1) : null), [p.spec, s0, s1])
   return (
     <Stack sx={{ p: 1.5, gap: 1.5 }}>
       <Stack sx={{ gap: 0.5 }}>
@@ -79,6 +85,12 @@ export default function AnalysisPanel(p: Props) {
           ) : (
             <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{t('analysis.unvoiced')}</Typography>
           )}
+        </Stack>
+      )}
+      {p.spec && spectrum && (
+        <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t(p.selection ? 'analysis.spectrumSelection' : 'analysis.spectrumAt')}</Typography>
+          <SpectrumPlot spec={p.spec} values={spectrum} formants={(p.selection ? r?.formants : v.formants) ?? []} />
         </Stack>
       )}
     </Stack>

@@ -20,6 +20,9 @@ export interface MenuActions {
   freqZoomed: boolean
   showFormants: boolean
   open: () => void
+  /** 解析の結果（F0 など）があるか。CSV に書き出せるか */
+  hasResults: boolean
+  exportCsv: () => void
   showSettings: () => void
   toggleLane: (lane: Lane) => void
   freqZoomIn: () => void
@@ -66,7 +69,11 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
     {
       label: t('menu.file'),
       accessKey: 'F',
-      entries: [{ label: t('menu.open'), shortcut: key('open'), onClick: a.open }, ...(mobile ? [] : [{ divider: true as const }, { label: t('menu.settings'), onClick: a.showSettings }])],
+      entries: [
+        { label: t('menu.open'), shortcut: key('open'), onClick: a.open },
+        { label: t(a.hasSelection ? 'menu.exportCsvSelection' : 'menu.exportCsv'), disabled: !a.hasResults, onClick: a.exportCsv },
+        ...(mobile ? [] : [{ divider: true as const }, { label: t('menu.settings'), onClick: a.showSettings }]),
+      ],
     },
     {
       label: t('menu.edit'),

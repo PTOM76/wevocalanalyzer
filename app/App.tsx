@@ -16,6 +16,7 @@ import AnalysisPanel from './AnalysisPanel'
 import { LangContext, resolveLang, setLang, t } from './i18n'
 import { resolveKeymap } from './keymap'
 import { licenseEntries } from './licenses'
+import { analysisCsv, downloadAnalysisCsv } from './exportCsv'
 import LiveTime from './LiveTime'
 import { appMenus } from './menus'
 import SettingsDialog from './SettingsDialog'
@@ -153,7 +154,7 @@ export default function App() {
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants,
-      open: picker.open, showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'),
+      open: picker.open, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -224,7 +225,7 @@ export default function App() {
       )}
     </Stack>
   )
-  const analysis = <AnalysisPanel pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
+  const analysis = <AnalysisPanel spec={spec} pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
   const jobLabel = () => t('job.kind.analyze')
 
   return (
