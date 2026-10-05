@@ -9,7 +9,7 @@ export type { AnalyzeOptions, Spectrogram } from './types'
 export { renderSpectrogram } from './spectrogram'
 
 /** ライブラリの版（追加機能のマニフェストと合わせる） */
-export const ANALYZER_VERSION = '0.1.0'
+export const ANALYZER_VERSION = '1.0.0'
 
 /** Rust 側 `spec::ROWS`、`spec::HOP`、`spec::MIN_HZ` と一致させる */
 const SPEC_ROWS = 128
