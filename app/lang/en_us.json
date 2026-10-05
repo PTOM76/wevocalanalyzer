@@ -10,8 +10,9 @@
   "empty.open": "Open file",
   "wave.scroll": "View range",
   "tab.analysis": "Analysis",
-  "analysis.soon": "Spectrogram, F0 and formant views are coming soon",
+  "analysis.soon": "F0 and formant views are coming soon",
   "error.open": "Could not open the file: {message}",
   "about.version": "Version",
-  "job.kind.analyze": "Analysis"
+  "job.kind.analyze": "Analysis",
+  "analysis.analyzing": "Analyzing…"
 }

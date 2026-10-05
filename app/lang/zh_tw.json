@@ -10,8 +10,9 @@
   "empty.open": "開啟檔案",
   "wave.scroll": "顯示範圍",
   "tab.analysis": "分析",
-  "analysis.soon": "頻譜圖、F0 和共振峰的顯示正在準備中",
+  "analysis.soon": "F0 和共振峰的顯示正在準備中",
   "error.open": "無法開啟檔案: {message}",
   "about.version": "版本",
-  "job.kind.analyze": "分析"
+  "job.kind.analyze": "分析",
+  "analysis.analyzing": "分析中…"
 }

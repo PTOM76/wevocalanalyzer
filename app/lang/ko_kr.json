@@ -10,8 +10,9 @@
   "empty.open": "파일 열기",
   "wave.scroll": "표시 범위",
   "tab.analysis": "분석",
-  "analysis.soon": "스펙트로그램, F0, 포먼트 표시는 준비 중입니다",
+  "analysis.soon": "F0, 포먼트 표시는 준비 중입니다",
   "error.open": "파일을 열 수 없습니다: {message}",
   "about.version": "버전",
-  "job.kind.analyze": "분석"
+  "job.kind.analyze": "분석",
+  "analysis.analyzing": "분석 중…"
 }

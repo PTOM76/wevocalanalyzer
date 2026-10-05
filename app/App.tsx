@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import {
   AboutDialog, AppHeader, BottomBar, DesktopLayout, FULL_HEIGHT, LABELS, MobileLayout, PevenLabels, StatusBar, StatusItem, StatusSpacer,
-  JobGauge, useFileDrop, useFilePicker, useMobileLayout, type MenuGroup,
+  JobGauge, startJob, useFileDrop, useFilePicker, useMobileLayout, type MenuGroup,
 } from 'pevenmui'
 import { AUDIO_ACCEPT, decodeFile, type Clip } from 'wevocal-lib'
 import { useWaveformView } from 'wevocal-lib/react'
 import { LangContext, resolveLang, setLang, t } from './i18n'
+import { analyzeSpectrogram, type Spectrogram } from '../src/index'
 import { usePlayer } from './usePlayer'
 import WaveView from './WaveView'
 
@@ -25,8 +26,21 @@ export default function App() {
   const [name, setName] = useState('')
   const [error, setError] = useState('')
   const [about, setAbout] = useState(false)
+  const [spec, setSpec] = useState<Spectrogram | null>(null)
   const player = usePlayer(clip)
   const view = useWaveformView(player.duration, player.livePosition, player.playing)
+
+  // 開いたらスペクトログラムを計算する（Worker で。別のファイルを開いたら中止する）
+  useEffect(() => {
+    setSpec(null)
+    if (!clip) return
+    const ac = new AbortController()
+    const job = startJob('analyze', t('job.kind.analyze'), () => ac.abort())
+    analyzeSpectrogram(clip, { signal: ac.signal, onProgress: job.update })
+      .then(setSpec, (e) => !ac.signal.aborted && setError(String(e)))
+      .finally(job.end)
+    return () => ac.abort()
+  }, [clip])
 
   const open = async (file: File) => {
     try {
@@ -65,7 +79,7 @@ export default function App() {
   )
 
   const editor = clip ? (
-    <WaveView clip={clip} view={view} position={player.position} playing={player.playing} livePosition={player.livePosition} onSeek={player.seek} />
+    <WaveView clip={clip} spec={spec} view={view} position={player.position} playing={player.playing} livePosition={player.livePosition} onSeek={player.seek} />
   ) : (
     <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center', gap: 2, p: 2 }}>
       <Typography sx={{ color: 'text.secondary' }}>{t('empty.hint')}</Typography>

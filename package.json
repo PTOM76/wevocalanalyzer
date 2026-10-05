@@ -7,6 +7,7 @@
   "license": "MIT",
   "exports": "./src/index.ts",
   "scripts": {
+    "build:wasm": "node scripts/build-wasm.mjs",
     "dev": "vite",
     "build": "tsc -p tsconfig.app.json && vite build",
     "lint": "oxlint app src",

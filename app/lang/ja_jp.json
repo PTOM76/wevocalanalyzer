@@ -10,8 +10,9 @@
   "empty.open": "ファイルを開く",
   "wave.scroll": "表示範囲",
   "tab.analysis": "解析",
-  "analysis.soon": "スペクトログラム、F0、フォルマントの表示は準備中です",
+  "analysis.soon": "F0、フォルマントの表示は準備中です",
   "error.open": "ファイルを開けませんでした: {message}",
   "about.version": "バージョン",
-  "job.kind.analyze": "解析"
+  "job.kind.analyze": "解析",
+  "analysis.analyzing": "解析中…"
 }

@@ -9,8 +9,8 @@ WeVocalAnalyzer を、波形を表示する土台から声の解析のツール�
 - 音声は外部に送らない
 
 ## 2. 手順
-1. スペクトログラム: Synth の `dsp/src/spec.rs` と `src/components/waveform/spectrogramImage.ts`、`draw.ts` のスペクトログラムの描画を移す。計算は Rust（wasm）で、STFT は wevocal-lib のものを使う。重いので Worker で行う
-2. ライブラリの API: `analyzeSpectrogram(clip, options)`。進み具合と中止は Extractor とそろえる
+1. （済み）スペクトログラム: Synth の `dsp/src/spec.rs` と `src/components/waveform/spectrogramImage.ts`、`draw.ts` のスペクトログラムの描画を移す。計算は Rust（wasm）で、STFT は wevocal-lib のものを使う。重いので Worker で行う
+2. （済み）ライブラリの API: `analyzeSpectrogram(clip, { onProgress, signal })`、`renderSpectrogram`
 3. WeVocalSynth に submodule として足し、追加機能（`analyzer`）として登録する。Synth のスペクトログラムは、追加機能に切り替えてから消す
 4. F0、フォルマント（F1〜F3）の帯。F0 は wevocal-lib の `f0`（YIN）を使う
 5. 周波数の解析（選択範囲の平均のスペクトル）、カーソル位置の数値、CSV の書き出し
