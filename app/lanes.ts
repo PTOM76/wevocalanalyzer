@@ -138,3 +138,37 @@ function noteName(hz: number) {
   const cents = Math.round((m - n) * 100)
   return `${NOTE_NAMES[((n % 12) + 12) % 12]}${Math.floor(n / 12) - 1} ${cents >= 0 ? '+' : ''}${cents}c`
 }
+
+/** 選択範囲の値: 声のある区間の F0 の平均（半音で平均）と音名、声のある割合、F1〜F3 の平均（Hz） */
+export function rangeStats(start: number, end: number, pitch: Pitch | null, formants: Formants | null) {
+  if (!pitch) return null
+  const k0 = Math.max(0, Math.ceil(start / pitch.hopSec))
+  const k1 = Math.min(pitch.data.length - 1, Math.floor(end / pitch.hopSec))
+  let frames = 0
+  let voiced = 0
+  let midi = 0
+  const sums = new Float64Array(formants?.count ?? 0)
+  const counts = new Uint32Array(formants?.count ?? 0)
+  for (let k = k0; k <= k1; k++) {
+    frames++
+    const hz = pitch.data[k]
+    if (hz <= 0) continue
+    voiced++
+    midi += hzToMidi(hz)
+    if (!formants) continue
+    for (let i = 0; i < formants.count; i++) {
+      const f = formants.data[k * formants.count + i]
+      if (f > 0) {
+        sums[i] += f
+        counts[i]++
+      }
+    }
+  }
+  const f0 = voiced ? 440 * 2 ** ((midi / voiced - 69) / 12) : 0
+  return {
+    f0,
+    note: f0 > 0 ? noteName(f0) : '',
+    voicedRatio: frames ? voiced / frames : 0,
+    formants: Array.from(sums, (s, i) => (counts[i] ? s / counts[i] : 0)),
+  }
+}

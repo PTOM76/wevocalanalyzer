@@ -37,7 +37,8 @@ export function usePlayer(clip: Clip | null) {
     setPosition(0)
   }, [clip, halt])
 
-  const play = async (from = position) => {
+  /** `from` から再生する。`to` を渡すとそこで止まる（選択範囲の再生） */
+  const play = async (from = position, to?: number) => {
     if (!clip) return
     const c = ctx()
     await startContext(c, 'analyzer')
@@ -51,12 +52,14 @@ export function usePlayer(clip: Clip | null) {
     s.buffer = bufferRef.current
     s.connect(c.destination)
     const start = from >= duration ? 0 : from
+    const end = to === undefined ? duration : Math.min(duration, to)
     s.onended = () => {
       sourceRef.current = null
       setPlaying(false)
-      setPosition(duration)
+      setPosition(end)
     }
-    s.start(0, start)
+    if (to === undefined) s.start(0, start)
+    else s.start(0, start, Math.max(0, end - start))
     sourceRef.current = s
     startRef.current = { at: c.currentTime, from: start }
     setPlaying(true)
@@ -82,5 +85,5 @@ export function usePlayer(clip: Clip | null) {
     else setPosition(to)
   }
 
-  return { playing, position, duration, livePosition, toggle: () => (playing ? pause() : void play()), stop, seek }
+  return { playing, position, duration, livePosition, toggle: () => (playing ? pause() : void play()), stop, seek, playRange: (from: number, to: number) => void play(from, to) }
 }

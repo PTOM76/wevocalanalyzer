@@ -7,17 +7,20 @@ import type { MessageKey } from './i18n'
  */
 export { keyLabelOf } from 'pevenmui'
 
-export type ActionId = 'playPause' | 'seekBack' | 'seekForward' | 'seekBackFine' | 'seekForwardFine' | 'seekStart' | 'seekEnd' | 'open'
+export type ActionId = 'playPause' | 'playSelection' | 'selectAll' | 'clearSelection' | 'seekBack' | 'seekForward' | 'seekBackFine' | 'seekForwardFine' | 'seekStart' | 'seekEnd' | 'open'
 
 /** 操作の一覧（設定の画面に出す順）。名前は訳文キー */
 export const ACTIONS: (Omit<KeyAction<ActionId>, 'label'> & { label: MessageKey })[] = [
   { id: 'playPause', label: 'play.playPause', keys: ['Space'] },
+  { id: 'playSelection', label: 'play.playSelection', keys: [] },
   { id: 'seekBack', label: 'key.seekBack', keys: ['ArrowLeft'] },
   { id: 'seekForward', label: 'key.seekForward', keys: ['ArrowRight'] },
   { id: 'seekBackFine', label: 'key.seekBackFine', keys: ['Shift+ArrowLeft'] },
   { id: 'seekForwardFine', label: 'key.seekForwardFine', keys: ['Shift+ArrowRight'] },
   { id: 'seekStart', label: 'play.toStart', keys: ['Home'] },
   { id: 'seekEnd', label: 'play.toEnd', keys: ['End'] },
+  { id: 'selectAll', label: 'edit.selectAll', keys: ['Ctrl+KeyA'] },
+  { id: 'clearSelection', label: 'edit.clearSelection', keys: ['Escape'] },
   { id: 'open', label: 'menu.open', keys: ['Ctrl+KeyO'] },
 ]
 

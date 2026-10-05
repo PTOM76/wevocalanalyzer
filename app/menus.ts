@@ -9,6 +9,7 @@ export interface MenuActions {
   keymap: Keymap
   wheelZoom: WheelZoom
   hasClip: boolean
+  hasSelection: boolean
   playing: boolean
   zoomed: boolean
   canZoomIn: boolean
@@ -24,6 +25,9 @@ export interface MenuActions {
   showAll: () => void
   toggleFollow: () => void
   togglePlay: () => void
+  playSelection: () => void
+  selectAll: () => void
+  clearSelection: () => void
   stop: () => void
   seekStart: () => void
   seekEnd: () => void
@@ -59,6 +63,14 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       entries: [{ label: t('menu.open'), shortcut: key('open'), onClick: a.open }, ...(mobile ? [] : [{ divider: true as const }, { label: t('menu.settings'), onClick: a.showSettings }])],
     },
     {
+      label: t('menu.edit'),
+      accessKey: 'E',
+      entries: [
+        { label: t('edit.selectAll'), shortcut: key('selectAll'), disabled: !a.hasClip, onClick: a.selectAll },
+        { label: t('edit.clearSelection'), shortcut: key('clearSelection'), disabled: !a.hasSelection, onClick: a.clearSelection },
+      ],
+    },
+    {
       label: t('menu.view'),
       accessKey: 'V',
       entries: [
@@ -78,6 +90,7 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       entries: [
         { label: t(a.playing ? 'play.pause' : 'play.play'), shortcut: key('playPause'), disabled: !a.hasClip, onClick: a.togglePlay },
         { label: t('common.stop'), disabled: !a.hasClip, onClick: a.stop },
+        { label: t('play.playSelection'), shortcut: key('playSelection'), disabled: !a.hasSelection, onClick: a.playSelection },
         { divider: true },
         { label: t('play.toStart'), shortcut: key('seekStart'), disabled: !a.hasClip, onClick: a.seekStart },
         { label: t('play.toEnd'), shortcut: key('seekEnd'), disabled: !a.hasClip, onClick: a.seekEnd },

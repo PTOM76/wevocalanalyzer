@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Divider, Snackbar, Stack, Typography, useColorScheme } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
+import { faCirclePlay, faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import {
   AppHeader, BottomBar, DesktopLayout, FULL_HEIGHT, JobGauge, LABELS, LicensesDialog, MobileLayout, PevenLabels, StatusBar, StatusItem, StatusSpacer,
   WindowModeContext, autoWindowMode, setUiScale, startJob, useFileDrop, useFilePicker, useMobileLayout, useShortcuts,
 } from 'pevenmui'
 import { UpdatePrompt, checkForUpdate, promptUpdate } from 'pevenmui/pwa'
 import { configureFileAccess } from 'pevenmui/web'
-import { AUDIO_ACCEPT, decodeFile, type Clip } from 'wevocal-lib'
+import { AUDIO_ACCEPT, decodeFile, type Clip, type Range } from 'wevocal-lib'
 import { ZOOM_STEP, useWaveformView } from 'wevocal-lib/react'
 import { analyzeFormants, analyzePitch, analyzeSpectrogram, type Formants, type Pitch, type Spectrogram } from '../src/index'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
@@ -49,6 +49,8 @@ export default function App() {
   const [formants, setFormants] = useState<Formants | null>(null)
   // カーソルの下の時刻（右の欄に値を出す。外に出たら再生位置の値）
   const [hover, setHover] = useState<number | null>(null)
+  // 選択範囲（1 つだけ）。別のファイルを開いたら外す
+  const [selection, setSelection] = useState<Range | null>(null)
   const player = usePlayer(clip)
   const view = useWaveformView(player.duration, player.livePosition, player.playing, settings.follow, '', settings.wheelZoom)
   const keymap = resolveKeymap(settings.keymap)
@@ -59,6 +61,7 @@ export default function App() {
     setSpec(null)
     setPitch(null)
     setFormants(null)
+    setSelection(null)
     if (!clip) return
     const ac = new AbortController()
     const job = startJob('analyze', t('job.kind.analyze'), () => ac.abort())
@@ -111,8 +114,13 @@ export default function App() {
     })
 
   const has = !!clip
+  const playSelection = () => selection && player.playRange(selection.start, selection.end)
+  const selectAll = () => setSelection({ start: 0, end: player.duration })
   useShortcuts(keymap, {
     playPause: has ? player.toggle : undefined,
+    playSelection: selection ? playSelection : undefined,
+    selectAll: has ? selectAll : undefined,
+    clearSelection: selection ? () => setSelection(null) : undefined,
     seekBack: has ? () => seekBy(-1) : undefined,
     seekForward: has ? () => seekBy(1) : undefined,
     seekBackFine: has ? () => seekBy(-0.1) : undefined,
@@ -124,10 +132,10 @@ export default function App() {
 
   const menus = appMenus(
     {
-      keymap, wheelZoom: settings.wheelZoom, hasClip: has, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
+      keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, showPitch: settings.showPitch, showFormants: settings.showFormants,
       open: picker.open, showSettings: openSettings, togglePitch: () => toggleSet('showPitch'), toggleFormants: () => toggleSet('showFormants'),
-      zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop,
+      zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
     },
@@ -139,6 +147,7 @@ export default function App() {
     <>
       <SmallButton title={t(player.playing ? 'play.pause' : 'play.play')} icon={player.playing ? faPause : faPlay} disabled={!has} onClick={player.toggle} />
       <SmallButton title={t('common.stop')} icon={faStop} disabled={!has} onClick={player.stop} />
+      <SmallButton title={t('play.playSelection')} icon={faCirclePlay} disabled={!selection} onClick={playSelection} />
     </>
   )
   const viewTools = (
@@ -172,6 +181,8 @@ export default function App() {
       playing={player.playing}
       livePosition={player.livePosition}
       onSeek={player.seek}
+      selection={selection}
+      onSelectionChange={setSelection}
     />
   ) : (
     // ファイルを開く前の画面（WeVocalSynth の EmptyState と同じ形）
@@ -189,7 +200,7 @@ export default function App() {
       )}
     </Stack>
   )
-  const analysis = <AnalysisPanel pitch={pitch} formants={formants} time={hover ?? player.position} hovering={hover !== null} />
+  const analysis = <AnalysisPanel pitch={pitch} formants={formants} time={hover ?? player.position} hovering={hover !== null} selection={selection} />
   const jobLabel = () => t('job.kind.analyze')
 
   return (

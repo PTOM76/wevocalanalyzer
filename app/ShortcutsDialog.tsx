@@ -5,7 +5,9 @@ import { ACTIONS, type Keymap } from './keymap'
 
 /** マウスなど、割り当てを変えられない操作: [キー（訳文キーまたはキー名）, 説明の訳文キー] */
 const POINTER: [string | MessageKey, MessageKey][] = [
-  ['shortcuts.drag', 'shortcuts.seek'],
+  ['shortcuts.drag', 'shortcuts.select'],
+  ['shortcuts.rulerDrag', 'shortcuts.seek'],
+  ['shortcuts.edgeDrag', 'shortcuts.adjustRange'],
   ['shortcuts.wheel', 'shortcuts.scrollZoom'],
 ]
 
