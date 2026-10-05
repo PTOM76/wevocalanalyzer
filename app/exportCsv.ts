@@ -1,5 +1,6 @@
 import { downloadBlob, type Range } from 'wevocal-lib'
 import type { Formants, Level, Pitch } from '../src/index'
+import type { LyricsSegment } from '../src/lyrics'
 
 /**
  * 解析の結果を CSV にする（10ms ごとに 1 行。時刻、F0、F1〜F3、強さ）。範囲があればその中だけ。
@@ -29,4 +30,18 @@ export function downloadAnalysisCsv(fileName: string, csv: string) {
   const base = fileName.replace(/\.[^.]+$/, '') || 'analysis'
   // 表計算ソフトが UTF-8 と分かるように BOM を付ける
   downloadBlob(new Blob(['﻿', csv], { type: 'text/csv' }), `${base}_analysis.csv`)
+}
+
+/** 秒を SRT の時刻（00:01:02,345）にする */
+const srtTime = (sec: number) => {
+  const ms = Math.round(sec * 1000)
+  const p = (n: number, w = 2) => String(n).padStart(w, '0')
+  return `${p(Math.floor(ms / 3600000))}:${p(Math.floor(ms / 60000) % 60)}:${p(Math.floor(ms / 1000) % 60)},${p(ms % 1000, 3)}`
+}
+
+/** 歌詞を SRT（字幕の形式）で保存する。名前は「元のファイル名_lyrics.srt」 */
+export function downloadLyricsSrt(fileName: string, segments: LyricsSegment[]) {
+  const base = fileName.replace(/\.[^.]+$/, '') || 'lyrics'
+  const srt = segments.map((s, i) => `${i + 1}\n${srtTime(s.start)} --> ${srtTime(s.end)}\n${s.text}\n`).join('\n')
+  downloadBlob(new Blob([srt], { type: 'text/plain' }), `${base}_lyrics.srt`)
 }

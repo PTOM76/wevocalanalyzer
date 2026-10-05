@@ -81,7 +81,13 @@ export default defineConfig({
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
       },
-      workbox: { inlineWorkboxRuntime: true, globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,wasm}'] },
+      workbox: {
+        inlineWorkboxRuntime: true,
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,wasm}'],
+        // 歌詞の文字化の ONNX Runtime（約 27MB）は全員には配らず、初めて使ったときに保存する（そのあとはオフラインでも使える）
+        globIgnores: ['**/ort-wasm-*'],
+        runtimeCaching: [{ urlPattern: /\/ort-wasm-[^/]+$/, handler: 'CacheFirst', options: { cacheName: 'wevocalanalyzer-runtime' } }],
+      },
     }),
   ],
   build: { outDir: resolve(root, 'dist'), emptyOutDir: true, assetsInlineLimit: 0 },

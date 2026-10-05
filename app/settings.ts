@@ -4,6 +4,7 @@ import type { WheelZoom } from 'wevocal-lib/react'
 import type { LangSetting } from './i18n'
 import type { KeymapOverrides } from './keymap'
 import type { LaneFlags, LaneWeights } from './layout'
+import type { LyricsModel } from '../src/lyrics'
 
 export type ThemeSetting = 'system' | 'light' | 'dark'
 
@@ -30,13 +31,17 @@ export interface Settings {
   f0Max: number
   formantCeiling: number
   specWindow: number
+  /** 歌詞の文字化: モデルの大きさ、言語（null なら自動）、CPU でも動かすか（とても遅いので開発者向け） */
+  lyricsModel: LyricsModel
+  lyricsLanguage: string | null
+  lyricsCpu: boolean
   /** ダイアログの出し方。auto は PWA かつ Chromium 系ならポップアップ、ほかはダイアログ。別窓を開けなければダイアログ */
   dialogWindow: WindowMode | 'auto'
   /** 開発版の更新（バージョンが同じでコミットだけ違う版）も知らせる */
   devUpdates: boolean
 }
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2 }, showFormants: true, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, dialogWindow: 'auto', devUpdates: false }
+export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false, lyrics: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2, lyrics: 1.5 }, showFormants: true, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, lyricsModel: 'base', lyricsLanguage: null, lyricsCpu: false, dialogWindow: 'auto', devUpdates: false }
 
 const KEY = 'wevocalanalyzer.settings'
 

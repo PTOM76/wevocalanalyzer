@@ -103,6 +103,7 @@ export function settingsPages(draft: Settings, set: (patch: Partial<Settings>) =
     ),
     debug: (
       <Group title={t('settings.groupDebug')}>
+        <Check checked={draft.lyricsCpu} onChange={(v) => set({ lyricsCpu: v })} label={t('settings.lyricsCpu')} help={t('settings.lyricsCpuHelp')} />
         <Check checked={draft.devUpdates} onChange={(v) => set({ devUpdates: v })} label={t('settings.devUpdates')} help={t('settings.devUpdatesHelp')} />
         <Row label={t('settings.dialogWindow')}>
           <Choice<WindowMode | 'auto'>

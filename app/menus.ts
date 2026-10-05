@@ -21,6 +21,10 @@ export interface MenuActions {
   showFormants: boolean
   showHarmonics: boolean
   open: () => void
+  /** 歌詞を文字化したか（SRT に書き出せるか）、書き出す、文字化のダイアログを開く */
+  hasLyrics: boolean
+  exportSrt: () => void
+  transcribe: () => void
   /** 解析の結果（F0 など）があるか。CSV に書き出せるか */
   hasResults: boolean
   exportCsv: () => void
@@ -74,6 +78,7 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       entries: [
         { label: t('menu.open'), shortcut: key('open'), onClick: a.open },
         { label: t(a.hasSelection ? 'menu.exportCsvSelection' : 'menu.exportCsv'), disabled: !a.hasResults, onClick: a.exportCsv },
+        { label: t('menu.exportSrt'), disabled: !a.hasLyrics, onClick: a.exportSrt },
         ...(mobile ? [] : [{ divider: true as const }, { label: t('menu.settings'), onClick: a.showSettings }]),
       ],
     },
@@ -121,6 +126,7 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
         { label: t('play.toEnd'), shortcut: key('seekEnd'), disabled: !a.hasClip, onClick: a.seekEnd },
       ],
     },
+    { label: t('menu.tools'), accessKey: 'T', entries: [{ label: t('menu.lyrics'), disabled: !a.hasClip, onClick: a.transcribe }] },
     help,
   ]
 }

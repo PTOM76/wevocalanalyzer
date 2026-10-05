@@ -13,7 +13,7 @@ const INDEX: Record<Category, MessageKey[]> = {
   keys: ['settings.groupMouse', 'settings.wheelZoom', 'settings.wheelZoomCtrl', 'settings.wheelZoomWheel', 'settings.groupShortcuts', ...ACTIONS.map((a) => a.label)],
   display: ['settings.groupAppearance', 'settings.theme', 'settings.uiScale', 'settings.uiScaleHelp', 'settings.language'],
   analysis: ['settings.groupF0', 'settings.f0Min', 'settings.f0Max', 'settings.f0RangeHelp', 'settings.groupFormant', 'settings.formantCeiling', 'settings.formantCeilingHelp', 'settings.groupSpec', 'settings.specWindow', 'settings.specWindowHelp'],
-  debug: ['settings.groupDebug', 'settings.devUpdates', 'settings.devUpdatesHelp', 'settings.dialogWindow'],
+  debug: ['settings.lyricsCpu', 'settings.lyricsCpuHelp', 'settings.groupDebug', 'settings.devUpdates', 'settings.devUpdatesHelp', 'settings.dialogWindow'],
 }
 
 /** 設定画面に渡す分類の一覧（名前と、検索の対象の訳文） */

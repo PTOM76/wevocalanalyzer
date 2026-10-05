@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Box, Button, Divider, Snackbar, Stack, Typography, useColorScheme } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCirclePlay, faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
@@ -16,7 +16,9 @@ import AnalysisPanel from './AnalysisPanel'
 import { LangContext, resolveLang, setLang, t } from './i18n'
 import { resolveKeymap } from './keymap'
 import { licenseEntries } from './licenses'
-import { analysisCsv, downloadAnalysisCsv } from './exportCsv'
+import { analysisCsv, downloadAnalysisCsv, downloadLyricsSrt } from './exportCsv'
+import { transcribeLyrics, type LyricsSegment } from '../src/lyrics'
+import LyricsDialog from './LyricsDialog'
 import LiveTime from './LiveTime'
 import { appMenus } from './menus'
 import SettingsDialog from './SettingsDialog'
@@ -51,6 +53,10 @@ export default function App() {
   const [pitch, setPitch] = useState<Pitch | null>(null)
   const [formants, setFormants] = useState<Formants | null>(null)
   const [level, setLevel] = useState<Level | null>(null)
+  // 歌詞（文字化していなければ null）と、文字化のダイアログ
+  const [lyrics, setLyrics] = useState<LyricsSegment[] | null>(null)
+  const [lyricsOpen, setLyricsOpen] = useState(false)
+  const lyricsAbort = useRef<AbortController | null>(null)
   // スペクトログラムで見る周波数の範囲（縦の拡大。null なら全体）
   const [freqRange, setFreqRange] = useState<FreqRange | null>(null)
   // カーソルの下の時刻（右の欄に値を出す。外に出たら再生位置の値）
@@ -65,6 +71,8 @@ export default function App() {
   useEffect(() => {
     setSelection(null)
     setFreqRange(null)
+    setLyrics(null)
+    lyricsAbort.current?.abort()
     setLevel(clip ? analyzeLevel(clip) : null)
   }, [clip])
   // スペクトログラム、F0、フォルマントの順に計算する（Worker で。別のファイルを開くか解析の設定を変えたら中止して計算し直す）。
@@ -137,6 +145,28 @@ export default function App() {
     })
 
   const has = !!clip
+  // 歌詞の文字化（モデルの取得の進み具合と、認識中であることをゲージに出す）。終わったら歌詞の帯を出す
+  const runLyrics = (device: 'webgpu' | 'wasm') => {
+    if (!clip) return
+    lyricsAbort.current?.abort()
+    const ac = new AbortController()
+    lyricsAbort.current = ac
+    const job = startJob('lyrics', t('job.kind.lyrics'), () => ac.abort())
+    transcribeLyrics(clip, {
+      model: settings.lyricsModel,
+      device,
+      language: settings.lyricsLanguage,
+      signal: ac.signal,
+      onDownload: (p) => job.update(p),
+      onTranscribe: () => job.update(-1),
+    })
+      .then((segments) => {
+        setLyrics(segments)
+        updateSettings({ lanes: { ...settings.lanes, lyrics: true } })
+      })
+      .catch((e) => !ac.signal.aborted && setToast(t('lyrics.failed', { message: e instanceof Error ? e.message : String(e) })))
+      .finally(job.end)
+  }
   const playSelection = () => selection && player.playRange(selection.start, selection.end)
   const selectAll = () => setSelection({ start: 0, end: player.duration })
   useShortcuts(keymap, {
@@ -157,7 +187,7 @@ export default function App() {
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
-      open: picker.open, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
+      open: picker.open, hasLyrics: !!lyrics, exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -199,6 +229,7 @@ export default function App() {
       pitch={pitch}
       formants={formants}
       level={level}
+      lyrics={lyrics}
       lanes={settings.lanes}
       weights={settings.laneWeights}
       onWeightsChange={(laneWeights) => updateSettings({ laneWeights })}
@@ -231,8 +262,8 @@ export default function App() {
       )}
     </Stack>
   )
-  const analysis = <AnalysisPanel spec={spec} pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
-  const jobLabel = () => t('job.kind.analyze')
+  const analysis = <AnalysisPanel lyrics={lyrics} spec={spec} pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
+  const jobLabel = (kind: string) => t(kind === 'lyrics' ? 'job.kind.lyrics' : 'job.kind.analyze')
 
   return (
     <LangContext.Provider value={lang}>
@@ -289,6 +320,15 @@ export default function App() {
               />
             )}
           </Box>
+          <LyricsDialog
+            open={lyricsOpen}
+            onClose={() => setLyricsOpen(false)}
+            model={settings.lyricsModel}
+            language={settings.lyricsLanguage}
+            allowCpu={settings.lyricsCpu}
+            onChange={updateSettings}
+            onRun={runLyrics}
+          />
           <SettingsDialog open={settingsOpen} focusSignal={settingsFocus} onClose={() => setSettingsOpen(false)} settings={settings} onChange={updateSettings} />
           <AboutDialog open={dialog === 'about'} onClose={() => setDialog(null)} />
           <LicensesDialog open={dialog === 'licenses'} onClose={() => setDialog(null)} title={t('menu.licenses')} intro={t('licenses.intro')} entries={licenseEntries()} />

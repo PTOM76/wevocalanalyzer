@@ -12,5 +12,8 @@ export const licenseEntries = (): LicenseEntry[] => [
   { name: 'Emotion', license: 'MIT', url: 'https://github.com/emotion-js/emotion', note: t('licenses.style') },
   { name: 'Font Awesome Free', license: 'CC BY 4.0 / MIT', url: 'https://fontawesome.com/license/free', note: t('licenses.icons') },
   { name: 'Roboto', license: 'OFL-1.1', url: 'https://fontsource.org/fonts/roboto', note: t('licenses.font') },
+  { name: 'Transformers.js', license: 'Apache-2.0', url: 'https://github.com/huggingface/transformers.js', note: t('licenses.lyrics') },
+  { name: 'ONNX Runtime Web', license: 'MIT', url: 'https://github.com/microsoft/onnxruntime', note: t('licenses.ort') },
+  { name: 'Whisper', license: 'MIT', url: 'https://github.com/openai/whisper', note: t('licenses.whisper') },
   { name: 'Workbox', license: 'MIT', url: 'https://github.com/GoogleChrome/workbox', note: t('licenses.pwa') },
 ]

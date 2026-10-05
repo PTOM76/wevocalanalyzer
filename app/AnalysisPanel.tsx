@@ -2,12 +2,14 @@ import { Box, Stack, Typography } from '@mui/material'
 import type { Range } from 'wevocal-lib'
 import { useMemo } from 'react'
 import type { Formants, Level, Pitch, Spectrogram } from '../src/index'
+import type { LyricsSegment } from '../src/lyrics'
 import SpectrumPlot, { spectrumOf } from './SpectrumPlot'
 import { useT } from './i18n'
-import { FORMANT_COLORS, levelAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
+import { FORMANT_COLORS, levelAt, lyricAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
 
 interface Props {
   spec: Spectrogram | null
+  lyrics: LyricsSegment[] | null
   pitch: Pitch | null
   formants: Formants | null
   level: Level | null
@@ -53,6 +55,7 @@ export default function AnalysisPanel(p: Props) {
         </Typography>
         {p.hoverHz !== null && <Value label={t('analysis.cursorFreq')} value={`${hz(p.hoverHz)}（${noteOf(p.hoverHz)}）`} />}
         <Value label={t('lane.level')} value={db(lv)} />
+        {p.lyrics && <Value label={t('lane.lyrics')} value={lyricAt(p.time, p.lyrics) || '—'} />}
         {!p.pitch ? (
           <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{t('analysis.analyzing')}</Typography>
         ) : v.f0 > 0 ? (

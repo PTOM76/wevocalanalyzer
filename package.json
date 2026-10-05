@@ -5,7 +5,10 @@
   "type": "module",
   "description": "声の解析（スペクトログラム、F0、フォルマント）をする Web ツール兼ライブラリ。ブラウザで動き、音声を外部に送らない",
   "license": "MIT",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./lyrics": "./src/lyrics.ts"
+  },
   "scripts": {
     "build:wasm": "node scripts/build-wasm.mjs",
     "dev": "vite",
@@ -21,6 +24,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "@fortawesome/react-fontawesome": "^3.5.0",
+    "@huggingface/transformers": "^4.3.0",
     "@mui/material": "^9.4.0",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",

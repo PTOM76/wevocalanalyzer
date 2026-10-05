@@ -1,5 +1,6 @@
 import { alpha, timeToX, type View } from 'wevocal-lib'
 import { LEVEL_FLOOR_DB, renderSpectrogram, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
+import type { LyricsSegment } from '../src/lyrics'
 
 /** 帯の描画に共通のもの（上端 `top` から高さ `h`） */
 export interface LaneBox {
@@ -295,3 +296,28 @@ export function drawHarmonics(b: LaneBox, spec: Spectrogram, pitch: Pitch) {
     g.stroke()
   }
 }
+
+/** 歌詞の帯: 区間ごとに枠と文字を並べる（入りきらない文字は切る）。`empty` は文字化していないときに出す文字 */
+export function drawLyrics(b: LaneBox, segments: LyricsSegment[] | null, fill: string, divider: string, text: string, empty: string) {
+  if (frame(b, divider, text, segments ? null : empty) || !segments) return
+  const { g, width, view, top, h } = b
+  for (const s of segments) {
+    const x0 = timeToX(width, view, s.start)
+    const x1 = timeToX(width, view, s.end)
+    if (x1 < 0 || x0 > width) continue
+    g.fillStyle = alpha(fill, 0.18)
+    g.fillRect(x0, top + 3, Math.max(1, x1 - x0), h - 6)
+    g.fillStyle = alpha(fill, 0.8)
+    g.fillRect(x0, top + 3, 1, h - 6)
+    g.save()
+    g.beginPath()
+    g.rect(x0, top, Math.max(0, x1 - x0), h)
+    g.clip()
+    g.fillStyle = text
+    g.fillText(s.text, x0 + 4, top + h / 2)
+    g.restore()
+  }
+}
+
+/** 時刻 `t` の歌詞（なければ空） */
+export const lyricAt = (t: number, segments: LyricsSegment[] | null) => segments?.find((s) => t >= s.start && t < s.end)?.text ?? ''
