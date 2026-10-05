@@ -1,5 +1,5 @@
 # WeVocalAnalyzer
-WeVocalAnalyzerは、Webブラウザ上で声を解析するためのツールである（準備中）。
+WeVocalAnalyzerは、Webブラウザ上で音声を解析するためのツールである。
 
 音声ファイルはサーバーへ送らず、処理はすべてブラウザ内で行う。<br />
 画面を持たないライブラリとしても使え、[WeVocalSynth](https://github.com/PTOM76/wevocalsynth) から追加機能として使う予定（今のところスペクトログラム）。
