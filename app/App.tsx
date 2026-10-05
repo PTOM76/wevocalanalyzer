@@ -9,7 +9,8 @@ import {
 import { AUDIO_ACCEPT, decodeFile, type Clip } from 'wevocal-lib'
 import { useWaveformView } from 'wevocal-lib/react'
 import { LangContext, resolveLang, setLang, t } from './i18n'
-import { analyzeSpectrogram, type Spectrogram } from '../src/index'
+import { analyzeFormants, analyzePitch, analyzeSpectrogram, type Formants, type Pitch, type Spectrogram } from '../src/index'
+import AnalysisPanel from './AnalysisPanel'
 import { usePlayer } from './usePlayer'
 import WaveView from './WaveView'
 
@@ -27,17 +28,31 @@ export default function App() {
   const [error, setError] = useState('')
   const [about, setAbout] = useState(false)
   const [spec, setSpec] = useState<Spectrogram | null>(null)
+  const [pitch, setPitch] = useState<Pitch | null>(null)
+  const [formants, setFormants] = useState<Formants | null>(null)
+  const [showPitch, setShowPitch] = useState(true)
+  const [showFormants, setShowFormants] = useState(true)
+  // カーソルの下の時刻（右の欄に値を出す。外に出たら再生位置の値）
+  const [hover, setHover] = useState<number | null>(null)
   const player = usePlayer(clip)
   const view = useWaveformView(player.duration, player.livePosition, player.playing)
 
-  // 開いたらスペクトログラムを計算する（Worker で。別のファイルを開いたら中止する）
+  // 開いたら、スペクトログラム、F0、フォルマントの順に計算する（Worker で。別のファイルを開いたら中止する）。
+  // 進み具合は 1 本のゲージにまとめる（重さの目安で 4 : 3 : 3 に割る）
   useEffect(() => {
     setSpec(null)
+    setPitch(null)
+    setFormants(null)
     if (!clip) return
     const ac = new AbortController()
     const job = startJob('analyze', t('job.kind.analyze'), () => ac.abort())
-    analyzeSpectrogram(clip, { signal: ac.signal, onProgress: job.update })
-      .then(setSpec, (e) => !ac.signal.aborted && setError(String(e)))
+    const part = (from: number, span: number) => ({ signal: ac.signal, onProgress: (p: number) => job.update(from + p * span) })
+    void (async () => {
+      setSpec(await analyzeSpectrogram(clip, part(0, 0.4)))
+      setPitch(await analyzePitch(clip, part(0.4, 0.3)))
+      setFormants(await analyzeFormants(clip, part(0.7, 0.3)))
+    })()
+      .catch((e) => !ac.signal.aborted && setError(String(e)))
       .finally(job.end)
     return () => ac.abort()
   }, [clip])
@@ -79,7 +94,15 @@ export default function App() {
   )
 
   const editor = clip ? (
-    <WaveView clip={clip} spec={spec} view={view} position={player.position} playing={player.playing} livePosition={player.livePosition} onSeek={player.seek} />
+    <WaveView
+      clip={clip}
+      spec={spec}
+      pitch={pitch}
+      formants={formants}
+      showPitch={showPitch}
+      showFormants={showFormants}
+      onHover={setHover}
+      view={view} position={player.position} playing={player.playing} livePosition={player.livePosition} onSeek={player.seek} />
   ) : (
     <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center', gap: 2, p: 2 }}>
       <Typography sx={{ color: 'text.secondary' }}>{t('empty.hint')}</Typography>
@@ -89,7 +112,18 @@ export default function App() {
       {error && <Typography sx={{ color: 'error.main', fontSize: 13 }}>{error}</Typography>}
     </Stack>
   )
-  const analysis = <Typography sx={{ p: 2, fontSize: 13, color: 'text.secondary' }}>{t('analysis.soon')}</Typography>
+  const analysis = (
+    <AnalysisPanel
+      pitch={pitch}
+      formants={formants}
+      time={hover ?? player.position}
+      hovering={hover !== null}
+      showPitch={showPitch}
+      onShowPitchChange={setShowPitch}
+      showFormants={showFormants}
+      onShowFormantsChange={setShowFormants}
+    />
+  )
   const jobLabel = () => t('job.kind.analyze')
 
   return (

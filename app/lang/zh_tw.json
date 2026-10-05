@@ -10,9 +10,13 @@
   "empty.open": "開啟檔案",
   "wave.scroll": "顯示範圍",
   "tab.analysis": "分析",
-  "analysis.soon": "F0 和共振峰的顯示正在準備中",
   "error.open": "無法開啟檔案: {message}",
   "about.version": "版本",
   "job.kind.analyze": "分析",
-  "analysis.analyzing": "分析中…"
+  "analysis.analyzing": "分析中…",
+  "analysis.showPitch": "顯示音高（F0）",
+  "analysis.showFormants": "疊加共振峰（F1~F3）",
+  "analysis.atCursor": "游標位置（{time} 秒）",
+  "analysis.atPlayhead": "播放位置（{time} 秒）",
+  "analysis.unvoiced": "無聲區間"
 }

@@ -10,9 +10,13 @@
   "empty.open": "ファイルを開く",
   "wave.scroll": "表示範囲",
   "tab.analysis": "解析",
-  "analysis.soon": "F0、フォルマントの表示は準備中です",
   "error.open": "ファイルを開けませんでした: {message}",
   "about.version": "バージョン",
   "job.kind.analyze": "解析",
-  "analysis.analyzing": "解析中…"
+  "analysis.analyzing": "解析中…",
+  "analysis.showPitch": "ピッチ（F0）を表示",
+  "analysis.showFormants": "フォルマント（F1〜F3）を重ねる",
+  "analysis.atCursor": "カーソルの位置（{time} 秒）",
+  "analysis.atPlayhead": "再生位置（{time} 秒）",
+  "analysis.unvoiced": "声のない区間"
 }

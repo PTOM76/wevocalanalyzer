@@ -10,9 +10,13 @@
   "empty.open": "파일 열기",
   "wave.scroll": "표시 범위",
   "tab.analysis": "분석",
-  "analysis.soon": "F0, 포먼트 표시는 준비 중입니다",
   "error.open": "파일을 열 수 없습니다: {message}",
   "about.version": "버전",
   "job.kind.analyze": "분석",
-  "analysis.analyzing": "분석 중…"
+  "analysis.analyzing": "분석 중…",
+  "analysis.showPitch": "피치(F0) 표시",
+  "analysis.showFormants": "포먼트(F1~F3) 겹쳐 표시",
+  "analysis.atCursor": "커서 위치({time}초)",
+  "analysis.atPlayhead": "재생 위치({time}초)",
+  "analysis.unvoiced": "무성 구간"
 }

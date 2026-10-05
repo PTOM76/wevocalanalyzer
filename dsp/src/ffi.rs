@@ -1,6 +1,7 @@
 //! wasm 向け C ABI。wasm-bindgen を使わず、Worker から素の `WebAssembly.instantiate` で呼べる関数だけを公開する。
 
-use crate::spec;
+use crate::{formant, spec};
+use wevocal_lib::f0;
 use std::cell::RefCell;
 
 #[cfg(target_arch = "wasm32")]
@@ -20,6 +21,7 @@ fn host_progress(p: f64) {
 }
 
 thread_local! {
+    static OUTPUT: RefCell<Vec<f32>> = const { RefCell::new(Vec::new()) };
     static OUTPUT_U8: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
 }
 
@@ -53,6 +55,38 @@ pub unsafe extern "C" fn analyze_spectrogram(input: *const f32, frames: usize, s
     let n = out.len() / spec::ROWS;
     OUTPUT_U8.with(|o| *o.borrow_mut() = out);
     n
+}
+
+/// モノラル音声の F0 を推定し、値の個数を返す（`f0::HOP_SEC` 間隔、Hz、無声は 0）。結果は `output_ptr` で取得する。
+///
+/// # Safety
+/// `input` は `frames` 個の有効な f32 を指していること。
+#[no_mangle]
+pub unsafe extern "C" fn analyze_f0(input: *const f32, frames: usize, sample_rate: f32) -> usize {
+    let x = std::slice::from_raw_parts(input, frames);
+    let out = f0::estimate(x, sample_rate, &mut host_progress);
+    let n = out.len();
+    OUTPUT.with(|o| *o.borrow_mut() = out);
+    n
+}
+
+/// モノラル音声のフォルマントを推定し、値の個数（フレーム数 × `formant::COUNT`）を返す。結果は `output_ptr` で取得する。
+///
+/// # Safety
+/// `input` は `frames` 個の有効な f32 を指していること。
+#[no_mangle]
+pub unsafe extern "C" fn analyze_formants(input: *const f32, frames: usize, sample_rate: f32) -> usize {
+    let x = std::slice::from_raw_parts(input, frames);
+    let out = formant::estimate(x, sample_rate, &mut host_progress);
+    let n = out.len();
+    OUTPUT.with(|o| *o.borrow_mut() = out);
+    n
+}
+
+/// 直前の結果（f32）の先頭。
+#[no_mangle]
+pub extern "C" fn output_ptr() -> *const f32 {
+    OUTPUT.with(|o| o.borrow().as_ptr())
 }
 
 /// 直前の結果（u8）の先頭。

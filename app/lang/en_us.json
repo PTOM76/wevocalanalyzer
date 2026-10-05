@@ -10,9 +10,13 @@
   "empty.open": "Open file",
   "wave.scroll": "View range",
   "tab.analysis": "Analysis",
-  "analysis.soon": "F0 and formant views are coming soon",
   "error.open": "Could not open the file: {message}",
   "about.version": "Version",
   "job.kind.analyze": "Analysis",
-  "analysis.analyzing": "Analyzing…"
+  "analysis.analyzing": "Analyzing…",
+  "analysis.showPitch": "Show pitch (F0)",
+  "analysis.showFormants": "Overlay formants (F1–F3)",
+  "analysis.atCursor": "At cursor ({time} s)",
+  "analysis.atPlayhead": "At playhead ({time} s)",
+  "analysis.unvoiced": "Unvoiced"
 }
