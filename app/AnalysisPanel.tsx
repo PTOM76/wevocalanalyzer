@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import type { Formants, Pitch } from '../src/index'
 import { useT } from './i18n'
 import { FORMANT_COLORS, valuesAt } from './lanes'
@@ -10,10 +10,6 @@ interface Props {
   time: number
   /** カーソルの下の値か（偽なら再生位置） */
   hovering: boolean
-  showFormants: boolean
-  onShowFormantsChange: (v: boolean) => void
-  showPitch: boolean
-  onShowPitchChange: (v: boolean) => void
 }
 
 /** 1 行の値（名前と数値。色の印があればその前に出す） */
@@ -29,17 +25,13 @@ function Value({ label, value, color }: { label: string; value: string; color?: 
   )
 }
 
-/** 解析の欄: 表示の切り替えと、時刻の F0、音名、F1〜F3 */
+/** 解析の欄: 時刻の F0、音名、F1〜F3（表示の切り替えはツールバーとメニュー） */
 export default function AnalysisPanel(p: Props) {
   const t = useT()
   const v = valuesAt(p.time, p.pitch, p.formants)
   const hz = (x: number | undefined) => (x ? `${Math.round(x)} Hz` : '—')
   return (
     <Stack sx={{ p: 1.5, gap: 1.5 }}>
-      <Box>
-        <FormControlLabel control={<Checkbox size="small" checked={p.showPitch} onChange={(e) => p.onShowPitchChange(e.target.checked)} />} label={t('analysis.showPitch')} />
-        <FormControlLabel control={<Checkbox size="small" checked={p.showFormants} onChange={(e) => p.onShowFormantsChange(e.target.checked)} />} label={t('analysis.showFormants')} />
-      </Box>
       <Stack sx={{ gap: 0.5 }}>
         <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
           {t(p.hovering ? 'analysis.atCursor' : 'analysis.atPlayhead', { time: p.time.toFixed(2) })}

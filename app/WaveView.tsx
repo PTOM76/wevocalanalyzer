@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Stack } from '@mui/material'
 import { canvasPixelRatio, usePalette } from 'pevenmui'
 import { computePeaks, drawPlayhead, drawRuler, drawWave, prepareCanvas, RULER_HEIGHT, SELECTION_DARK, SELECTION_LIGHT, type Clip, type WaveColors } from 'wevocal-lib'
-import { Minimap, type useWaveformView } from 'wevocal-lib/react'
+import { Minimap, useEdgeScroll, useTouchGestures, type useWaveformView } from 'wevocal-lib/react'
 import type { Formants, Pitch, Spectrogram } from '../src/index'
 import { useT } from './i18n'
 import { drawFormants, drawPitch, drawSpec, pitchRange } from './lanes'
@@ -108,16 +108,50 @@ export default function WaveView({ clip, spec, pitch, formants, showFormants, sh
 
   const timeAt = (clientX: number) => {
     const rect = canvasRef.current!.getBoundingClientRect()
-    return v.view.start + ((clientX - rect.left) / Math.max(1, rect.width)) * v.view.dur
+    return Math.max(0, Math.min(duration, v.view.start + ((clientX - rect.left) / Math.max(1, rect.width)) * v.view.dur))
   }
+  // 押したままドラッグすると再生位置を動かす。端に来たら表示範囲を流す（WeVocalSynth の目盛りのドラッグと同じ）
+  const scrubbing = useRef(false)
+  const edgeScroll = useEdgeScroll({ canvasRef, view: v.view, duration, setRange: v.setRange, seek: onSeek })
+  const scrubTo = (x: number) => {
+    onSeek(timeAt(x))
+    edgeScroll.update(x)
+  }
+  // スマホ: 2 本指で拡大縮小、目盛りの長押しで横移動
+  const touch = useTouchGestures({ canvasRef, view: v.view, setRange: v.setRange, seekAt: scrubTo })
+  const onRuler = (clientY: number) => clientY - canvasRef.current!.getBoundingClientRect().top < RULER_HEIGHT
 
   return (
     <Stack sx={{ height: '100%' }}>
       <Box ref={boxRef} sx={{ flex: 1, minHeight: 0, position: 'relative' }}>
         <canvas
           ref={canvasRef}
-          onPointerDown={(e) => onSeek(timeAt(e.clientX))}
-          onPointerMove={(e) => onHover(timeAt(e.clientX))}
+          onPointerDown={(e) => {
+            if (e.button === 2) return
+            e.currentTarget.setPointerCapture(e.pointerId)
+            if (touch.down(e)) {
+              scrubbing.current = false
+              return
+            }
+            if (e.pointerType === 'touch' && onRuler(e.clientY)) return touch.rulerDown(e)
+            scrubbing.current = true
+            scrubTo(e.clientX)
+          }}
+          onPointerMove={(e) => {
+            if (touch.move(e)) return
+            if (scrubbing.current) scrubTo(e.clientX)
+            if (e.pointerType !== 'touch') onHover(timeAt(e.clientX))
+          }}
+          onPointerUp={(e) => {
+            scrubbing.current = false
+            edgeScroll.stop()
+            touch.up(e)
+          }}
+          onPointerCancel={(e) => {
+            scrubbing.current = false
+            edgeScroll.stop()
+            touch.up(e)
+          }}
           onPointerLeave={() => onHover(null)}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', touchAction: 'none' }} />
         <canvas ref={headRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
