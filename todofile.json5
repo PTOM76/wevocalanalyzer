@@ -6,6 +6,17 @@
         "git submodule update --init",
         "npm install"
     ],
+    // WeVocalSynth の submodule として開発するとき: こちらの pevenmui/ を隠し、隣の ../pevenmui だけを使う
+    // (同じものが2か所に見えて、違う方を直さないように)
+    "setup:nested": [
+        "git submodule deinit -f pevenmui",
+        "git submodule deinit -f wevocal-lib",
+        "git sparse-checkout set --no-cone \"/*\" \"!/pevenmui/\" \"!/wevocal-lib/\""
+    ],
+    // 隣（WeVocalSynth 側）の pevenmui・wevocal-lib を更新したら、こちらの submodule の登録もそのコミットに合わせてコミットする
+    "update:nested": "node scripts/update-nested.mjs",
+    // dsp/ をビルドして src/dsp.wasm を作り直す。DSP を変えたら結果もコミットする
+    "wasm": "npm run build:wasm",
 
     // ---- 開発 ----
     "dev": "npm run dev",
