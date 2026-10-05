@@ -32,11 +32,13 @@ function commitHash(): string {
   }
 }
 
+const commit = commitHash()
+
 export default defineConfig({
   root: resolve(root, 'app'),
   // 配信先のサブパスは BASE_PATH で指定する
   base: process.env.BASE_PATH ?? '/',
-  define: { __APP_VERSION__: JSON.stringify(pkg.version), __APP_COMMIT__: JSON.stringify(commitHash()) },
+  define: { __APP_VERSION__: JSON.stringify(pkg.version), __APP_COMMIT__: JSON.stringify(commit) },
   publicDir: resolve(root, 'public'),
   resolve: {
     alias: [
@@ -52,6 +54,13 @@ export default defineConfig({
   server: { fs: { allow: [root, pevenmui, wevocalLib, ...nodeModules] } },
   plugins: [
     react(),
+    // 更新の確認で「どの版が来たか」を出すため、配信中の版を version.json に書く（WeVocalSynth と同じ。無いと確認に失敗する）
+    {
+      name: 'version-json',
+      generateBundle() {
+        this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ version: pkg.version, commit }) })
+      },
+    },
     VitePWA({
       // 新しい版は利用者が「更新」を押したときに切り替える
       registerType: 'prompt',

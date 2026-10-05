@@ -18,7 +18,7 @@ export interface Settings {
   keymap: KeymapOverrides
   /** 再生中に表示範囲を再生位置に追従させる */
   follow: boolean
-  /** ピッチの帯を出す、フォルマントをスペクトログラムに重ねる */
+  /** ピッチの帯を出す（既定は出さない。初めは波形とスペクトログラムだけ）、フォルマントをスペクトログラムに重ねる */
   showPitch: boolean
   showFormants: boolean
   /** ダイアログの出し方。auto は PWA かつ Chromium 系ならポップアップ、ほかはダイアログ。別窓を開けなければダイアログ */
@@ -27,7 +27,7 @@ export interface Settings {
   devUpdates: boolean
 }
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, showPitch: true, showFormants: true, dialogWindow: 'auto', devUpdates: false }
+export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, showPitch: false, showFormants: true, dialogWindow: 'auto', devUpdates: false }
 
 const KEY = 'wevocalanalyzer.settings'
 
