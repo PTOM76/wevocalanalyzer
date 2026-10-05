@@ -13,7 +13,7 @@ WeVocalSynth と同じ部品（[PevenMUI](https://github.com/PTOM76/pevenmui) �
 | 表示 | 波形、スペクトログラム、時間の目盛り、ミニマップ。ホイールでズームとスクロール |
 | 再生 | 再生、一時停止、停止。波形を押すとその位置へ |
 
-解析のうち、F0、フォルマント、歌詞の文字化はこれから。進め方は [docs/PLAN.md](docs/PLAN.md)。
+解析のうち、F0、フォルマント、歌詞の文字化はこれから。要件は [docs/REQUIREMENT.md](docs/REQUIREMENT.md)。
 
 ## 構成
 | 場所 | 中身 |
