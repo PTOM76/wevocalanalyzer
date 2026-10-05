@@ -23,6 +23,12 @@ export interface Formants {
   hopSec: number
 }
 
+/** 強さ（RMS、dBFS）。`data[k]` は時刻 k × hopSec の値 */
+export interface Level {
+  data: Float32Array
+  hopSec: number
+}
+
 /** 解析の共通の指定 */
 export interface AnalyzeOptions {
   /** 進み具合（0〜1） */

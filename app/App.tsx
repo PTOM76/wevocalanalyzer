@@ -10,7 +10,7 @@ import { UpdatePrompt, checkForUpdate, promptUpdate } from 'pevenmui/pwa'
 import { configureFileAccess } from 'pevenmui/web'
 import { AUDIO_ACCEPT, decodeFile, type Clip, type Range } from 'wevocal-lib'
 import { ZOOM_STEP, useWaveformView } from 'wevocal-lib/react'
-import { analyzeFormants, analyzePitch, analyzeSpectrogram, type Formants, type Pitch, type Spectrogram } from '../src/index'
+import { analyzeFormants, analyzeLevel, analyzePitch, analyzeSpectrogram, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
 import AnalysisPanel from './AnalysisPanel'
 import { LangContext, resolveLang, setLang, t } from './i18n'
@@ -23,7 +23,9 @@ import { useSettings } from './settings'
 import ShortcutsDialog from './ShortcutsDialog'
 import { usePlayer } from './usePlayer'
 import ViewTools, { SmallButton } from './ViewTools'
-import WaveView from './WaveView'
+import WaveView, { type Hover } from './WaveView'
+import { FREQ_ZOOM_STEP, zoomFreq, type FreqRange } from './lanes'
+import type { Lane } from './layout'
 
 /** 画面の組み立て（WeVocalSynth と同じ部品と作り）。配置は PevenMUI、波形は wevocal-lib */
 export default function App() {
@@ -47,8 +49,11 @@ export default function App() {
   const [spec, setSpec] = useState<Spectrogram | null>(null)
   const [pitch, setPitch] = useState<Pitch | null>(null)
   const [formants, setFormants] = useState<Formants | null>(null)
+  const [level, setLevel] = useState<Level | null>(null)
+  // スペクトログラムで見る周波数の範囲（縦の拡大。null なら全体）
+  const [freqRange, setFreqRange] = useState<FreqRange | null>(null)
   // カーソルの下の時刻（右の欄に値を出す。外に出たら再生位置の値）
-  const [hover, setHover] = useState<number | null>(null)
+  const [hover, setHover] = useState<Hover | null>(null)
   // 選択範囲（1 つだけ）。別のファイルを開いたら外す
   const [selection, setSelection] = useState<Range | null>(null)
   const player = usePlayer(clip)
@@ -62,6 +67,8 @@ export default function App() {
     setPitch(null)
     setFormants(null)
     setSelection(null)
+    setFreqRange(null)
+    setLevel(clip ? analyzeLevel(clip) : null)
     if (!clip) return
     const ac = new AbortController()
     const job = startJob('analyze', t('job.kind.analyze'), () => ac.abort())
@@ -100,7 +107,19 @@ export default function App() {
   const center = view.view.start + view.view.dur / 2
   const zoomIn = () => view.zoomAround(ZOOM_STEP, center)
   const zoomOut = () => view.zoomAround(1 / ZOOM_STEP, center)
-  const toggleSet = (k: 'follow' | 'showPitch' | 'showFormants') => updateSettings({ [k]: !settings[k] })
+  const toggleSet = (k: 'follow' | 'showFormants') => updateSettings({ [k]: !settings[k] })
+  // 帯の表示の切り替え（1 つは必ず残す）
+  const toggleLane = (lane: Lane) => {
+    const next = { ...settings.lanes, [lane]: !settings.lanes[lane] }
+    if (Object.values(next).some(Boolean)) updateSettings({ lanes: next })
+  }
+  // スペクトログラムの縦の拡大。メニューからは今の範囲の真ん中（対数の周波数軸）を中心にする
+  const fullFreq: FreqRange | null = spec ? [spec.minHz, spec.maxHz] : null
+  const freqZoom = (center: number | null, factor: number) => {
+    if (!fullFreq) return
+    const [lo, hi] = freqRange ?? fullFreq
+    setFreqRange(zoomFreq(fullFreq, freqRange, center ?? Math.sqrt(lo * hi), factor))
+  }
   const openSettings = () => {
     setSettingsOpen(true)
     setSettingsFocus((n) => n + 1)
@@ -133,8 +152,8 @@ export default function App() {
   const menus = appMenus(
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
-      follow: settings.follow, showPitch: settings.showPitch, showFormants: settings.showFormants,
-      open: picker.open, showSettings: openSettings, togglePitch: () => toggleSet('showPitch'), toggleFormants: () => toggleSet('showFormants'),
+      follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants,
+      open: picker.open, showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -161,8 +180,8 @@ export default function App() {
       onShowAll={view.showAll}
       follow={settings.follow}
       onFollowChange={(follow) => updateSettings({ follow })}
-      showPitch={settings.showPitch}
-      onShowPitchChange={(showPitch) => updateSettings({ showPitch })}
+      lanes={settings.lanes}
+      onLaneToggle={toggleLane}
       showFormants={settings.showFormants}
       onShowFormantsChange={(showFormants) => updateSettings({ showFormants })}
     />
@@ -173,8 +192,13 @@ export default function App() {
       spec={spec}
       pitch={pitch}
       formants={formants}
-      showPitch={settings.showPitch}
+      level={level}
+      lanes={settings.lanes}
+      weights={settings.laneWeights}
+      onWeightsChange={(laneWeights) => updateSettings({ laneWeights })}
       showFormants={settings.showFormants}
+      freqRange={freqRange}
+      onFreqZoom={(hz, factor) => freqZoom(hz, factor)}
       onHover={setHover}
       view={view}
       position={player.position}
@@ -200,7 +224,7 @@ export default function App() {
       )}
     </Stack>
   )
-  const analysis = <AnalysisPanel pitch={pitch} formants={formants} time={hover ?? player.position} hovering={hover !== null} selection={selection} />
+  const analysis = <AnalysisPanel pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
   const jobLabel = () => t('job.kind.analyze')
 
   return (

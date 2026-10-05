@@ -2,6 +2,8 @@ import type { MenuGroup } from 'pevenmui'
 import type { WheelZoom } from 'wevocal-lib/react'
 import { t } from './i18n'
 import { keyLabelOf, type ActionId, type Keymap } from './keymap'
+import { LANES, type Lane, type LaneFlags } from './layout'
+import { LANE_INFO } from './ViewTools'
 import { openExternal, USER_GUIDE_URL } from './links'
 
 /** メニューから呼ぶ操作と、チェックや押せるかに使う今の状態 */
@@ -14,11 +16,15 @@ export interface MenuActions {
   zoomed: boolean
   canZoomIn: boolean
   follow: boolean
-  showPitch: boolean
+  lanes: LaneFlags
+  freqZoomed: boolean
   showFormants: boolean
   open: () => void
   showSettings: () => void
-  togglePitch: () => void
+  toggleLane: (lane: Lane) => void
+  freqZoomIn: () => void
+  freqZoomOut: () => void
+  freqZoomReset: () => void
   toggleFormants: () => void
   zoomIn: () => void
   zoomOut: () => void
@@ -74,12 +80,21 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       label: t('menu.view'),
       accessKey: 'V',
       entries: [
-        { label: t('analysis.f0'), checked: a.showPitch, disabled: !a.hasClip, onClick: a.togglePitch },
-        { label: t('analysis.formants'), checked: a.showFormants, disabled: !a.hasClip, onClick: a.toggleFormants },
+        ...LANES.map((l) => ({ label: t(LANE_INFO[l].label), checked: a.lanes[l], disabled: !a.hasClip || (a.lanes[l] && LANES.filter((x) => a.lanes[x]).length === 1), onClick: () => a.toggleLane(l) })),
+        { label: t('analysis.formants'), checked: a.showFormants, disabled: !a.hasClip || !a.lanes.spec, onClick: a.toggleFormants },
         { divider: true },
         { label: t('wave.zoomIn'), shortcut: a.wheelZoom === 'wheel' ? 'Wheel' : 'Ctrl+Wheel', disabled: !a.hasClip || !a.canZoomIn, onClick: a.zoomIn },
         { label: t('wave.zoomOut'), disabled: !a.hasClip || !a.zoomed, onClick: a.zoomOut },
         { label: t('wave.showAll'), disabled: !a.hasClip || !a.zoomed, onClick: a.showAll },
+        {
+          label: t('lane.freqZoom'),
+          disabled: !a.hasClip || !a.lanes.spec,
+          submenu: [
+            { label: t('wave.vZoomIn'), shortcut: 'Alt+Wheel', onClick: a.freqZoomIn },
+            { label: t('wave.vZoomOut'), disabled: !a.freqZoomed, onClick: a.freqZoomOut },
+            { label: t('wave.vZoomReset'), disabled: !a.freqZoomed, onClick: a.freqZoomReset },
+          ],
+        },
         { divider: true },
         { label: t('wave.follow'), checked: a.follow, onClick: a.toggleFollow },
       ],

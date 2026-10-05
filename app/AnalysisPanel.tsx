@@ -1,12 +1,15 @@
 import { Box, Stack, Typography } from '@mui/material'
 import type { Range } from 'wevocal-lib'
-import type { Formants, Pitch } from '../src/index'
+import type { Formants, Level, Pitch } from '../src/index'
 import { useT } from './i18n'
-import { FORMANT_COLORS, rangeStats, valuesAt } from './lanes'
+import { FORMANT_COLORS, levelAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
 
 interface Props {
   pitch: Pitch | null
   formants: Formants | null
+  level: Level | null
+  /** カーソルの高さの周波数（スペクトログラムか F0 の帯の上だけ） */
+  hoverHz: number | null
   /** 値を出す時刻（カーソルの下、なければ再生位置） */
   time: number
   /** カーソルの下の値か（偽なら再生位置） */
@@ -34,12 +37,16 @@ export default function AnalysisPanel(p: Props) {
   const v = valuesAt(p.time, p.pitch, p.formants)
   const hz = (x: number | undefined) => (x ? `${Math.round(x)} Hz` : '—')
   const r = p.selection ? rangeStats(p.selection.start, p.selection.end, p.pitch, p.formants) : null
+  const db = (x: number | null) => (x === null ? '—' : `${x.toFixed(1)} dB`)
+  const lv = levelAt(p.time, p.level)
   return (
     <Stack sx={{ p: 1.5, gap: 1.5 }}>
       <Stack sx={{ gap: 0.5 }}>
         <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
           {t(p.hovering ? 'analysis.atCursor' : 'analysis.atPlayhead', { time: p.time.toFixed(2) })}
         </Typography>
+        {p.hoverHz !== null && <Value label={t('analysis.cursorFreq')} value={`${hz(p.hoverHz)}（${noteOf(p.hoverHz)}）`} />}
+        <Value label={t('lane.level')} value={db(lv)} />
         {!p.pitch ? (
           <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{t('analysis.analyzing')}</Typography>
         ) : v.f0 > 0 ? (
@@ -64,6 +71,7 @@ export default function AnalysisPanel(p: Props) {
             <>
               <Value label={t('analysis.meanF0')} value={`${hz(r.f0)}（${r.note}）`} />
               <Value label={t('analysis.voiced')} value={`${Math.round(r.voicedRatio * 100)}%`} />
+              <Value label={t('analysis.meanLevel')} value={db(meanLevel(p.selection!.start, p.selection!.end, p.level))} />
               {r.formants.map((f, i) => (
                 <Value key={i} label={t('analysis.meanFormant', { n: i + 1 })} value={hz(f)} color={FORMANT_COLORS[i]} />
               ))}

@@ -5,7 +5,8 @@
 import type { Clip } from 'wevocal-lib'
 import type { AnalyzeOptions, AnalyzeRequest, Formants, Pitch, Spectrogram, WorkerMessage } from './types'
 
-export type { AnalyzeOptions, Formants, Pitch, Spectrogram } from './types'
+export type { AnalyzeOptions, Formants, Level, Pitch, Spectrogram } from './types'
+export { analyzeLevel, LEVEL_FLOOR_DB } from './level'
 export { renderSpectrogram } from './spectrogram'
 
 /** ライブラリの版（追加機能のマニフェストと合わせる） */

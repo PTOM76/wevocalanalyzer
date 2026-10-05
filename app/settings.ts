@@ -3,6 +3,7 @@ import type { WindowMode } from 'pevenmui'
 import type { WheelZoom } from 'wevocal-lib/react'
 import type { LangSetting } from './i18n'
 import type { KeymapOverrides } from './keymap'
+import type { LaneFlags, LaneWeights } from './layout'
 
 export type ThemeSetting = 'system' | 'light' | 'dark'
 
@@ -18,8 +19,10 @@ export interface Settings {
   keymap: KeymapOverrides
   /** 再生中に表示範囲を再生位置に追従させる */
   follow: boolean
-  /** ピッチの帯を出す（既定は出さない。初めは波形とスペクトログラムだけ）、フォルマントをスペクトログラムに重ねる */
-  showPitch: boolean
+  /** 出す帯（初めは波形とスペクトログラムだけ）と、帯の高さの比（境目のドラッグで変える） */
+  lanes: LaneFlags
+  laneWeights: LaneWeights
+  /** フォルマントをスペクトログラムに重ねる */
   showFormants: boolean
   /** ダイアログの出し方。auto は PWA かつ Chromium 系ならポップアップ、ほかはダイアログ。別窓を開けなければダイアログ */
   dialogWindow: WindowMode | 'auto'
@@ -27,14 +30,16 @@ export interface Settings {
   devUpdates: boolean
 }
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, showPitch: false, showFormants: true, dialogWindow: 'auto', devUpdates: false }
+export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2 }, showFormants: true, dialogWindow: 'auto', devUpdates: false }
 
 const KEY = 'wevocalanalyzer.settings'
 
 function load(): Settings {
   try {
     // 古い設定に無い項目は既定値で埋める
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }
+    const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}')
+    // 帯は種類が増えても既定値で埋める
+    return { ...DEFAULT_SETTINGS, ...saved, lanes: { ...DEFAULT_SETTINGS.lanes, ...saved.lanes }, laneWeights: { ...DEFAULT_SETTINGS.laneWeights, ...saved.laneWeights } }
   } catch {
     return DEFAULT_SETTINGS
   }
