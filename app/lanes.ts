@@ -47,7 +47,7 @@ export function drawSpec(b: LaneBox, spec: Spectrogram | null, divider: string, 
 /** スペクトログラムの帯の中で、周波数 `hz` の高さ（対数の周波数軸） */
 const specY = (spec: Spectrogram, top: number, h: number, hz: number) => top + h - (Math.log(hz / spec.minHz) / Math.log(spec.maxHz / spec.minHz)) * h
 
-/** フォルマントの点をスペクトログラムに重ねる。声のない区間（F0 が 0）は描かない */
+/** フォルマントの点をスペクトログラムに重ねる。無声区間（F0 が 0）は描かない */
 export function drawFormants(b: LaneBox, spec: Spectrogram, formants: Formants, pitch: Pitch) {
   const { g, width, view, top, h } = b
   const k0 = Math.max(0, Math.floor(view.start / formants.hopSec))
@@ -139,7 +139,7 @@ function noteName(hz: number) {
   return `${NOTE_NAMES[((n % 12) + 12) % 12]}${Math.floor(n / 12) - 1} ${cents >= 0 ? '+' : ''}${cents}c`
 }
 
-/** 選択範囲の値: 声のある区間の F0 の平均（半音で平均）と音名、声のある割合、F1〜F3 の平均（Hz） */
+/** 選択範囲の値: 有声区間の平均 F0（半音で平均）と音名、有声率、F1〜F3 の平均（Hz） */
 export function rangeStats(start: number, end: number, pitch: Pitch | null, formants: Formants | null) {
   if (!pitch) return null
   const k0 = Math.max(0, Math.ceil(start / pitch.hopSec))

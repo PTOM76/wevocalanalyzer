@@ -15,7 +15,7 @@ export interface Pitch {
   hopSec: number
 }
 
-/** フォルマント。フレーム k の F(i+1) は `data[k * count + i]`（Hz、見つからなければ 0）。声のない区間は F0 で隠す */
+/** フォルマント。フレーム k の F(i+1) は `data[k * count + i]`（Hz、見つからなければ 0）。無声区間は F0 で隠す */
 export interface Formants {
   data: Float32Array
   /** 1 フレームあたりの数（F1〜F3 なら 3） */

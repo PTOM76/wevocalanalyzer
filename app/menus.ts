@@ -74,7 +74,7 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       label: t('menu.view'),
       accessKey: 'V',
       entries: [
-        { label: t('menu.pitch'), checked: a.showPitch, disabled: !a.hasClip, onClick: a.togglePitch },
+        { label: t('analysis.f0'), checked: a.showPitch, disabled: !a.hasClip, onClick: a.togglePitch },
         { label: t('analysis.formants'), checked: a.showFormants, disabled: !a.hasClip, onClick: a.toggleFormants },
         { divider: true },
         { label: t('wave.zoomIn'), shortcut: a.wheelZoom === 'wheel' ? 'Wheel' : 'Ctrl+Wheel', disabled: !a.hasClip || !a.canZoomIn, onClick: a.zoomIn },

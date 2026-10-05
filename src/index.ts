@@ -1,5 +1,5 @@
 /**
- * WeVocalAnalyzer: 声の解析（UI を持たず、React にも依存しない。画面は app/）。
+ * WeVocalAnalyzer: 音声の解析（UI を持たず、React にも依存しない。画面は app/）。
  * WeVocalSynth からは追加機能として使う（今のところスペクトログラムだけ。docs/PLAN.md）
  */
 import type { Clip } from 'wevocal-lib'
@@ -85,7 +85,7 @@ export async function analyzePitch(clip: Clip, opts: AnalyzeOptions = {}): Promi
   return { data: (await request('f0', clip, opts)) as Float32Array, hopSec: HOP_SEC }
 }
 
-/** フォルマント F1〜F3（LPC、10ms 間隔）。声のない区間も値が入るので、表示するときは F0 で隠す */
+/** フォルマント F1〜F3（LPC、10ms 間隔）。無声区間にも値が入るので、表示するときは F0 で隠す */
 export async function analyzeFormants(clip: Clip, opts: AnalyzeOptions = {}): Promise<Formants> {
   return { data: (await request('formant', clip, opts)) as Float32Array, count: FORMANT_COUNT, hopSec: HOP_SEC }
 }
