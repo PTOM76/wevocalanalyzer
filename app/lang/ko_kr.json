@@ -1,0 +1,17 @@
+{
+  "menu.file": "파일",
+  "menu.open": "열기…",
+  "menu.help": "도움말",
+  "menu.about": "WeVocalAnalyzer 정보",
+  "play.play": "재생",
+  "play.pause": "일시 정지",
+  "play.stop": "정지",
+  "empty.hint": "오디오 파일을 열거나 여기에 놓으세요",
+  "empty.open": "파일 열기",
+  "wave.scroll": "표시 범위",
+  "tab.analysis": "분석",
+  "analysis.soon": "스펙트로그램, F0, 포먼트 표시는 준비 중입니다",
+  "error.open": "파일을 열 수 없습니다: {message}",
+  "about.version": "버전",
+  "job.kind.analyze": "분석"
+}

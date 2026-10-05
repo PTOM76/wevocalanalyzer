@@ -1,0 +1,17 @@
+{
+  "menu.file": "ファイル",
+  "menu.open": "開く…",
+  "menu.help": "ヘルプ",
+  "menu.about": "WeVocalAnalyzer について",
+  "play.play": "再生",
+  "play.pause": "一時停止",
+  "play.stop": "停止",
+  "empty.hint": "音声ファイルを開くか、ここにドロップしてください",
+  "empty.open": "ファイルを開く",
+  "wave.scroll": "表示範囲",
+  "tab.analysis": "解析",
+  "analysis.soon": "スペクトログラム、F0、フォルマントの表示は準備中です",
+  "error.open": "ファイルを開けませんでした: {message}",
+  "about.version": "バージョン",
+  "job.kind.analyze": "解析"
+}

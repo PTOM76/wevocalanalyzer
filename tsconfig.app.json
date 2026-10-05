@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "esnext",
+    "types": ["vite/client", "vite-plugin-pwa/react"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    // 隣の pevenmui（WeVocalSynth の submodule として開発するとき）を先に探し、なければ自分の submodule
+    "paths": {
+      "pevenmui": ["../pevenmui/src/index.ts", "./pevenmui/src/index.ts"],
+      "pevenmui/pwa": ["../pevenmui/src/pwa/index.ts", "./pevenmui/src/pwa/index.ts"],
+      "pevenmui/web": ["../pevenmui/src/web/index.ts", "./pevenmui/src/web/index.ts"],
+      "wevocal-lib": ["../wevocal-lib/web/src/index.ts", "./wevocal-lib/web/src/index.ts"],
+      "wevocal-lib/react": ["../wevocal-lib/web/src/react/index.ts", "./wevocal-lib/web/src/react/index.ts"]
+    }
+  },
+  "include": ["app", "src"]
+}

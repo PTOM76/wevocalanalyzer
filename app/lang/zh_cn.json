@@ -1,0 +1,17 @@
+{
+  "menu.file": "文件",
+  "menu.open": "打开…",
+  "menu.help": "帮助",
+  "menu.about": "关于 WeVocalAnalyzer",
+  "play.play": "播放",
+  "play.pause": "暂停",
+  "play.stop": "停止",
+  "empty.hint": "打开音频文件或拖放到此处",
+  "empty.open": "打开文件",
+  "wave.scroll": "显示范围",
+  "tab.analysis": "分析",
+  "analysis.soon": "频谱图、F0 和共振峰的显示正在准备中",
+  "error.open": "无法打开文件: {message}",
+  "about.version": "版本",
+  "job.kind.analyze": "分析"
+}
