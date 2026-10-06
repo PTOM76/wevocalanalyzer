@@ -29,6 +29,7 @@ import ViewTools, { SmallButton } from './ViewTools'
 import WaveView, { type Hover } from './WaveView'
 import { FREQ_ZOOM_STEP, zoomFreq, type FreqRange } from './lanes'
 import type { Lane } from './layout'
+import { app } from './appConfig'
 
 /** 画面の組み立て（WeVocalSynth と同じ部品と作り）。配置は PevenMUI、波形は wevocal-lib */
 export default function App() {
@@ -270,7 +271,7 @@ export default function App() {
       <PevenLabels.Provider value={i18n.labels(lang)}>
         <WindowModeContext.Provider value={settings.dialogWindow === 'auto' ? autoWindowMode() : settings.dialogWindow}>
           <Box sx={{ height: FULL_HEIGHT, display: 'flex', flexDirection: 'column', overflow: 'hidden', bgcolor: 'background.default' }}>
-            <AppHeader title="WeVocalAnalyzer" icon={<AppIcon size={16} />} menus={menus} />
+            <AppHeader icon={<AppIcon size={16} />} menus={menus} />
             {picker.input}
             {mobile ? (
               <MobileLayout
@@ -278,7 +279,7 @@ export default function App() {
                 editorFooter={null}
                 view={viewTools}
                 tabs={[{ key: 'analysis', label: t('tab.analysis'), content: analysis }]}
-                storageKey="wevocalanalyzer.mobilePanelPinned"
+                storageKey={app.key('mobilePanelPinned')}
                 playBar={
                   <BottomBar kindLabel={jobLabel}>
                     <Stack direction="row" sx={{ alignItems: 'center', px: 1, py: 0.5 }}>
@@ -292,7 +293,7 @@ export default function App() {
               />
             ) : (
               <DesktopLayout
-                storageKey="wevocalanalyzer.inspectorWidth"
+                storageKey={app.key('inspectorWidth')}
                 toolbar={
                   <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5, px: 1, py: 0.25, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
                     {transport}

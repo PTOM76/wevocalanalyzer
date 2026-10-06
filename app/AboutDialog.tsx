@@ -4,7 +4,7 @@ import { formatBuild } from 'pevenmui/pwa'
 import { useT } from './i18n'
 import { REPOSITORY_URL } from './links'
 
-const AUTHOR = 'PitaQ'
+import { app } from './appConfig'
 
 /** 今動いている版（バージョンとコミット。例: 1.0.0 (47a7e39)） */
 export const APP_BUILD = formatBuild(__APP_VERSION__, __APP_COMMIT__)
@@ -20,11 +20,10 @@ export default function AboutDialog({ open, onClose }: { open: boolean; onClose:
       open={open}
       onClose={onClose}
       icon={<AppIcon size={56} />}
-      name="WeVocalAnalyzer"
       rows={[
         // コミットまで出して、バージョン番号を上げずにデプロイした版も見分けられるようにする
         [t('about.version'), <span className="selectable">{APP_BUILD}</span>],
-        [t('about.author'), AUTHOR],
+        [t('about.author'), app.author],
         [
           'GitHub',
           <Link className="selectable" href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">

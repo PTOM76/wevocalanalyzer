@@ -5,6 +5,7 @@ import type { LangSetting } from './i18n'
 import type { KeymapOverrides } from './keymap'
 import type { LaneFlags, LaneWeights } from './layout'
 import type { LyricsModel } from '../src/lyrics'
+import { app } from './appConfig'
 
 export type ThemeSetting = 'system' | 'light' | 'dark'
 
@@ -43,7 +44,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false, lyrics: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2, lyrics: 1.5 }, showFormants: true, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, lyricsModel: 'base', lyricsLanguage: null, lyricsCpu: false, dialogWindow: 'auto', devUpdates: false }
 
-const KEY = 'wevocalanalyzer.settings'
+const KEY = app.key('settings')
 
 function load(): Settings {
   try {

@@ -1,9 +1,10 @@
-// 外部へのリンク。移転したらここだけを変える（WeVocalSynth の src/links.ts と同じ形）
+// 外部へのリンク（URL は appInfo.ts）
+import { app } from './appConfig'
 
-export const REPOSITORY_URL = 'https://github.com/PTOM76/wevocalanalyzer'
+export const REPOSITORY_URL = app.repository
 
 /** ユーザーガイド（ヘルプ → ユーザーガイド） */
-export const USER_GUIDE_URL = 'https://github.com/PTOM76/wevocalanalyzer#readme'
+export const USER_GUIDE_URL = app.guide
 
 /** リンクをブラウザの新しいタブで開く（アプリの画面はそのまま残す） */
 export const openExternal = (url: string) => window.open(url, '_blank', 'noopener,noreferrer')
