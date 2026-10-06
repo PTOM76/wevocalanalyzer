@@ -3,7 +3,7 @@ import { Box, Button, Divider, Snackbar, Stack, Typography, useColorScheme } fro
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCirclePlay, faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import {
-  AppHeader, BottomBar, DesktopLayout, FULL_HEIGHT, JobGauge, LABELS, LicensesDialog, MobileLayout, PevenLabels, StatusBar, StatusItem, StatusSpacer,
+  AppHeader, BottomBar, DesktopLayout, FULL_HEIGHT, JobGauge, LicensesDialog, MobileLayout, PevenLabels, StatusBar, StatusItem, StatusSpacer,
   WindowModeContext, autoWindowMode, setUiScale, startJob, useFileDrop, useFilePicker, useMobileLayout, useShortcuts,
 } from 'pevenmui'
 import { UpdatePrompt, checkForUpdate, promptUpdate } from 'pevenmui/pwa'
@@ -13,7 +13,7 @@ import { ZOOM_STEP, useWaveformView } from 'wevocal-lib/react'
 import { analyzeFormants, analyzeLevel, analyzePitch, analyzeSpectrogram, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
 import AnalysisPanel from './AnalysisPanel'
-import { LangContext, resolveLang, setLang, t } from './i18n'
+import { i18n, LangContext, resolveLang, setLang, t } from './i18n'
 import { resolveKeymap } from './keymap'
 import { licenseEntries } from './licenses'
 import { analysisCsv, downloadAnalysisCsv, downloadLyricsSrt } from './exportCsv'
@@ -140,7 +140,7 @@ export default function App() {
   const checkUpdate = () =>
     void checkForUpdate().then((r) => {
       if (r.kind === 'found') return promptUpdate(r.build)
-      const l = LABELS[lang]
+      const l = i18n.labels(lang)
       setToast({ latest: l.updateLatest, unsupported: l.updateUnsupported, failed: l.updateFailed }[r.kind])
     })
 
@@ -267,7 +267,7 @@ export default function App() {
 
   return (
     <LangContext.Provider value={lang}>
-      <PevenLabels.Provider value={LABELS[lang]}>
+      <PevenLabels.Provider value={i18n.labels(lang)}>
         <WindowModeContext.Provider value={settings.dialogWindow === 'auto' ? autoWindowMode() : settings.dialogWindow}>
           <Box sx={{ height: FULL_HEIGHT, display: 'flex', flexDirection: 'column', overflow: 'hidden', bgcolor: 'background.default' }}>
             <AppHeader title="WeVocalAnalyzer" icon={<AppIcon size={16} />} menus={menus} />

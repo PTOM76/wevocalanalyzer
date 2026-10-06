@@ -1,10 +1,10 @@
 import { useMemo, type ReactNode } from 'react'
 import { UpdateSection } from 'pevenmui/pwa'
-import { Check, Choice, Group, KeymapEditor, LANG_NAMES, Row, type WindowMode } from 'pevenmui'
+import { Check, Choice, Group, KeymapEditor, Row, type WindowMode } from 'pevenmui'
 import type { WheelZoom } from 'wevocal-lib/react'
 import type { Settings, ThemeSetting } from './settings'
 import { ACTIONS, type KeymapOverrides } from './keymap'
-import { useT, type LangSetting, type MessageKey } from './i18n'
+import { i18n, useT, type LangSetting, type MessageKey } from './i18n'
 import type { Category } from './settingsSearch'
 
 /** 解析の設定の選択肢: F0 を探す範囲（Hz）、フォルマントの最高周波数（Hz）、スペクトログラムの窓の長さ（サンプル） */
@@ -75,7 +75,7 @@ export function settingsPages(draft: Settings, set: (patch: Partial<Settings>) =
           />
         </Row>
         <Row label={t('settings.language')}>
-          <Choice<LangSetting> value={draft.language} onChange={(v) => set({ language: v })} options={[['auto', t('settings.languageAuto')], ...LANG_NAMES]} />
+          <Choice<LangSetting> value={draft.language} onChange={(v) => set({ language: v })} options={[['auto', t('settings.languageAuto')], ...i18n.options()]} />
         </Row>
       </Group>
     ),
