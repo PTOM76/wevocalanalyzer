@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Box, Button, Divider, Snackbar, Stack, Typography, useColorScheme } from '@mui/material'
+import { Box, Button, Divider, MenuItem, Select, Snackbar, Stack, Typography, useColorScheme } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCirclePlay, faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import {
@@ -8,7 +8,7 @@ import {
 } from 'pevenmui'
 import { UpdatePrompt, checkForUpdate, promptUpdate } from 'pevenmui/pwa'
 import { configureFileAccess } from 'pevenmui/web'
-import { AUDIO_ACCEPT, decodeFile, type Clip, type Range } from 'wevocal-lib'
+import { AUDIO_ACCEPT, decodeFile, isWvspFile, readWvsp, WVSP_EXT, WvspError, type Clip, type Range } from 'wevocal-lib'
 import { ZOOM_STEP, useWaveformView } from 'wevocal-lib/react'
 import { analyzeFormants, analyzeLevel, analyzePitch, analyzeSpectrogram, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
@@ -44,6 +44,9 @@ export default function App() {
 
   const [clip, setClip] = useState<Clip | null>(null)
   const [name, setName] = useState('')
+  // WeVocalSynth のプロジェクト（.wvsp）を開いたときのトラック（加工後の音）。トラックが 2 本以上なら、ツールバーで選ぶ
+  const [projectTracks, setProjectTracks] = useState<{ name: string; clip: Clip }[]>([])
+  const [trackIndex, setTrackIndex] = useState(0)
   const [error, setError] = useState('')
   const [toast, setToast] = useState<string | null>(null)
   const [dialog, setDialog] = useState<'about' | 'licenses' | 'shortcuts' | null>(null)
@@ -99,15 +102,33 @@ export default function App() {
   const open = async (file: File) => {
     try {
       setError('')
+      if (isWvspFile(file)) {
+        // プロジェクトは、編集していたトラックの加工後の音を開く
+        const p = await readWvsp(file)
+        const list = p.tracks.map((tr) => ({ name: tr.info.name, clip: tr.edited }))
+        setProjectTracks(list)
+        setTrackIndex(p.active)
+        setClip(list[p.active].clip)
+        setName(file.name)
+        return
+      }
+      setProjectTracks([])
       setClip(await decodeFile(file))
       setName(file.name)
     } catch (e) {
-      setError(t('error.open', { message: e instanceof Error ? e.message : String(e) }))
+      const message = e instanceof WvspError ? t(e.code === 'unsupported' ? 'error.wvspUnsupported' : 'error.wvspInvalid') : e instanceof Error ? e.message : String(e)
+      setError(t('error.open', { message }))
     }
+  }
+  /** プロジェクトのトラックを切り替える */
+  const selectTrack = (i: number) => {
+    setTrackIndex(i)
+    setClip(projectTracks[i].clip)
   }
   // 開く画面はフォルダを覚える。最近使用したファイルの一覧はないので記録しない
   configureFileAccess({ rememberFolder: true, startFolder: 'music', recentFiles: false, pickerMode: 'auto' })
-  const picker = useFilePicker(AUDIO_ACCEPT, (f) => void open(f), t('file.audioType'))
+  // 音声ファイルのほか、WeVocalSynth のプロジェクト（.wvsp）も開ける
+  const picker = useFilePicker(`${AUDIO_ACCEPT},${WVSP_EXT}`, (f) => void open(f), t('file.audioType'))
   useFileDrop((f) => void open(f))
 
   // 再生位置の移動（WeVocalSynth の useSeek と同じ量。少しずつは 0.1 秒）。画面の外に出たら表示範囲を動かす
@@ -204,6 +225,16 @@ export default function App() {
       <SmallButton title={t('play.playSelection')} icon={faCirclePlay} disabled={!selection} onClick={playSelection} />
     </>
   )
+  // プロジェクトのトラックを選ぶ欄（トラックが 2 本以上のときだけ）
+  const trackSelect = projectTracks.length > 1 && (
+    <Select size="small" value={trackIndex} onChange={(e) => selectTrack(Number(e.target.value))} aria-label={t('project.track')} sx={{ ml: 'auto', fontSize: 13, '& .MuiSelect-select': { py: 0.5 } }}>
+      {projectTracks.map((tr, i) => (
+        <MenuItem key={i} value={i} sx={{ fontSize: 13 }}>
+          {tr.name}
+        </MenuItem>
+      ))}
+    </Select>
+  )
   const viewTools = (
     <ViewTools
       disabled={!has}
@@ -277,7 +308,7 @@ export default function App() {
               <MobileLayout
                 editor={editor}
                 editorFooter={null}
-                view={viewTools}
+                view={<>{viewTools}{trackSelect}</>}
                 tabs={[{ key: 'analysis', label: t('tab.analysis'), content: analysis }]}
                 storageKey={app.key('mobilePanelPinned')}
                 playBar={
@@ -302,13 +333,14 @@ export default function App() {
                     </Typography>
                     <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
                     {viewTools}
+                    {trackSelect}
                   </Stack>
                 }
                 editor={editor}
                 inspector={analysis}
                 statusBar={
                   <StatusBar>
-                    <StatusItem>{name || '—'}</StatusItem>
+                    <StatusItem>{projectTracks.length > 1 ? `${name}（${projectTracks[trackIndex]?.name}）` : name || '—'}</StatusItem>
                     {clip && (
                       <StatusItem secondary>
                         {clip.sampleRate} Hz・{clip.channels.length === 1 ? 'Mono' : `${clip.channels.length} ch`}
