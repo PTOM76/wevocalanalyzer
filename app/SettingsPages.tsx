@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from 'react'
 import { UpdateSection } from 'pevenmui/pwa'
-import { Check, Choice, Group, KeymapEditor, Row, type WindowMode } from 'pevenmui'
+import { AddonSection, Check, Choice, Group, KeymapEditor, Row, type WindowMode } from 'pevenmui'
 import type { WheelZoom } from 'wevocal-lib/react'
 import type { Settings, ThemeSetting } from './settings'
 import { ACTIONS, type KeymapOverrides } from './keymap'
@@ -98,6 +98,9 @@ export function settingsPages(draft: Settings, set: (patch: Partial<Settings>) =
           <Row label={t('settings.specWindow')} help={t('settings.specWindowHelp')}>
             <Choice<string> value={String(draft.specWindow)} onChange={(v) => set({ specWindow: Number(v) })} options={WINDOWS.map((n): [string, string] => [String(n), `${n}`])} />
           </Row>
+        </Group>
+        <Group title={t('settings.groupLyrics')}>
+          <AddonSection ids={['analyzer-lyrics']} />
         </Group>
       </>
     ),

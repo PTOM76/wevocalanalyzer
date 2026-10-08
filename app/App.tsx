@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCirclePlay, faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
 import {
   AppHeader, BottomBar, DesktopLayout, FULL_HEIGHT, JobGauge, LicensesDialog, MobileLayout, PevenLabels, StatusBar, StatusItem, StatusSpacer,
-  WindowModeContext, autoWindowMode, setUiScale, startJob, useFileDrop, useFilePicker, useMobileLayout, useShortcuts,
+  WindowModeContext, autoWindowMode, setUiScale, startJob, useAddonInstall, useFileDrop, useFilePicker, useMobileLayout, useShortcuts,
 } from 'pevenmui'
 import { UpdatePrompt, checkForUpdate, promptUpdate } from 'pevenmui/pwa'
 import { configureFileAccess } from 'pevenmui/web'
@@ -17,7 +17,8 @@ import { i18n, LangContext, resolveLang, setLang, t } from './i18n'
 import { resolveKeymap } from './keymap'
 import { licenseEntries } from './licenses'
 import { analysisCsv, downloadAnalysisCsv, downloadLyricsSrt } from './exportCsv'
-import { transcribeLyrics, type LyricsSegment } from '../src/lyrics'
+import type { LyricsSegment } from '../src/lyricsTypes'
+import { addons, type LyricsAddon } from './addons'
 import LyricsDialog from './LyricsDialog'
 import LiveTime from './LiveTime'
 import { appMenus } from './menus'
@@ -168,13 +169,21 @@ export default function App() {
 
   const has = !!clip
   // 歌詞の文字化（モデルの取得の進み具合と、認識中であることをゲージに出す）。終わったら歌詞の帯を出す
-  const runLyrics = (device: 'webgpu' | 'wasm') => {
+  const addonInstall = useAddonInstall()
+  const runLyrics = async (device: 'webgpu' | 'wasm') => {
     if (!clip) return
+    // 文字化は追加機能（未導入なら導入のダイアログを出す）
+    if (!(await addonInstall.ensure('analyzer-lyrics'))) return
+    const lyricsAddon = await addons.loadAddon<LyricsAddon>('analyzer-lyrics').catch((e: unknown) => {
+      setToast(t('lyrics.failed', { message: e instanceof Error ? e.message : String(e) }))
+      return null
+    })
+    if (!lyricsAddon) return
     lyricsAbort.current?.abort()
     const ac = new AbortController()
     lyricsAbort.current = ac
     const job = startJob('lyrics', t('job.kind.lyrics'), () => ac.abort())
-    transcribeLyrics(clip, {
+    lyricsAddon.transcribeLyrics(clip, {
       model: settings.lyricsModel,
       device,
       language: settings.lyricsLanguage,
@@ -360,8 +369,9 @@ export default function App() {
             language={settings.lyricsLanguage}
             allowCpu={settings.lyricsCpu}
             onChange={updateSettings}
-            onRun={runLyrics}
+            onRun={(d) => void runLyrics(d)}
           />
+          {addonInstall.dialog}
           <SettingsDialog open={settingsOpen} focusSignal={settingsFocus} onClose={() => setSettingsOpen(false)} settings={settings} onChange={updateSettings} />
           <AboutDialog open={dialog === 'about'} onClose={() => setDialog(null)} />
           <LicensesDialog open={dialog === 'licenses'} onClose={() => setDialog(null)} title={t('menu.licenses')} intro={t('licenses.intro')} entries={licenseEntries()} />

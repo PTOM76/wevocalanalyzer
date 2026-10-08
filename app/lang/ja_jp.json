@@ -3,6 +3,7 @@
   "about.license": "ライセンス",
   "about.licenseText": "MIT",
   "about.version": "バージョン",
+
   "analysis.analyzing": "解析中…",
   "analysis.atCursor": "カーソルの位置（{time} 秒）",
   "analysis.atPlayhead": "再生位置（{time} 秒）",
@@ -19,27 +20,36 @@
   "analysis.spectrumSelection": "スペクトル（選択範囲の平均）",
   "analysis.unvoiced": "無声区間",
   "analysis.voiced": "有声率",
+
   "common.cancel": "キャンセル",
   "common.stop": "停止",
+
   "edit.clearSelection": "選択解除",
   "edit.selectAll": "すべて選択",
+
   "empty.choose": "ファイルを選択",
   "empty.formats": "WAV / AIFF / MP3 / MP4 など（ドラッグ＆ドロップ可）",
+
   "error.open": "ファイルを開けませんでした: {message}",
   "error.wvspInvalid": "WeVocalSynth のプロジェクトファイルではありません",
   "error.wvspUnsupported": "対応していない版のプロジェクトファイルです（WeVocalAnalyzer を更新してください）",
+
   "file.audioType": "音声ファイル",
+
   "job.kind.analyze": "解析中",
   "job.kind.lyrics": "歌詞の文字化",
+
   "key.seekBack": "再生位置を戻す",
   "key.seekBackFine": "再生位置を少し戻す",
   "key.seekForward": "再生位置を進める",
   "key.seekForwardFine": "再生位置を少し進める",
+
   "lane.freqZoom": "スペクトログラムの縦の拡大",
   "lane.level": "強さ（RMS）",
   "lane.lyrics": "歌詞",
   "lane.spec": "スペクトログラム",
   "lane.wave": "波形",
+
   "licenses.app": "本体",
   "licenses.audio": "音声の読み込みと解析（FFT、F0 推定など）",
   "licenses.font": "フォント",
@@ -51,6 +61,7 @@
   "licenses.style": "画面の部品のスタイル",
   "licenses.ui": "画面の部品",
   "licenses.whisper": "歌詞の文字化のモデル（Hugging Face の onnx-community が ONNX にしたもの）",
+
   "lyrics.cpuSlow": "WebGPU を使用できないため、CPU で処理します。とても時間がかかります",
   "lyrics.failed": "文字化できませんでした: {message}",
   "lyrics.intro": "Whisper で歌詞を文字にし、時刻を付けて帯に並べる。モデルは初めて使うときにダウンロードし、ブラウザに保存する（音声は外部に送らない）。伴奏のある曲は、先にボーカルを取り出すと正確になる",
@@ -68,6 +79,7 @@
   "lyrics.none": "「ツール」→「歌詞を文字化」で表示",
   "lyrics.run": "文字化する",
   "lyrics.title": "歌詞を文字化",
+
   "menu.about": "このアプリについて",
   "menu.checkUpdate": "更新を確認",
   "menu.edit": "編集",
@@ -85,13 +97,16 @@
   "menu.tools": "ツール",
   "menu.userGuide": "ユーザーガイド",
   "menu.view": "表示",
+
   "play.pause": "一時停止",
   "play.play": "再生",
   "play.playPause": "再生 / 一時停止",
   "play.playSelection": "範囲を試聴",
   "play.toEnd": "末尾へ",
   "play.toStart": "先頭へ",
+
   "project.track": "トラック",
+
   "settings.auto": "自動判定",
   "settings.cat.analysis": "解析",
   "settings.cat.debug": "開発者向け",
@@ -137,6 +152,8 @@
   "settings.windowPopup": "ポップアップ",
   "settings.windowSub": "サブウィンドウ",
   "settings.windowTab": "別タブ",
+  "settings.groupLyrics": "歌詞の文字化",
+
   "shortcuts.adjustRange": "範囲を調整",
   "shortcuts.drag": "ドラッグ",
   "shortcuts.edgeDrag": "範囲の端をドラッグ",
@@ -146,9 +163,13 @@
   "shortcuts.select": "範囲選択",
   "shortcuts.wheel": "ホイール / Ctrl+ホイール",
   "shortcuts.zoomScroll": "拡大縮小 / 横スクロール",
+
   "tab.analysis": "解析",
+
   "time.input": "再生位置を入力",
+
   "update.check": "今すぐ確認",
+
   "wave.follow": "再生位置に追従",
   "wave.scroll": "表示位置",
   "wave.showAll": "全体表示",
@@ -158,5 +179,7 @@
   "wave.wheelHint": "{action} (Ctrl+ホイール。縦は Alt+ホイール)",
   "wave.wheelHintPlain": "{action} (ホイール。縦は Alt+ホイール)",
   "wave.zoomIn": "拡大",
-  "wave.zoomOut": "縮小"
+  "wave.zoomOut": "縮小",
+
+  "addon.lyrics": "歌詞の文字化（Whisper）"
 }

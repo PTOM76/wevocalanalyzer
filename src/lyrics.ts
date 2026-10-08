@@ -1,12 +1,12 @@
 /**
- * 歌詞の文字化（Whisper）。transformers.js を使うので大きく、ライブラリの入口（index.ts）とは分ける
- * （WeVocalSynth の追加機能はスペクトログラムだけを使い、これを含めない）。
+ * 歌詞の文字化（Whisper）。transformers.js を使うので大きく、ライブラリの入口（index.ts）とは分け、
+ * 追加機能 analyzer-lyrics として配る（Analyzer と WeVocalSynth の両方。vite.addons.lyrics.config.ts）。
  * 歌声は話し声より認識しにくいので、伴奏のある曲は先にボーカルを取り出す（WeVocalExtractor）とよい
  */
 import type { Clip } from 'wevocal-lib'
 import type { LyricsMessage, LyricsModel, LyricsRequest, LyricsSegment } from './lyricsTypes'
 
-export { LYRICS_MODEL_MB, type LyricsModel, type LyricsSegment } from './lyricsTypes'
+export { hasWebGpu, LYRICS_MODEL_MB, type LyricsModel, type LyricsSegment } from './lyricsTypes'
 
 /** Whisper が受け付けるサンプルレート */
 const WHISPER_RATE = 16000
@@ -22,17 +22,6 @@ export interface LyricsOptions {
   /** 取得が終わり、認識を始めたとき（認識の進み具合は分からない） */
   onTranscribe?: () => void
   signal?: AbortSignal
-}
-
-/** この環境で WebGPU を使えるか（アダプターを取れるか） */
-export async function hasWebGpu(): Promise<boolean> {
-  const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu
-  if (!gpu) return false
-  try {
-    return !!(await gpu.requestAdapter())
-  } catch {
-    return false
-  }
 }
 
 /** 全チャンネルを平均し、16kHz にする（ブラウザの OfflineAudioContext で変換する） */

@@ -1,3 +1,16 @@
+// 追加機能を読み込む前の画面（モデルの選択、WebGPU の確認）からも使うので、transformers.js を読まない
+
+/** この環境で WebGPU を使えるか（アダプターを取れるか） */
+export async function hasWebGpu(): Promise<boolean> {
+  const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu
+  if (!gpu) return false
+  try {
+    return !!(await gpu.requestAdapter())
+  } catch {
+    return false
+  }
+}
+
 /** Whisper のモデルの大きさ。大きいほど正確で、取得と計算に時間がかかる */
 export type LyricsModel = 'tiny' | 'base' | 'small'
 

@@ -3,6 +3,7 @@
   "about.license": "授權",
   "about.licenseText": "MIT",
   "about.version": "版本",
+
   "analysis.analyzing": "分析中…",
   "analysis.atCursor": "游標位置（{time} 秒）",
   "analysis.atPlayhead": "播放位置（{time} 秒）",
@@ -19,27 +20,36 @@
   "analysis.spectrumSelection": "頻譜（選取範圍平均）",
   "analysis.unvoiced": "無聲段",
   "analysis.voiced": "有聲率",
+
   "common.cancel": "取消",
   "common.stop": "停止",
+
   "edit.clearSelection": "取消選取",
   "edit.selectAll": "全選",
+
   "empty.choose": "選擇檔案",
   "empty.formats": "WAV / AIFF / MP3 / MP4 等（可拖放）",
+
   "error.open": "無法開啟檔案: {message}",
   "error.wvspInvalid": "不是 WeVocalSynth 的專案檔",
   "error.wvspUnsupported": "不支援此版本的專案檔（請更新 WeVocalAnalyzer）",
+
   "file.audioType": "音訊檔案",
+
   "job.kind.analyze": "正在分析",
   "job.kind.lyrics": "歌詞轉寫",
+
   "key.seekBack": "播放位置後退",
   "key.seekBackFine": "播放位置稍微後退",
   "key.seekForward": "播放位置前進",
   "key.seekForwardFine": "播放位置稍微前進",
+
   "lane.freqZoom": "頻譜圖縱向縮放",
   "lane.level": "電平（RMS）",
   "lane.lyrics": "歌詞",
   "lane.spec": "頻譜圖",
   "lane.wave": "波形",
+
   "licenses.app": "本體",
   "licenses.audio": "音訊的讀取與分析（FFT、F0 估計等）",
   "licenses.font": "字型",
@@ -51,6 +61,7 @@
   "licenses.style": "介面元件的樣式",
   "licenses.ui": "介面元件",
   "licenses.whisper": "歌詞轉寫模型（由 Hugging Face 的 onnx-community 轉換為 ONNX）",
+
   "lyrics.cpuSlow": "無法使用 WebGPU，將以 CPU 處理，需要很長時間",
   "lyrics.failed": "無法轉寫: {message}",
   "lyrics.intro": "使用 Whisper 將歌詞轉為文字，並帶時間放在軌道上。模型在首次使用時下載並儲存在瀏覽器中（音訊不會傳送到外部）。有伴奏的歌曲先擷取人聲會更準確",
@@ -68,6 +79,7 @@
   "lyrics.none": "透過「工具」→「轉寫歌詞」顯示",
   "lyrics.run": "轉寫",
   "lyrics.title": "轉寫歌詞",
+
   "menu.about": "關於",
   "menu.checkUpdate": "檢查更新",
   "menu.edit": "編輯",
@@ -85,13 +97,16 @@
   "menu.tools": "工具",
   "menu.userGuide": "使用指南",
   "menu.view": "檢視",
+
   "play.pause": "暫停",
   "play.play": "播放",
   "play.playPause": "播放 / 暫停",
   "play.playSelection": "試聽範圍",
   "play.toEnd": "跳到結尾",
   "play.toStart": "回到開頭",
+
   "project.track": "軌道",
+
   "settings.auto": "自動判斷",
   "settings.cat.analysis": "分析",
   "settings.cat.debug": "開發人員",
@@ -137,6 +152,8 @@
   "settings.windowPopup": "彈出視窗",
   "settings.windowSub": "子視窗",
   "settings.windowTab": "新分頁",
+  "settings.groupLyrics": "歌詞轉寫",
+
   "shortcuts.adjustRange": "調整範圍",
   "shortcuts.drag": "拖曳",
   "shortcuts.edgeDrag": "拖曳範圍邊緣",
@@ -146,9 +163,13 @@
   "shortcuts.select": "選取範圍",
   "shortcuts.wheel": "滾輪 / Ctrl+滾輪",
   "shortcuts.zoomScroll": "縮放 / 水平捲動",
+
   "tab.analysis": "分析",
+
   "time.input": "輸入播放位置",
+
   "update.check": "立即檢查",
+
   "wave.follow": "跟隨播放位置",
   "wave.scroll": "顯示位置",
   "wave.showAll": "顯示全部",
@@ -158,5 +179,7 @@
   "wave.wheelHint": "{action}（Ctrl+滾輪；縱向為 Alt+滾輪）",
   "wave.wheelHintPlain": "{action}（滾輪；縱向為 Alt+滾輪）",
   "wave.zoomIn": "放大",
-  "wave.zoomOut": "縮小"
+  "wave.zoomOut": "縮小",
+
+  "addon.lyrics": "歌詞轉寫（Whisper）"
 }

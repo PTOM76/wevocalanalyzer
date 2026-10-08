@@ -12,7 +12,8 @@
   "scripts": {
     "build:wasm": "node scripts/build-wasm.mjs",
     "dev": "vite",
-    "build": "tsc -p tsconfig.app.json && vite build",
+    "build": "tsc -p tsconfig.app.json && vite build && node scripts/build-addons.mjs",
+    "build:addons": "node scripts/build-addons.mjs public",
     "lint": "oxlint app src",
     "preview": "vite preview"
   },

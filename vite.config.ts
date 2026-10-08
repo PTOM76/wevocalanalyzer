@@ -21,7 +21,7 @@ function submodule(name: string, entry: string, env: string | undefined) {
 // PevenMUI（UI 部品）と wevocal-lib（音声の読み込み、再生、波形。TypeScript 側は web/）
 const pevenmui = submodule('pevenmui', 'src/index.ts', process.env.PEVENMUI_PATH)
 // アプリの定義をビルドに渡すプラグイン（場所が決まるのは実行時なので、動的に読み込む。Node が .ts の型を取り除いて読む）
-const { pevenApp, pevenManifest }: typeof import('../pevenmui/src/vite.ts') = await import(pathToFileURL(resolve(pevenmui, 'src/vite.ts')).href)
+const { pevenAddonsRoute, pevenApp, pevenManifest }: typeof import('../pevenmui/src/vite.ts') = await import(pathToFileURL(resolve(pevenmui, 'src/vite.ts')).href)
 const wevocalLib = submodule('wevocal-lib', 'web/src/index.ts', process.env.WEVOCAL_LIB_PATH)
 const nodeModules = [resolve(root, 'node_modules'), resolve(root, '../node_modules')].filter((p) => existsSync(p))
 
@@ -66,9 +66,12 @@ export default defineConfig({
       workbox: {
         inlineWorkboxRuntime: true,
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,wasm}'],
-        // 歌詞の文字化の ONNX Runtime（約 27MB）は全員には配らず、初めて使ったときに保存する（そのあとはオフラインでも使える）
-        globIgnores: ['**/ort-wasm-*'],
-        runtimeCaching: [{ urlPattern: /\/ort-wasm-[^/]+$/, handler: 'CacheFirst', options: { cacheName: 'wevocalanalyzer-runtime' } }],
+        // 追加機能（歌詞の文字化など）は本体のプリキャッシュに入れず、導入した人だけ別の保存先に置く（app/addons.ts）
+        globIgnores: ['addons/**'],
+        // 追加機能のページ（addons/ 以下）を開いたときにアプリ本体の index.html を返さない
+        navigateFallbackDenylist: [/\/addons\//],
+        // 追加機能のファイルを保存先から返す（PevenMUI の pevenAddonsRoute）
+        runtimeCaching: [pevenAddonsRoute(APP_INFO.id)],
       },
     }),
   ],

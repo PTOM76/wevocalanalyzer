@@ -3,6 +3,7 @@
   "about.license": "License",
   "about.licenseText": "MIT",
   "about.version": "Version",
+
   "analysis.analyzing": "Analyzing…",
   "analysis.atCursor": "At cursor ({time} s)",
   "analysis.atPlayhead": "At playhead ({time} s)",
@@ -19,27 +20,36 @@
   "analysis.spectrumSelection": "Spectrum (selection average)",
   "analysis.unvoiced": "Unvoiced",
   "analysis.voiced": "Voiced ratio",
+
   "common.cancel": "Cancel",
   "common.stop": "Stop",
+
   "edit.clearSelection": "Clear selection",
   "edit.selectAll": "Select all",
+
   "empty.choose": "Choose a file",
   "empty.formats": "WAV / AIFF / MP3 / MP4 etc. (drag & drop supported)",
+
   "error.open": "Could not open the file: {message}",
   "error.wvspInvalid": "Not a WeVocalSynth project file",
   "error.wvspUnsupported": "Unsupported project file version (please update WeVocalAnalyzer)",
+
   "file.audioType": "Audio file",
+
   "job.kind.analyze": "Analyzing",
   "job.kind.lyrics": "Lyrics transcription",
+
   "key.seekBack": "Move playhead back",
   "key.seekBackFine": "Move playhead back slightly",
   "key.seekForward": "Move playhead forward",
   "key.seekForwardFine": "Move playhead forward slightly",
+
   "lane.freqZoom": "Spectrogram vertical zoom",
   "lane.level": "Level (RMS)",
   "lane.lyrics": "Lyrics",
   "lane.spec": "Spectrogram",
   "lane.wave": "Waveform",
+
   "licenses.app": "This app",
   "licenses.audio": "Audio decoding and analysis (FFT, F0 estimation, etc.)",
   "licenses.font": "Font",
@@ -51,6 +61,7 @@
   "licenses.style": "Styling of UI components",
   "licenses.ui": "UI components",
   "licenses.whisper": "Lyrics transcription model (ONNX conversion by onnx-community on Hugging Face)",
+
   "lyrics.cpuSlow": "WebGPU is not available, so the CPU will be used. This takes a very long time",
   "lyrics.failed": "Could not transcribe: {message}",
   "lyrics.intro": "Transcribes the lyrics with Whisper and places them on a lane with timestamps. The model is downloaded on first use and stored in the browser (audio is never sent anywhere). For songs with accompaniment, extracting the vocals first improves accuracy",
@@ -68,6 +79,7 @@
   "lyrics.none": "Use Tools → Transcribe lyrics",
   "lyrics.run": "Transcribe",
   "lyrics.title": "Transcribe lyrics",
+
   "menu.about": "About WeVocalSynth",
   "menu.checkUpdate": "Check for updates",
   "menu.edit": "Edit",
@@ -85,13 +97,16 @@
   "menu.tools": "Tools",
   "menu.userGuide": "User guide",
   "menu.view": "View",
+
   "play.pause": "Pause",
   "play.play": "Play",
   "play.playPause": "Play / Pause",
   "play.playSelection": "Play selection",
   "play.toEnd": "Go to end",
   "play.toStart": "Go to start",
+
   "project.track": "Track",
+
   "settings.auto": "Auto detect",
   "settings.cat.analysis": "Analysis",
   "settings.cat.debug": "Developer",
@@ -137,6 +152,8 @@
   "settings.windowPopup": "Popup",
   "settings.windowSub": "Sub-window",
   "settings.windowTab": "New tab",
+  "settings.groupLyrics": "Lyrics transcription",
+
   "shortcuts.adjustRange": "Adjust the range",
   "shortcuts.drag": "Drag",
   "shortcuts.edgeDrag": "Drag a range edge",
@@ -146,9 +163,13 @@
   "shortcuts.select": "Select a range",
   "shortcuts.wheel": "Wheel / Ctrl+wheel",
   "shortcuts.zoomScroll": "Zoom / Scroll",
+
   "tab.analysis": "Analysis",
+
   "time.input": "Enter playhead position",
+
   "update.check": "Check now",
+
   "wave.follow": "Follow playhead",
   "wave.scroll": "View position",
   "wave.showAll": "Show all",
@@ -158,5 +179,7 @@
   "wave.wheelHint": "{action} (Ctrl+wheel; vertical: Alt+wheel)",
   "wave.wheelHintPlain": "{action} (wheel; vertical: Alt+wheel)",
   "wave.zoomIn": "Zoom in",
-  "wave.zoomOut": "Zoom out"
+  "wave.zoomOut": "Zoom out",
+
+  "addon.lyrics": "Lyrics transcription (Whisper)"
 }

@@ -3,6 +3,7 @@
   "about.license": "许可证",
   "about.licenseText": "MIT",
   "about.version": "版本",
+
   "analysis.analyzing": "分析中…",
   "analysis.atCursor": "光标位置（{time} 秒）",
   "analysis.atPlayhead": "播放位置（{time} 秒）",
@@ -19,27 +20,36 @@
   "analysis.spectrumSelection": "频谱（选区平均）",
   "analysis.unvoiced": "清音段",
   "analysis.voiced": "浊音率",
+
   "common.cancel": "取消",
   "common.stop": "停止",
+
   "edit.clearSelection": "取消选择",
   "edit.selectAll": "全选",
+
   "empty.choose": "选择文件",
   "empty.formats": "WAV / AIFF / MP3 / MP4 等（可拖放）",
+
   "error.open": "无法打开文件: {message}",
   "error.wvspInvalid": "不是 WeVocalSynth 的工程文件",
   "error.wvspUnsupported": "不支持此版本的工程文件（请更新 WeVocalAnalyzer）",
+
   "file.audioType": "音频文件",
+
   "job.kind.analyze": "正在分析",
   "job.kind.lyrics": "歌词转写",
+
   "key.seekBack": "播放位置后退",
   "key.seekBackFine": "播放位置稍微后退",
   "key.seekForward": "播放位置前进",
   "key.seekForwardFine": "播放位置稍微前进",
+
   "lane.freqZoom": "频谱图纵向缩放",
   "lane.level": "电平（RMS）",
   "lane.lyrics": "歌词",
   "lane.spec": "频谱图",
   "lane.wave": "波形",
+
   "licenses.app": "本体",
   "licenses.audio": "音频的读取与分析（FFT、F0 估计等）",
   "licenses.font": "字体",
@@ -51,6 +61,7 @@
   "licenses.style": "界面组件的样式",
   "licenses.ui": "界面组件",
   "licenses.whisper": "歌词转写模型（由 Hugging Face 的 onnx-community 转换为 ONNX）",
+
   "lyrics.cpuSlow": "无法使用 WebGPU，将用 CPU 处理，需要很长时间",
   "lyrics.failed": "无法转写: {message}",
   "lyrics.intro": "使用 Whisper 将歌词转为文字，并带时间放在轨道上。模型在首次使用时下载并保存在浏览器中（音频不会发送到外部）。有伴奏的歌曲先提取人声会更准确",
@@ -68,6 +79,7 @@
   "lyrics.none": "通过「工具」→「转写歌词」显示",
   "lyrics.run": "转写",
   "lyrics.title": "转写歌词",
+
   "menu.about": "关于",
   "menu.checkUpdate": "检查更新",
   "menu.edit": "编辑",
@@ -85,13 +97,16 @@
   "menu.tools": "工具",
   "menu.userGuide": "使用指南",
   "menu.view": "视图",
+
   "play.pause": "暂停",
   "play.play": "播放",
   "play.playPause": "播放 / 暂停",
   "play.playSelection": "试听选区",
   "play.toEnd": "跳到结尾",
   "play.toStart": "回到开头",
+
   "project.track": "轨道",
+
   "settings.auto": "自动判断",
   "settings.cat.analysis": "分析",
   "settings.cat.debug": "开发者",
@@ -137,6 +152,8 @@
   "settings.windowPopup": "弹出窗口",
   "settings.windowSub": "子窗口",
   "settings.windowTab": "新标签页",
+  "settings.groupLyrics": "歌词转写",
+
   "shortcuts.adjustRange": "调整范围",
   "shortcuts.drag": "拖动",
   "shortcuts.edgeDrag": "拖动范围边缘",
@@ -146,9 +163,13 @@
   "shortcuts.select": "选择范围",
   "shortcuts.wheel": "滚轮 / Ctrl+滚轮",
   "shortcuts.zoomScroll": "缩放 / 横向滚动",
+
   "tab.analysis": "分析",
+
   "time.input": "输入播放位置",
+
   "update.check": "立即检查",
+
   "wave.follow": "跟随播放位置",
   "wave.scroll": "显示位置",
   "wave.showAll": "显示全部",
@@ -158,5 +179,7 @@
   "wave.wheelHint": "{action}（Ctrl+滚轮；纵向为 Alt+滚轮）",
   "wave.wheelHintPlain": "{action}（滚轮；纵向为 Alt+滚轮）",
   "wave.zoomIn": "放大",
-  "wave.zoomOut": "缩小"
+  "wave.zoomOut": "缩小",
+
+  "addon.lyrics": "歌词转写（Whisper）"
 }

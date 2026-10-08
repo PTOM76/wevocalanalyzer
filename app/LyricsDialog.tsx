@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, DialogActions, DialogContent, MenuItem, Select, Stack, Typography } from '@mui/material'
 import { WindowDialog } from 'pevenmui'
-import { hasWebGpu, LYRICS_MODEL_MB, type LyricsModel } from '../src/lyrics'
+import { hasWebGpu, LYRICS_MODEL_MB, type LyricsModel } from '../src/lyricsTypes'
 import { useT, type MessageKey } from './i18n'
 
 /** 選べる言語（transformers.js の名前）。null は自動 */

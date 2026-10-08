@@ -3,6 +3,7 @@
   "about.license": "라이선스",
   "about.licenseText": "MIT",
   "about.version": "버전",
+
   "analysis.analyzing": "분석 중…",
   "analysis.atCursor": "커서 위치({time}초)",
   "analysis.atPlayhead": "재생 위치({time}초)",
@@ -19,27 +20,36 @@
   "analysis.spectrumSelection": "스펙트럼(선택 범위 평균)",
   "analysis.unvoiced": "무성 구간",
   "analysis.voiced": "유성률",
+
   "common.cancel": "취소",
   "common.stop": "정지",
+
   "edit.clearSelection": "선택 해제",
   "edit.selectAll": "모두 선택",
+
   "empty.choose": "파일 선택",
   "empty.formats": "WAV / AIFF / MP3 / MP4 등 (드래그 앤 드롭 가능)",
+
   "error.open": "파일을 열 수 없습니다: {message}",
   "error.wvspInvalid": "WeVocalSynth 프로젝트 파일이 아닙니다",
   "error.wvspUnsupported": "지원하지 않는 버전의 프로젝트 파일입니다(WeVocalAnalyzer를 업데이트하세요)",
+
   "file.audioType": "오디오 파일",
+
   "job.kind.analyze": "분석 중",
   "job.kind.lyrics": "가사 받아쓰기",
+
   "key.seekBack": "재생 위치 뒤로",
   "key.seekBackFine": "재생 위치 조금 뒤로",
   "key.seekForward": "재생 위치 앞으로",
   "key.seekForwardFine": "재생 위치 조금 앞으로",
+
   "lane.freqZoom": "스펙트로그램 세로 확대",
   "lane.level": "레벨(RMS)",
   "lane.lyrics": "가사",
   "lane.spec": "스펙트로그램",
   "lane.wave": "파형",
+
   "licenses.app": "본체",
   "licenses.audio": "오디오 읽기와 분석(FFT, F0 추정 등)",
   "licenses.font": "글꼴",
@@ -51,6 +61,7 @@
   "licenses.style": "화면 구성 요소의 스타일",
   "licenses.ui": "화면 구성 요소",
   "licenses.whisper": "가사 받아쓰기 모델(Hugging Face의 onnx-community가 ONNX로 변환)",
+
   "lyrics.cpuSlow": "WebGPU를 사용할 수 없어 CPU로 처리합니다. 시간이 매우 오래 걸립니다",
   "lyrics.failed": "받아쓰기를 할 수 없습니다: {message}",
   "lyrics.intro": "Whisper로 가사를 문자로 바꾸고 시각과 함께 레인에 배치한다. 모델은 처음 사용할 때 다운로드하여 브라우저에 저장한다(음성은 외부로 보내지 않음). 반주가 있는 곡은 먼저 보컬을 추출하면 더 정확하다",
@@ -68,6 +79,7 @@
   "lyrics.none": "「도구」→「가사 받아쓰기」로 표시",
   "lyrics.run": "받아쓰기",
   "lyrics.title": "가사 받아쓰기",
+
   "menu.about": "이 앱에 대하여",
   "menu.checkUpdate": "업데이트 확인",
   "menu.edit": "편집",
@@ -85,13 +97,16 @@
   "menu.tools": "도구",
   "menu.userGuide": "사용자 가이드",
   "menu.view": "보기",
+
   "play.pause": "일시정지",
   "play.play": "재생",
   "play.playPause": "재생 / 일시정지",
   "play.playSelection": "범위 미리 듣기",
   "play.toEnd": "끝으로",
   "play.toStart": "처음으로",
+
   "project.track": "트랙",
+
   "settings.auto": "자동 판정",
   "settings.cat.analysis": "분석",
   "settings.cat.debug": "개발자용",
@@ -137,6 +152,8 @@
   "settings.windowPopup": "팝업",
   "settings.windowSub": "보조 창",
   "settings.windowTab": "새 탭",
+  "settings.groupLyrics": "가사 받아쓰기",
+
   "shortcuts.adjustRange": "범위 조정",
   "shortcuts.drag": "드래그",
   "shortcuts.edgeDrag": "범위 끝을 드래그",
@@ -146,9 +163,13 @@
   "shortcuts.select": "범위 선택",
   "shortcuts.wheel": "휠 / Ctrl+휠",
   "shortcuts.zoomScroll": "확대·축소 / 가로 스크롤",
+
   "tab.analysis": "분석",
+
   "time.input": "재생 위치 입력",
+
   "update.check": "지금 확인",
+
   "wave.follow": "재생 위치 따라가기",
   "wave.scroll": "보기 위치",
   "wave.showAll": "전체 보기",
@@ -158,5 +179,7 @@
   "wave.wheelHint": "{action} (Ctrl+휠. 세로는 Alt+휠)",
   "wave.wheelHintPlain": "{action} (휠. 세로는 Alt+휠)",
   "wave.zoomIn": "확대",
-  "wave.zoomOut": "축소"
+  "wave.zoomOut": "축소",
+
+  "addon.lyrics": "가사 받아쓰기 (Whisper)"
 }
