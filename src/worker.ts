@@ -11,6 +11,7 @@ interface DspExports {
   analyze_spectrogram(input: number, frames: number, sampleRate: number, window: number): number
   analyze_f0(input: number, frames: number, sampleRate: number, minHz: number, maxHz: number): number
   analyze_formants(input: number, frames: number, sampleRate: number, ceiling: number): number
+  segment_morae(input: number, frames: number, sampleRate: number, codes: number, count: number): number
   output_u8_ptr(): number
   output_ptr(): number
 }
@@ -36,6 +37,17 @@ function analyze(dsp: DspExports, req: AnalyzeRequest): Uint8Array | Float32Arra
     if (req.kind === 'spec') {
       const frames = dsp.analyze_spectrogram(input, n, req.sampleRate, req.window ?? 2048)
       return new Uint8Array(dsp.memory.buffer, dsp.output_u8_ptr(), frames * SPEC_ROWS).slice()
+    }
+    if (req.kind === 'mora') {
+      const codes = req.codes ?? []
+      const c = dsp.alloc_f32(codes.length)
+      try {
+        new Float32Array(dsp.memory.buffer, c, codes.length).set(codes)
+        const count = dsp.segment_morae(input, n, req.sampleRate, c, codes.length)
+        return new Float32Array(dsp.memory.buffer, dsp.output_ptr(), count * 3).slice()
+      } finally {
+        dsp.free_f32(c, codes.length)
+      }
     }
     const count = req.kind === 'f0' ? dsp.analyze_f0(input, n, req.sampleRate, req.minHz ?? 60, req.maxHz ?? 1000) : dsp.analyze_formants(input, n, req.sampleRate, req.ceiling ?? 5500)
     return new Float32Array(dsp.memory.buffer, dsp.output_ptr(), count).slice()

@@ -46,3 +46,23 @@ export function splitMora(reading: string): string[] {
   }
   return morae
 }
+
+// 一音の印（dsp の mora.rs と一致させる）: 下位 3 ビットが母音（0〜4 があいうえお、5 が ん、6 が っ、7 が ー）、その上が子音の種類
+const VOWELS = ['あかさたなはまやらわがざだばぱぁゃゎ', 'いきしちにひみりぎじぢびぴぃ', 'うくすつぬふむゆるぐずづぶぷゔぅゅ', 'えけせてねへめれげぜでべぺぇ', 'おこそとのほもよろをごぞどぼぽぉょ']
+const CONSONANTS: [number, string][] = [
+  [1, 'かきくけこがぎぐげごたちつてとだぢづでどぱぴぷぺぽばびぶべぼ'], // 破裂
+  [2, 'さしすせそざじずぜぞはひふへほ'], // 摩擦
+  [3, 'なにぬねのまみむめも'], // 鼻音
+]
+
+/** 一音（ひらがな。きゃ のような 2 文字も）の印。分からないものは「あ」として扱う */
+export function moraCode(mora: string): number {
+  const m = toHiragana(mora)
+  if (m === 'ん') return 5
+  if (m === 'っ') return 6
+  if (m === 'ー') return 7
+  // 母音は最後の字（きゃ なら ゃ）、子音は最初の字で決める
+  const vowel = Math.max(0, VOWELS.findIndex((v) => v.includes(m[m.length - 1])))
+  const consonant = CONSONANTS.find(([, s]) => s.includes(m[0]))?.[0] ?? 0
+  return vowel | (consonant << 3)
+}

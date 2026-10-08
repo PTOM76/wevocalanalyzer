@@ -3,9 +3,11 @@
  * WeVocalSynth からは追加機能として使う（今のところスペクトログラムだけ。docs/PLAN.md）
  */
 import type { Clip } from 'wevocal-lib'
-import type { AnalyzeOptions, AnalyzeRequest, FormantOptions, Formants, Pitch, PitchOptions, Spectrogram, SpectrogramOptions, WorkerMessage } from './types'
+import type { AnalyzeOptions, AnalyzeRequest, FormantOptions, Formants, MoraRange, Pitch, PitchOptions, Spectrogram, SpectrogramOptions, WorkerMessage } from './types'
+import { moraCode } from './reading'
 
-export type { AnalyzeOptions, FormantOptions, Formants, Level, Pitch, PitchOptions, Spectrogram, SpectrogramOptions } from './types'
+export type { AnalyzeOptions, FormantOptions, Formants, Level, MoraRange, Pitch, PitchOptions, Spectrogram, SpectrogramOptions } from './types'
+export { moraCode, readingOf, splitMora, toHiragana } from './reading'
 export { analyzeLevel, LEVEL_FLOOR_DB } from './level'
 export { renderSpectrogram } from './spectrogram'
 
@@ -63,7 +65,7 @@ function mixDown(channels: Float32Array[]): Float32Array {
 }
 
 /** Worker で `kind` の解析をする（チャンネルは平均してから） */
-async function request(kind: AnalyzeRequest['kind'], clip: Clip, opts: AnalyzeOptions, params: Pick<AnalyzeRequest, 'window' | 'minHz' | 'maxHz' | 'ceiling'> = {}) {
+async function request(kind: AnalyzeRequest['kind'], clip: Clip, opts: AnalyzeOptions, params: Pick<AnalyzeRequest, 'window' | 'minHz' | 'maxHz' | 'ceiling' | 'codes'> = {}) {
   opts.signal?.throwIfAborted()
   const id = nextId++
   const samples = mixDown(clip.channels)
@@ -89,4 +91,14 @@ export async function analyzePitch(clip: Clip, opts: PitchOptions = {}): Promise
 /** フォルマント F1〜F3（LPC、10ms 間隔）。無声区間にも値が入るので、表示するときは F0 で隠す */
 export async function analyzeFormants(clip: Clip, opts: FormantOptions = {}): Promise<Formants> {
   return { data: (await request('formant', clip, opts, { ceiling: opts.ceiling })) as Float32Array, count: FORMANT_COUNT, hopSec: HOP_SEC }
+}
+
+/**
+ * 歌の 1 区間（`clip`。前後に少し余白があってよい）を、読みの一音（`morae`。splitMora で分けたもの）ずつに分ける。
+ * 時刻は `clip` の先頭から（秒）。声がなければ空
+ */
+export async function segmentMorae(clip: Clip, morae: string[], opts: AnalyzeOptions = {}): Promise<MoraRange[]> {
+  if (!morae.length) return []
+  const out = (await request('mora', clip, opts, { codes: morae.map(moraCode) })) as Float32Array
+  return Array.from({ length: out.length / 3 }, (_, i) => ({ start: out[i * 3], end: out[i * 3 + 1], mora: morae[i], sure: out[i * 3 + 2] > 0 }))
 }

@@ -56,15 +56,27 @@ export interface AnalyzeOptions {
   signal?: AbortSignal
 }
 
+/** 一音（秒。渡した音の先頭から） */
+export interface MoraRange {
+  start: number
+  end: number
+  /** 読み（ひらがな。きゃ のような 2 文字もある） */
+  mora: string
+  /** 境目がはっきりしているか（偽なら確認の画面で色を変える） */
+  sure: boolean
+}
+
 /** Worker へ送るもの */
 export interface AnalyzeRequest {
   id: number
-  kind: 'spec' | 'f0' | 'formant'
+  kind: 'spec' | 'f0' | 'formant' | 'mora'
   /** 解析の設定（スペクトログラムの窓の長さ、F0 を探す範囲、フォルマントの最高周波数） */
   window?: number
   minHz?: number
   maxHz?: number
   ceiling?: number
+  /** 一音ずつの印（mora のとき。reading.ts の moraCode） */
+  codes?: number[]
   samples: Float32Array
   sampleRate: number
 }

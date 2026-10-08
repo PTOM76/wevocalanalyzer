@@ -1,6 +1,6 @@
 //! wasm 向け C ABI。wasm-bindgen を使わず、Worker から素の `WebAssembly.instantiate` で呼べる関数だけを公開する。
 
-use crate::{formant, spec};
+use crate::{formant, mora, spec};
 use wevocal_lib::f0;
 use std::cell::RefCell;
 
@@ -81,6 +81,21 @@ pub unsafe extern "C" fn analyze_formants(input: *const f32, frames: usize, samp
     let out = formant::estimate(x, sample_rate, ceiling, &mut host_progress);
     let n = out.len();
     OUTPUT.with(|o| *o.borrow_mut() = out);
+    n
+}
+
+/// モノラル音声（歌の 1 区間）を一音ずつに分け、音の数を返す。`codes` は一音ずつの印（`mora::VOWEL_MASK` などの値を f32 にしたもの）。
+/// 結果は音ごとに 3 つ（始まり、終わり（秒）、確かか 1/0）で、`output_ptr` で取得する。
+///
+/// # Safety
+/// `input` は `frames` 個、`codes` は `count` 個の有効な f32 を指していること。
+#[no_mangle]
+pub unsafe extern "C" fn segment_morae(input: *const f32, frames: usize, sample_rate: f32, codes: *const f32, count: usize) -> usize {
+    let x = std::slice::from_raw_parts(input, frames);
+    let c: Vec<u8> = std::slice::from_raw_parts(codes, count).iter().map(|&v| v as u8).collect();
+    let out = mora::segment(x, sample_rate, &c);
+    let n = out.len();
+    OUTPUT.with(|o| *o.borrow_mut() = out.iter().flat_map(|m| [m.start, m.end, if m.sure { 1.0 } else { 0.0 }]).collect());
     n
 }
 
