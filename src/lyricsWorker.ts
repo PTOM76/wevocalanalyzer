@@ -4,7 +4,7 @@ import ortMjs from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url'
 import ortWasm from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url'
 import type { LyricsRequest, LyricsMessage } from './lyricsTypes'
 
-// ONNX Runtime の wasm は、アプリと一緒に配ったものを使う（指定しないと transformers.js は外部の CDN から読み込み、オフラインで使えない）
+// ONNX Runtime の wasm は、追加機能に一緒に入れたものを使う（指定しないと transformers.js は外部の CDN から読み込み、オフラインで使えない）
 const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown } }
 if (onnx.wasm) onnx.wasm.wasmPaths = { mjs: ortMjs, wasm: ortWasm }
 
