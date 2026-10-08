@@ -5,6 +5,7 @@
 //! 有声か無声かは見ないので、表示する側が F0（無声は 0）で隠す。
 
 use wevocal_lib::f0::HOP_SEC;
+use wevocal_lib::lpc::lpc;
 use wevocal_lib::resample;
 use wevocal_lib::window::hann;
 
@@ -63,7 +64,7 @@ pub fn estimate(x: &[f32], sample_rate: f32, ceiling: f32, progress: &mut dyn Fn
             frame[i] = (v - 0.97 * prev) * window[i];
             prev = v;
         }
-        let Some(a) = lpc(&frame, order) else { continue };
+        let Some((a, _)) = lpc(&frame, order) else { continue };
         // 包絡 1 / |A(e^{jω})|²（山の位置だけを見るので、大きさはそろえない）
         for (g, e) in env.iter_mut().enumerate() {
             let (mut re, mut im) = (0.0f32, 0.0f32);
@@ -93,32 +94,6 @@ pub fn estimate(x: &[f32], sample_rate: f32, ceiling: f32, progress: &mut dyn Fn
     }
     progress(1.0);
     out
-}
-
-/// 自己相関法の LPC 係数 a[0..=order]（a[0] = 1）。無音などで求まらなければ None。
-fn lpc(x: &[f32], order: usize) -> Option<Vec<f32>> {
-    let r: Vec<f64> = (0..=order).map(|lag| x[lag..].iter().zip(x).map(|(&a, &b)| a as f64 * b as f64).sum()).collect();
-    if r[0] < 1e-10 {
-        return None;
-    }
-    // Levinson-Durbin
-    let mut a = vec![0.0f64; order + 1];
-    a[0] = 1.0;
-    let mut err = r[0];
-    for i in 1..=order {
-        let acc: f64 = (1..i).map(|j| a[j] * r[i - j]).sum();
-        let k = -(r[i] + acc) / err;
-        let prev = a.clone();
-        for j in 1..i {
-            a[j] = prev[j] + k * prev[i - j];
-        }
-        a[i] = k;
-        err *= 1.0 - k * k;
-        if err <= 0.0 {
-            return None;
-        }
-    }
-    Some(a.iter().map(|&v| v as f32).collect())
 }
 
 #[cfg(test)]
