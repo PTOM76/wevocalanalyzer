@@ -23,6 +23,7 @@ export interface MenuActions {
   open: () => void
   /** 歌詞を文字化したか（SRT に書き出せるか）、書き出す、文字化のダイアログを開く */
   hasLyrics: boolean
+  editLyrics: () => void
   exportSrt: () => void
   transcribe: () => void
   /** 解析の結果（F0 など）があるか。CSV に書き出せるか */
@@ -126,7 +127,11 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
         { label: t('play.toEnd'), shortcut: key('seekEnd'), disabled: !a.hasClip, onClick: a.seekEnd },
       ],
     },
-    { label: t('menu.tools'), accessKey: 'T', entries: [{ label: t('menu.lyrics'), disabled: !a.hasClip, onClick: a.transcribe }] },
+    { label: t('menu.tools'), accessKey: 'T', entries: [
+        { label: t('menu.lyrics'), disabled: !a.hasClip, onClick: a.transcribe },
+        { label: t('menu.editLyrics'), disabled: !a.hasLyrics, onClick: a.editLyrics },
+      ],
+    },
     help,
   ]
 }

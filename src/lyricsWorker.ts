@@ -2,7 +2,9 @@
 import { env, pipeline, type AutomaticSpeechRecognitionPipeline } from '@huggingface/transformers'
 import ortMjs from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url'
 import ortWasm from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url'
-import type { LyricsRequest, LyricsMessage } from './lyricsTypes'
+import { loadTokenizer } from './kuromojiDict'
+import type { LyricsRequest, LyricsMessage, LyricsSegment } from './lyricsTypes'
+import { readingOf } from './reading'
 
 // ONNX Runtime の wasm は、追加機能に一緒に入れたものを使う（指定しないと transformers.js は外部の CDN から読み込み、オフラインで使えない）
 const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown } }
@@ -29,6 +31,22 @@ async function load(req: LyricsRequest) {
   return asr
 }
 
+// 読みを付ける形態素解析（辞書は約 19MB。日本語の区間があるときだけ読み、使い回す）
+let tokenizer: ReturnType<typeof loadTokenizer> | null = null
+
+const JAPANESE = /[ぁ-ヿ一-鿿]/
+
+/** 日本語の区間に読みを付ける */
+async function addReadings(segments: LyricsSegment[], dicPath: string): Promise<LyricsSegment[]> {
+  if (!segments.some((s) => JAPANESE.test(s.text))) return segments
+  tokenizer ??= loadTokenizer(dicPath)
+  const tk = await tokenizer.catch((e) => {
+    tokenizer = null
+    throw e
+  })
+  return segments.map((s) => (JAPANESE.test(s.text) ? { ...s, reading: readingOf(tk.tokenize(s.text)) } : s))
+}
+
 self.onmessage = async (e: MessageEvent<LyricsRequest>) => {
   const req = e.data
   try {
@@ -45,7 +63,8 @@ self.onmessage = async (e: MessageEvent<LyricsRequest>) => {
     // 区間は [始まり, 終わり]（最後の区間は終わりが null のことがある）と文字
     const result = (Array.isArray(out) ? out[0] : out) as { chunks?: { timestamp: [number, number | null]; text: string }[] }
     const segments = (result.chunks ?? []).map((c) => ({ start: c.timestamp[0], end: c.timestamp[1] ?? c.timestamp[0], text: c.text.trim() })).filter((s) => s.text)
-    post({ kind: 'done', segments })
+    // 読みを付けられなくても（辞書を取れないなど）、文字化の結果は返す
+    post({ kind: 'done', segments: await addReadings(segments, req.dicPath).catch(() => segments) })
   } catch (err) {
     post({ kind: 'error', error: err instanceof Error ? err.message : String(err) })
   }

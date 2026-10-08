@@ -22,6 +22,8 @@ export interface LyricsSegment {
   start: number
   end: number
   text: string
+  /** 読み（ひらがな）。日本語の区間だけ（kuromoji。reading.ts）。利用者が直すこともある */
+  reading?: string
 }
 
 /** Worker へ送るもの。`samples` は 16kHz のモノラル */
@@ -31,6 +33,8 @@ export interface LyricsRequest {
   /** 言語（transformers.js の名前。'japanese' など）。null なら自動で判定する */
   language: string | null
   samples: Float32Array
+  /** kuromoji の辞書のフォルダー（URL のパス。kuromoji は URL の // を潰すので、スキームを付けない） */
+  dicPath: string
 }
 
 /** Worker から返るもの */

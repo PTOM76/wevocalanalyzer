@@ -16,5 +16,7 @@ export const licenseEntries = (): LicenseEntry[] => [
   { name: 'Transformers.js', license: 'Apache-2.0', url: 'https://github.com/huggingface/transformers.js', note: t('licenses.lyrics') },
   { name: 'ONNX Runtime Web', license: 'MIT', url: 'https://github.com/microsoft/onnxruntime', note: t('licenses.ort') },
   { name: 'Whisper', license: 'MIT', url: 'https://github.com/openai/whisper', note: t('licenses.whisper') },
+  { name: 'kuromoji.js', license: 'Apache-2.0', url: 'https://github.com/takuyaa/kuromoji.js', note: t('licenses.reading') },
+  { name: 'mecab-ipadic', license: 'NAIST (IPADIC)', url: 'https://github.com/takuyaa/kuromoji.js/blob/master/NOTICE.md', note: t('licenses.reading') },
   { name: 'Workbox', license: 'MIT', url: 'https://github.com/GoogleChrome/workbox', note: t('licenses.pwa') },
 ]

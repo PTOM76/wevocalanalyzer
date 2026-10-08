@@ -23,6 +23,7 @@
 
   "common.cancel": "취소",
   "common.stop": "정지",
+  "common.save": "저장",
 
   "edit.clearSelection": "선택 해제",
   "edit.selectAll": "모두 선택",
@@ -61,6 +62,7 @@
   "licenses.style": "화면 구성 요소의 스타일",
   "licenses.ui": "화면 구성 요소",
   "licenses.whisper": "가사 받아쓰기 모델(Hugging Face의 onnx-community가 ONNX로 변환)",
+  "licenses.reading": "가사 읽기",
 
   "lyrics.cpuSlow": "WebGPU를 사용할 수 없어 CPU로 처리합니다. 시간이 매우 오래 걸립니다",
   "lyrics.failed": "받아쓰기를 할 수 없습니다: {message}",
@@ -79,6 +81,7 @@
   "lyrics.none": "「도구」→「가사 받아쓰기」로 표시",
   "lyrics.run": "받아쓰기",
   "lyrics.title": "가사 받아쓰기",
+  "lyrics.reading": "읽기",
 
   "menu.about": "이 앱에 대하여",
   "menu.checkUpdate": "업데이트 확인",
@@ -97,6 +100,7 @@
   "menu.tools": "도구",
   "menu.userGuide": "사용자 가이드",
   "menu.view": "보기",
+  "menu.editLyrics": "가사와 읽기 편집…",
 
   "play.pause": "일시정지",
   "play.play": "재생",
@@ -181,5 +185,9 @@
   "wave.zoomIn": "확대",
   "wave.zoomOut": "축소",
 
-  "addon.lyrics": "가사 받아쓰기 (Whisper)"
+  "addon.lyrics": "가사 받아쓰기 (Whisper)",
+
+  "lyricsEdit.title": "가사와 읽기 편집",
+  "lyricsEdit.help": "읽기는 히라가나로 입력합니다. 한 음씩 잘라내기는 이 읽기를 바탕으로 합니다",
+  "lyricsEdit.text": "가사"
 }

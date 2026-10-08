@@ -23,6 +23,7 @@
 
   "common.cancel": "取消",
   "common.stop": "停止",
+  "common.save": "保存",
 
   "edit.clearSelection": "取消选择",
   "edit.selectAll": "全选",
@@ -61,6 +62,7 @@
   "licenses.style": "界面组件的样式",
   "licenses.ui": "界面组件",
   "licenses.whisper": "歌词转写模型（由 Hugging Face 的 onnx-community 转换为 ONNX）",
+  "licenses.reading": "歌词读音",
 
   "lyrics.cpuSlow": "无法使用 WebGPU，将用 CPU 处理，需要很长时间",
   "lyrics.failed": "无法转写: {message}",
@@ -79,6 +81,7 @@
   "lyrics.none": "通过「工具」→「转写歌词」显示",
   "lyrics.run": "转写",
   "lyrics.title": "转写歌词",
+  "lyrics.reading": "读音",
 
   "menu.about": "关于",
   "menu.checkUpdate": "检查更新",
@@ -97,6 +100,7 @@
   "menu.tools": "工具",
   "menu.userGuide": "使用指南",
   "menu.view": "视图",
+  "menu.editLyrics": "编辑歌词和读音…",
 
   "play.pause": "暂停",
   "play.play": "播放",
@@ -181,5 +185,9 @@
   "wave.zoomIn": "放大",
   "wave.zoomOut": "缩小",
 
-  "addon.lyrics": "歌词转写（Whisper）"
+  "addon.lyrics": "歌词转写（Whisper）",
+
+  "lyricsEdit.title": "编辑歌词和读音",
+  "lyricsEdit.help": "读音请用平假名输入。逐音切分会以此读音为准",
+  "lyricsEdit.text": "歌词"
 }

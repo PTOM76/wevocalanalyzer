@@ -23,6 +23,7 @@
 
   "common.cancel": "取消",
   "common.stop": "停止",
+  "common.save": "儲存",
 
   "edit.clearSelection": "取消選取",
   "edit.selectAll": "全選",
@@ -61,6 +62,7 @@
   "licenses.style": "介面元件的樣式",
   "licenses.ui": "介面元件",
   "licenses.whisper": "歌詞轉寫模型（由 Hugging Face 的 onnx-community 轉換為 ONNX）",
+  "licenses.reading": "歌詞讀音",
 
   "lyrics.cpuSlow": "無法使用 WebGPU，將以 CPU 處理，需要很長時間",
   "lyrics.failed": "無法轉寫: {message}",
@@ -79,6 +81,7 @@
   "lyrics.none": "透過「工具」→「轉寫歌詞」顯示",
   "lyrics.run": "轉寫",
   "lyrics.title": "轉寫歌詞",
+  "lyrics.reading": "讀音",
 
   "menu.about": "關於",
   "menu.checkUpdate": "檢查更新",
@@ -97,6 +100,7 @@
   "menu.tools": "工具",
   "menu.userGuide": "使用指南",
   "menu.view": "檢視",
+  "menu.editLyrics": "編輯歌詞和讀音…",
 
   "play.pause": "暫停",
   "play.play": "播放",
@@ -181,5 +185,9 @@
   "wave.zoomIn": "放大",
   "wave.zoomOut": "縮小",
 
-  "addon.lyrics": "歌詞轉寫（Whisper）"
+  "addon.lyrics": "歌詞轉寫（Whisper）",
+
+  "lyricsEdit.title": "編輯歌詞和讀音",
+  "lyricsEdit.help": "讀音請用平假名輸入。逐音切分會以此讀音為準",
+  "lyricsEdit.text": "歌詞"
 }

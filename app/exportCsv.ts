@@ -1,6 +1,6 @@
 import { downloadBlob, type Range } from 'wevocal-lib'
 import type { Formants, Level, Pitch } from '../src/index'
-import type { LyricsSegment } from '../src/lyrics'
+import type { LyricsSegment } from '../src/lyricsTypes'
 
 /**
  * 解析の結果を CSV にする（10ms ごとに 1 行。時刻、F0、F1〜F3、強さ）。範囲があればその中だけ。

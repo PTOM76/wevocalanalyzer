@@ -71,7 +71,9 @@ export async function transcribeLyrics(clip: Clip, o: LyricsOptions): Promise<Ly
       if (worker === w) worker = null
       reject(new Error(e.message || 'lyrics worker error'))
     }
-    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples }
+    // 辞書は追加機能の dict/（index.js と同じ場所。vite.addons.lyrics.config.ts でコピーする）
+    const dicPath = new URL('./dict/', import.meta.url).pathname
+    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples, dicPath }
     w.postMessage(req, [samples.buffer])
   })
 }

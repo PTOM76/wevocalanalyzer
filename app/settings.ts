@@ -4,7 +4,7 @@ import type { WheelZoom } from 'wevocal-lib/react'
 import type { LangSetting } from './i18n'
 import type { KeymapOverrides } from './keymap'
 import type { LaneFlags, LaneWeights } from './layout'
-import type { LyricsModel } from '../src/lyrics'
+import type { LyricsModel } from '../src/lyricsTypes'
 import { app } from './appConfig'
 
 export type ThemeSetting = 'system' | 'light' | 'dark'

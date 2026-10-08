@@ -20,6 +20,7 @@ import { analysisCsv, downloadAnalysisCsv, downloadLyricsSrt } from './exportCsv
 import type { LyricsSegment } from '../src/lyricsTypes'
 import { addons, type LyricsAddon } from './addons'
 import LyricsDialog from './LyricsDialog'
+import LyricsEditDialog from './LyricsEditDialog'
 import LiveTime from './LiveTime'
 import { appMenus } from './menus'
 import SettingsDialog from './SettingsDialog'
@@ -61,6 +62,7 @@ export default function App() {
   // 歌詞（文字化していなければ null）と、文字化のダイアログ
   const [lyrics, setLyrics] = useState<LyricsSegment[] | null>(null)
   const [lyricsOpen, setLyricsOpen] = useState(false)
+  const [lyricsEditOpen, setLyricsEditOpen] = useState(false)
   const lyricsAbort = useRef<AbortController | null>(null)
   // スペクトログラムで見る周波数の範囲（縦の拡大。null なら全体）
   const [freqRange, setFreqRange] = useState<FreqRange | null>(null)
@@ -218,7 +220,7 @@ export default function App() {
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
-      open: picker.open, hasLyrics: !!lyrics, exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
+      open: picker.open, hasLyrics: !!lyrics, exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -371,6 +373,7 @@ export default function App() {
             onChange={updateSettings}
             onRun={(d) => void runLyrics(d)}
           />
+          {lyrics && <LyricsEditDialog open={lyricsEditOpen} onClose={() => setLyricsEditOpen(false)} lyrics={lyrics} onSave={setLyrics} />}
           {addonInstall.dialog}
           <SettingsDialog open={settingsOpen} focusSignal={settingsFocus} onClose={() => setSettingsOpen(false)} settings={settings} onChange={updateSettings} />
           <AboutDialog open={dialog === 'about'} onClose={() => setDialog(null)} />

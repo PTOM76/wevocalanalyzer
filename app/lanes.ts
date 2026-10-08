@@ -1,6 +1,6 @@
 import { alpha, timeToX, type View } from 'wevocal-lib'
 import { LEVEL_FLOOR_DB, renderSpectrogram, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
-import type { LyricsSegment } from '../src/lyrics'
+import type { LyricsSegment } from '../src/lyricsTypes'
 
 /** 帯の描画に共通のもの（上端 `top` から高さ `h`） */
 export interface LaneBox {
@@ -320,4 +320,5 @@ export function drawLyrics(b: LaneBox, segments: LyricsSegment[] | null, fill: s
 }
 
 /** 時刻 `t` の歌詞（なければ空） */
-export const lyricAt = (t: number, segments: LyricsSegment[] | null) => segments?.find((s) => t >= s.start && t < s.end)?.text ?? ''
+export const lyricSegmentAt = (t: number, segments: LyricsSegment[] | null) => segments?.find((s) => t >= s.start && t < s.end)
+export const lyricAt = (t: number, segments: LyricsSegment[] | null) => lyricSegmentAt(t, segments)?.text ?? ''
