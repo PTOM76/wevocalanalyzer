@@ -1,4 +1,4 @@
-// 歌詞の文字化の Worker。Whisper を transformers.js（ONNX Runtime Web）で動かす。モデルは初めて使うときに取得し、ブラウザに保存する
+// 歌詞の文字化の Worker。Whisper を transformers.js（ONNX Runtime Web）で動かす。モデルは追加機能 whisper-<大きさ> の保存先から読む
 import { env, pipeline, type AutomaticSpeechRecognitionPipeline } from '@huggingface/transformers'
 import ortMjs from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url'
 import ortWasm from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url'
@@ -18,6 +18,11 @@ let loaded: { key: string; asr: AutomaticSpeechRecognitionPipeline } | null = nu
 async function load(req: LyricsRequest) {
   const key = `${req.model}|${req.device}`
   if (loaded?.key === key) return loaded.asr
+  // モデルは追加機能の保存先から（Service Worker が返す）。無いファイル（CPU 用の量子化したものなど）だけ Hugging Face から取る。
+  // transformers.js 自身の保存先には置かない（追加機能と二重になり、設定から削除できないため）
+  env.allowLocalModels = true
+  env.localModelPath = req.modelBase
+  env.useBrowserCache = false
   // WebGPU はエンコーダーを fp32、デコーダーを 4bit に量子化したもの（transformers.js の例と同じ）。CPU は 8bit
   const dtype = req.device === 'webgpu' ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8'
   const asr = (await pipeline('automatic-speech-recognition', `onnx-community/whisper-${req.model}`, {

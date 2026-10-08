@@ -1,4 +1,4 @@
-// 追加機能を <出力先>/addons/ に作る（今は歌詞の文字化 analyzer-lyrics だけ）
+// 追加機能を <出力先>/addons/ に作る（歌詞の文字化 analyzer-lyrics と、そのモデル whisper-<大きさ>）
 //   node scripts/build-addons.mjs          … dist（npm run build の後に実行する）
 //   node scripts/build-addons.mjs public   … public（npm run dev でも使える）
 // WeVocalSynth の scripts/build-addons.mjs と同じ形の manifest.json（ファイルの大きさとハッシュ、内容から決めた版）を書く
@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { writeWhisperManifests } from './whisperAddons.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = resolve(root, process.argv[2] ?? 'dist', 'addons')
@@ -35,3 +36,5 @@ export function writeManifest(id, dir, entry) {
 
 execSync('npx vite build -c vite.addons.lyrics.config.ts', { cwd: root, stdio: 'inherit', env: { ...process.env, ADDONS_OUT: OUT } })
 writeManifest('analyzer-lyrics', join(OUT, 'analyzer-lyrics'), 'index.js')
+// モデル（マニフェストだけ。ファイルは Hugging Face から取得する）
+await writeWhisperManifests(OUT)

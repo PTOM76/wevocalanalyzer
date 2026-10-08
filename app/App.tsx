@@ -80,6 +80,8 @@ export default function App() {
   const view = useWaveformView(player.duration, player.livePosition, player.playing, settings.follow, '', settings.wheelZoom)
   const keymap = resolveKeymap(settings.keymap)
 
+  // 追加機能を選んだフォルダーに保存するか（試験的。PevenMUI の追加機能の仕組みに渡す）
+  useEffect(() => addons.folder.setEnabled(settings.addonFolder), [settings.addonFolder])
   // 別のファイルを開いたら、選択と縦の拡大を戻し、強さを計算する（軽いのでその場で）
   useEffect(() => {
     setSelection(null)
@@ -181,7 +183,8 @@ export default function App() {
   const runLyrics = async (device: 'webgpu' | 'wasm') => {
     if (!clip) return
     // 文字化は追加機能（未導入なら導入のダイアログを出す）
-    if (!(await addonInstall.ensure('analyzer-lyrics'))) return
+    // 文字化の処理と、選んだ大きさのモデル
+    if (!(await addonInstall.ensure(`whisper-${settings.lyricsModel}`))) return
     const lyricsAddon = await addons.loadAddon<LyricsAddon>('analyzer-lyrics').catch((e: unknown) => {
       setToast(t('lyrics.failed', { message: e instanceof Error ? e.message : String(e) }))
       return null

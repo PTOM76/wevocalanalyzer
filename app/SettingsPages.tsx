@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from 'react'
 import { UpdateSection } from 'pevenmui/pwa'
-import { AddonSection, Check, Choice, Group, KeymapEditor, Row, type WindowMode } from 'pevenmui'
+import { AddonFolderRow, AddonSection, addonFolderSupported, Check, Choice, Group, KeymapEditor, Row, type WindowMode } from 'pevenmui'
 import type { WheelZoom } from 'wevocal-lib/react'
 import type { Settings, ThemeSetting } from './settings'
 import { ACTIONS, type KeymapOverrides } from './keymap'
@@ -100,7 +100,7 @@ export function settingsPages(draft: Settings, set: (patch: Partial<Settings>) =
           </Row>
         </Group>
         <Group title={t('settings.groupLyrics')}>
-          <AddonSection ids={['analyzer-lyrics']} />
+          <AddonSection ids={['analyzer-lyrics', 'whisper-tiny', 'whisper-base', 'whisper-small']} />
         </Group>
       </>
     ),
@@ -108,6 +108,8 @@ export function settingsPages(draft: Settings, set: (patch: Partial<Settings>) =
       <Group title={t('settings.groupDebug')}>
         <Check checked={draft.lyricsCpu} onChange={(v) => set({ lyricsCpu: v })} label={t('settings.lyricsCpu')} help={t('settings.lyricsCpuHelp')} />
         <Check checked={draft.devUpdates} onChange={(v) => set({ devUpdates: v })} label={t('settings.devUpdates')} help={t('settings.devUpdatesHelp')} />
+        {addonFolderSupported() && <Check checked={draft.addonFolder} onChange={(v) => set({ addonFolder: v })} label={t('settings.addonFolder')} help={t('settings.addonFolderHelp')} />}
+        {addonFolderSupported() && draft.addonFolder && <AddonFolderRow />}
         <Row label={t('settings.dialogWindow')}>
           <Choice<WindowMode | 'auto'>
             value={draft.dialogWindow}

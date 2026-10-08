@@ -73,7 +73,9 @@ export async function transcribeLyrics(clip: Clip, o: LyricsOptions): Promise<Ly
     }
     // 辞書は追加機能の dict/（index.js と同じ場所。vite.addons.lyrics.config.ts でコピーする）
     const dicPath = new URL('./dict/', import.meta.url).pathname
-    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples, dicPath }
+    // モデルは追加機能 whisper-<大きさ>（この追加機能の隣のフォルダー。scripts/whisperAddons.mjs）
+    const modelBase = new URL(`../whisper-${o.model}/`, import.meta.url).href
+    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples, dicPath, modelBase }
     w.postMessage(req, [samples.buffer])
   })
 }

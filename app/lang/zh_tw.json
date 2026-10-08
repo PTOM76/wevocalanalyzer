@@ -159,6 +159,8 @@
   "settings.windowSub": "子視窗",
   "settings.windowTab": "新分頁",
   "settings.groupLyrics": "歌詞轉寫",
+  "settings.addonFolder": "將附加功能儲存到所選資料夾",
+  "settings.addonFolderHelp": "將模型等附加功能儲存到所選資料夾，而不是瀏覽器的儲存空間（Chrome、Edge）。僅適用於之後安裝的附加功能，已安裝的仍可使用",
 
   "shortcuts.adjustRange": "調整範圍",
   "shortcuts.drag": "拖曳",
@@ -187,7 +189,13 @@
   "wave.zoomIn": "放大",
   "wave.zoomOut": "縮小",
 
-  "addon.lyrics": "歌詞轉寫（Whisper）",
+  "addon.lyrics": "歌詞轉寫執行環境",
+  "addon.whisperTiny": "歌詞轉寫模型（輕量，Whisper tiny）",
+  "addon.whisperTinyShort": "模型（輕量，Whisper tiny）",
+  "addon.whisperBase": "歌詞轉寫模型（標準，Whisper base）",
+  "addon.whisperBaseShort": "模型（標準，Whisper base）",
+  "addon.whisperSmall": "歌詞轉寫模型（高精度，Whisper small）",
+  "addon.whisperSmallShort": "模型（高精度，Whisper small）",
 
   "lyricsEdit.title": "編輯歌詞和讀音",
   "lyricsEdit.help": "讀音請用平假名輸入。逐音切分會以此讀音為準",

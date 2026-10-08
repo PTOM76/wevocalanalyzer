@@ -159,6 +159,8 @@
   "settings.windowSub": "보조 창",
   "settings.windowTab": "새 탭",
   "settings.groupLyrics": "가사 받아쓰기",
+  "settings.addonFolder": "추가 기능을 선택한 폴더에 저장",
+  "settings.addonFolderHelp": "모델 등 추가 기능을 브라우저의 저장 영역이 아닌 선택한 폴더에 저장합니다(Chrome, Edge). 앞으로 설치하는 것이 대상이며, 설치된 것은 그대로 사용할 수 있습니다",
 
   "shortcuts.adjustRange": "범위 조정",
   "shortcuts.drag": "드래그",
@@ -187,7 +189,13 @@
   "wave.zoomIn": "확대",
   "wave.zoomOut": "축소",
 
-  "addon.lyrics": "가사 받아쓰기 (Whisper)",
+  "addon.lyrics": "가사 받아쓰기 실행 환경",
+  "addon.whisperTiny": "가사 받아쓰기 모델 (경량, Whisper tiny)",
+  "addon.whisperTinyShort": "모델 (경량, Whisper tiny)",
+  "addon.whisperBase": "가사 받아쓰기 모델 (표준, Whisper base)",
+  "addon.whisperBaseShort": "모델 (표준, Whisper base)",
+  "addon.whisperSmall": "가사 받아쓰기 모델 (고정밀, Whisper small)",
+  "addon.whisperSmallShort": "모델 (고정밀, Whisper small)",
 
   "lyricsEdit.title": "가사와 읽기 편집",
   "lyricsEdit.help": "읽기는 히라가나로 입력합니다. 한 음씩 잘라내기는 이 읽기를 바탕으로 합니다",

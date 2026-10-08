@@ -159,6 +159,8 @@
   "settings.windowSub": "Sub-window",
   "settings.windowTab": "New tab",
   "settings.groupLyrics": "Lyrics transcription",
+  "settings.addonFolder": "Store add-ons in a chosen folder",
+  "settings.addonFolderHelp": "Saves add-ons such as models to a folder you choose instead of the browser's storage (Chrome, Edge). Applies to add-ons installed from now on; installed ones keep working",
 
   "shortcuts.adjustRange": "Adjust the range",
   "shortcuts.drag": "Drag",
@@ -187,7 +189,13 @@
   "wave.zoomIn": "Zoom in",
   "wave.zoomOut": "Zoom out",
 
-  "addon.lyrics": "Lyrics transcription (Whisper)",
+  "addon.lyrics": "Lyrics transcription runtime",
+  "addon.whisperTiny": "Lyrics transcription model (Light, Whisper tiny)",
+  "addon.whisperTinyShort": "Model (Light, Whisper tiny)",
+  "addon.whisperBase": "Lyrics transcription model (Standard, Whisper base)",
+  "addon.whisperBaseShort": "Model (Standard, Whisper base)",
+  "addon.whisperSmall": "Lyrics transcription model (Precise, Whisper small)",
+  "addon.whisperSmallShort": "Model (Precise, Whisper small)",
 
   "lyricsEdit.title": "Edit lyrics and readings",
   "lyricsEdit.help": "Enter readings in hiragana. Cutting into single sounds uses these readings",

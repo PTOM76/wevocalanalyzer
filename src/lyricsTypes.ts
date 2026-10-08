@@ -14,8 +14,8 @@ export async function hasWebGpu(): Promise<boolean> {
 /** Whisper のモデルの大きさ。大きいほど正確で、取得と計算に時間がかかる */
 export type LyricsModel = 'tiny' | 'base' | 'small'
 
-/** モデルの取得の大きさの目安（MB。WebGPU で使う量子化したもの） */
-export const LYRICS_MODEL_MB: Record<LyricsModel, number> = { tiny: 40, base: 80, small: 250 }
+/** モデルの取得の大きさの目安（MB。WebGPU で使うもの。追加機能 whisper-<大きさ> の合計） */
+export const LYRICS_MODEL_MB: Record<LyricsModel, number> = { tiny: 120, base: 200, small: 560 }
 
 /** 歌詞の 1 区間（時刻は秒） */
 export interface LyricsSegment {
@@ -35,6 +35,8 @@ export interface LyricsRequest {
   samples: Float32Array
   /** kuromoji の辞書のフォルダー（URL のパス。kuromoji は URL の // を潰すので、スキームを付けない） */
   dicPath: string
+  /** モデルの追加機能（whisper-<大きさ>）の場所。この下の onnx-community/whisper-<大きさ>/ から読む */
+  modelBase: string
 }
 
 /** Worker から返るもの */

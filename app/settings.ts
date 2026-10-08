@@ -40,9 +40,11 @@ export interface Settings {
   dialogWindow: WindowMode | 'auto'
   /** 開発版の更新（バージョンが同じでコミットだけ違う版）も知らせる */
   devUpdates: boolean
+  /** 追加機能を選んだフォルダーに保存する（試験的。Chrome、Edge） */
+  addonFolder: boolean
 }
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false, lyrics: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2, lyrics: 1.5 }, showFormants: true, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, lyricsModel: 'base', lyricsLanguage: null, lyricsCpu: false, dialogWindow: 'auto', devUpdates: false }
+export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false, lyrics: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2, lyrics: 1.5 }, showFormants: true, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, lyricsModel: 'base', lyricsLanguage: null, lyricsCpu: false, dialogWindow: 'auto', devUpdates: false, addonFolder: false }
 
 const KEY = app.key('settings')
 

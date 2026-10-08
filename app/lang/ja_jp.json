@@ -159,6 +159,8 @@
   "settings.windowSub": "サブウィンドウ",
   "settings.windowTab": "別タブ",
   "settings.groupLyrics": "歌詞の文字化",
+  "settings.addonFolder": "追加機能を選んだフォルダーに保存する",
+  "settings.addonFolderHelp": "モデルなどの追加機能を、ブラウザのデータ領域ではなく、選んだフォルダーに保存します（Chrome、Edge）。これから導入するものが対象で、導入済みのものはそのまま使用できます",
 
   "shortcuts.adjustRange": "範囲を調整",
   "shortcuts.drag": "ドラッグ",
@@ -187,7 +189,13 @@
   "wave.zoomIn": "拡大",
   "wave.zoomOut": "縮小",
 
-  "addon.lyrics": "歌詞の文字化（Whisper）",
+  "addon.lyrics": "歌詞の文字化の実行環境",
+  "addon.whisperTiny": "歌詞の文字化のモデル（軽量、Whisper tiny）",
+  "addon.whisperTinyShort": "モデル（軽量、Whisper tiny）",
+  "addon.whisperBase": "歌詞の文字化のモデル（標準、Whisper base）",
+  "addon.whisperBaseShort": "モデル（標準、Whisper base）",
+  "addon.whisperSmall": "歌詞の文字化のモデル（高精度、Whisper small）",
+  "addon.whisperSmallShort": "モデル（高精度、Whisper small）",
 
   "lyricsEdit.title": "歌詞と読みの編集",
   "lyricsEdit.help": "読みはひらがなで入力します。一音ずつの切り出しは、この読みをもとに行います",
