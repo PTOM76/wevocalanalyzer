@@ -39,6 +39,7 @@
 
   "job.kind.analyze": "正在分析",
   "job.kind.lyrics": "歌詞轉寫",
+  "job.kind.morae": "正在逐音切分",
 
   "key.seekBack": "播放位置後退",
   "key.seekBackFine": "播放位置稍微後退",
@@ -101,6 +102,7 @@
   "menu.userGuide": "使用指南",
   "menu.view": "檢視",
   "menu.editLyrics": "編輯歌詞和讀音…",
+  "menu.splitMorae": "逐音切分",
 
   "play.pause": "暫停",
   "play.play": "播放",

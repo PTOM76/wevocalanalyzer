@@ -24,6 +24,8 @@ export interface MenuActions {
   /** 歌詞を文字化したか（SRT に書き出せるか）、書き出す、文字化のダイアログを開く */
   hasLyrics: boolean
   editLyrics: () => void
+  hasReadings: boolean
+  splitMorae: () => void
   exportSrt: () => void
   transcribe: () => void
   /** 解析の結果（F0 など）があるか。CSV に書き出せるか */
@@ -130,6 +132,7 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
     { label: t('menu.tools'), accessKey: 'T', entries: [
         { label: t('menu.lyrics'), disabled: !a.hasClip, onClick: a.transcribe },
         { label: t('menu.editLyrics'), disabled: !a.hasLyrics, onClick: a.editLyrics },
+        { label: t('menu.splitMorae'), disabled: !a.hasReadings, onClick: a.splitMorae },
       ],
     },
     help,

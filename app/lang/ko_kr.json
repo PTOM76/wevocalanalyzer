@@ -39,6 +39,7 @@
 
   "job.kind.analyze": "분석 중",
   "job.kind.lyrics": "가사 받아쓰기",
+  "job.kind.morae": "한 음씩 나누는 중",
 
   "key.seekBack": "재생 위치 뒤로",
   "key.seekBackFine": "재생 위치 조금 뒤로",
@@ -101,6 +102,7 @@
   "menu.userGuide": "사용자 가이드",
   "menu.view": "보기",
   "menu.editLyrics": "가사와 읽기 편집…",
+  "menu.splitMorae": "한 음씩 나누기",
 
   "play.pause": "일시정지",
   "play.play": "재생",

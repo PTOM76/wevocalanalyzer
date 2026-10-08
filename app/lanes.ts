@@ -1,6 +1,7 @@
 import { alpha, timeToX, type View } from 'wevocal-lib'
 import { LEVEL_FLOOR_DB, renderSpectrogram, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
+import type { MoraRange } from '../src/types'
 
 /** 帯の描画に共通のもの（上端 `top` から高さ `h`） */
 export interface LaneBox {
@@ -298,7 +299,10 @@ export function drawHarmonics(b: LaneBox, spec: Spectrogram, pitch: Pitch) {
 }
 
 /** 歌詞の帯: 区間ごとに枠と文字を並べる（入りきらない文字は切る）。`empty` は文字化していないときに出す文字 */
-export function drawLyrics(b: LaneBox, segments: LyricsSegment[] | null, fill: string, divider: string, text: string, empty: string) {
+/**
+ * 歌詞の帯。`morae`（一音ずつの範囲）があれば、下半分に区切りと読みを描く
+ */
+export function drawLyrics(b: LaneBox, segments: LyricsSegment[] | null, fill: string, divider: string, text: string, empty: string, morae: MoraRange[] | null = null, unsure = fill) {
   if (frame(b, divider, text, segments ? null : empty) || !segments) return
   const { g, width, view, top, h } = b
   for (const s of segments) {
@@ -314,9 +318,28 @@ export function drawLyrics(b: LaneBox, segments: LyricsSegment[] | null, fill: s
     g.rect(x0, top, Math.max(0, x1 - x0), h)
     g.clip()
     g.fillStyle = text
-    g.fillText(s.text, x0 + 4, top + h / 2)
+    g.fillText(s.text, x0 + 4, top + (morae ? h / 4 : h / 2))
     g.restore()
   }
+  if (!morae) return
+  // 一音ずつ: 下半分に区切りの線と読み（確かでない音は色を変える）
+  const y = top + h / 2
+  const align = g.textAlign
+  g.textAlign = 'center'
+  for (const m of morae) {
+    const x0 = timeToX(width, view, m.start)
+    const x1 = timeToX(width, view, m.end)
+    if (x1 < 0 || x0 > width) continue
+    g.fillStyle = alpha(m.sure ? fill : unsure, 0.25)
+    g.fillRect(x0, y, Math.max(1, x1 - x0 - 1), h / 2 - 3)
+    g.fillStyle = alpha(m.sure ? fill : unsure, 0.9)
+    g.fillRect(x0, y, 1, h / 2 - 3)
+    if (x1 - x0 > 10) {
+      g.fillStyle = text
+      g.fillText(m.mora, (x0 + x1) / 2, y + h / 4 - 1)
+    }
+  }
+  g.textAlign = align
 }
 
 /** 時刻 `t` の歌詞（なければ空） */

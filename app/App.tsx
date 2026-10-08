@@ -10,7 +10,7 @@ import { UpdatePrompt, checkForUpdate, promptUpdate } from 'pevenmui/pwa'
 import { configureFileAccess } from 'pevenmui/web'
 import { AUDIO_ACCEPT, decodeFile, isWvspFile, readWvsp, WVSP_EXT, WvspError, type Clip, type Range } from 'wevocal-lib'
 import { ZOOM_STEP, useWaveformView } from 'wevocal-lib/react'
-import { analyzeFormants, analyzeLevel, analyzePitch, analyzeSpectrogram, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
+import { analyzeFormants, analyzeLevel, analyzePitch, analyzeSpectrogram, findMoraeInLyrics, type Formants, type MoraRange, type Level, type Pitch, type Spectrogram } from '../src/index'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
 import AnalysisPanel from './AnalysisPanel'
 import { i18n, LangContext, resolveLang, setLang, t } from './i18n'
@@ -60,7 +60,13 @@ export default function App() {
   const [formants, setFormants] = useState<Formants | null>(null)
   const [level, setLevel] = useState<Level | null>(null)
   // 歌詞（文字化していなければ null）と、文字化のダイアログ
-  const [lyrics, setLyrics] = useState<LyricsSegment[] | null>(null)
+  const [lyrics, setLyricsState] = useState<LyricsSegment[] | null>(null)
+  // 一音ずつの範囲（歌詞と読みから求める。歌詞が変わったら消す）
+  const [morae, setMorae] = useState<MoraRange[] | null>(null)
+  const setLyrics = (l: LyricsSegment[] | null) => {
+    setLyricsState(l)
+    setMorae(null)
+  }
   const [lyricsOpen, setLyricsOpen] = useState(false)
   const [lyricsEditOpen, setLyricsEditOpen] = useState(false)
   const lyricsAbort = useRef<AbortController | null>(null)
@@ -200,6 +206,19 @@ export default function App() {
       .catch((e) => !ac.signal.aborted && setToast(t('lyrics.failed', { message: e instanceof Error ? e.message : String(e) })))
       .finally(job.end)
   }
+  // 一音ずつに分ける（読みのある区間だけ。進み具合はゲージ）
+  const runMorae = () => {
+    if (!clip || !lyrics) return
+    const ac = new AbortController()
+    const job = startJob('morae', t('job.kind.morae'), () => ac.abort())
+    findMoraeInLyrics(clip, lyrics, { signal: ac.signal, onProgress: (p) => job.update(p) })
+      .then((m) => {
+        setMorae(m)
+        updateSettings({ lanes: { ...settings.lanes, lyrics: true } })
+      })
+      .catch((e) => !ac.signal.aborted && setToast(t('lyrics.failed', { message: e instanceof Error ? e.message : String(e) })))
+      .finally(job.end)
+  }
   const playSelection = () => selection && player.playRange(selection.start, selection.end)
   const selectAll = () => setSelection({ start: 0, end: player.duration })
   useShortcuts(keymap, {
@@ -220,7 +239,7 @@ export default function App() {
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
-      open: picker.open, hasLyrics: !!lyrics, exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
+      open: picker.open, hasLyrics: !!lyrics, exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -273,6 +292,7 @@ export default function App() {
       formants={formants}
       level={level}
       lyrics={lyrics}
+      morae={morae}
       lanes={settings.lanes}
       weights={settings.laneWeights}
       onWeightsChange={(laneWeights) => updateSettings({ laneWeights })}
@@ -306,7 +326,7 @@ export default function App() {
     </Stack>
   )
   const analysis = <AnalysisPanel lyrics={lyrics} spec={spec} pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
-  const jobLabel = (kind: string) => t(kind === 'lyrics' ? 'job.kind.lyrics' : 'job.kind.analyze')
+  const jobLabel = (kind: string) => t(kind === 'lyrics' ? 'job.kind.lyrics' : kind === 'morae' ? 'job.kind.morae' : 'job.kind.analyze')
 
   return (
     <LangContext.Provider value={lang}>

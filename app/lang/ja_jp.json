@@ -39,6 +39,7 @@
 
   "job.kind.analyze": "解析中",
   "job.kind.lyrics": "歌詞の文字化",
+  "job.kind.morae": "一音ずつに分けています",
 
   "key.seekBack": "再生位置を戻す",
   "key.seekBackFine": "再生位置を少し戻す",
@@ -101,6 +102,7 @@
   "menu.userGuide": "ユーザーガイド",
   "menu.view": "表示",
   "menu.editLyrics": "歌詞と読みを編集…",
+  "menu.splitMorae": "一音ずつに分ける",
 
   "play.pause": "一時停止",
   "play.play": "再生",

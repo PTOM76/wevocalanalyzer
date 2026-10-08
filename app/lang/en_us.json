@@ -39,6 +39,7 @@
 
   "job.kind.analyze": "Analyzing",
   "job.kind.lyrics": "Lyrics transcription",
+  "job.kind.morae": "Splitting into single sounds",
 
   "key.seekBack": "Move playhead back",
   "key.seekBackFine": "Move playhead back slightly",
@@ -101,6 +102,7 @@
   "menu.userGuide": "User guide",
   "menu.view": "View",
   "menu.editLyrics": "Edit lyrics and readings…",
+  "menu.splitMorae": "Split into single sounds",
 
   "play.pause": "Pause",
   "play.play": "Play",

@@ -4,7 +4,8 @@
  */
 import type { Clip } from 'wevocal-lib'
 import type { AnalyzeOptions, AnalyzeRequest, FormantOptions, Formants, MoraRange, Pitch, PitchOptions, Spectrogram, SpectrogramOptions, WorkerMessage } from './types'
-import { moraCode } from './reading'
+import { moraCode, splitMora } from './reading'
+import type { LyricsSegment } from './lyricsTypes'
 
 export type { AnalyzeOptions, FormantOptions, Formants, Level, MoraRange, Pitch, PitchOptions, Spectrogram, SpectrogramOptions } from './types'
 export { moraCode, readingOf, splitMora, toHiragana } from './reading'
@@ -101,4 +102,30 @@ export async function segmentMorae(clip: Clip, morae: string[], opts: AnalyzeOpt
   if (!morae.length) return []
   const out = (await request('mora', clip, opts, { codes: morae.map(moraCode) })) as Float32Array
   return Array.from({ length: out.length / 3 }, (_, i) => ({ start: out[i * 3], end: out[i * 3 + 1], mora: morae[i], sure: out[i * 3 + 2] > 0 }))
+}
+
+/** Whisper の区間の端はずれやすいので、前後をこれだけ広げて境目を探す（秒） */
+const MORA_MARGIN_SEC = 0.3
+
+/**
+ * 文字化した区間ごとに、読み（reading）を一音ずつに分けて境目を求める。時刻は `clip` の先頭から（秒）。
+ * `onProgress` は区間の数に対する割合
+ */
+export async function findMoraeInLyrics(clip: Clip, segments: LyricsSegment[], opts: AnalyzeOptions = {}): Promise<MoraRange[]> {
+  const out: MoraRange[] = []
+  const len = clip.channels[0]?.length ?? 0
+  for (const [i, s] of segments.entries()) {
+    opts.signal?.throwIfAborted()
+    const morae = splitMora(s.reading ?? '')
+    if (!morae.length) continue
+    // 前の区間の終わりより前には広げない（同じ音を 2 回数えないため）
+    const from = Math.max(0, s.start - MORA_MARGIN_SEC, out.length ? out[out.length - 1].end : 0)
+    const a = Math.floor(from * clip.sampleRate)
+    const b = Math.min(len, Math.ceil((s.end + MORA_MARGIN_SEC) * clip.sampleRate))
+    if (b <= a) continue
+    const part = { sampleRate: clip.sampleRate, channels: clip.channels.map((c) => c.subarray(a, b)) }
+    for (const m of await segmentMorae(part, morae, { signal: opts.signal })) out.push({ ...m, start: m.start + from, end: m.end + from })
+    opts.onProgress?.((i + 1) / segments.length)
+  }
+  return out
 }
