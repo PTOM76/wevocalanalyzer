@@ -67,7 +67,7 @@ export default defineConfig({
         inlineWorkboxRuntime: true,
         // 更新で切り替わったときに、名前の違う古い版のキャッシュを消す
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,wasm}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,wasm}'],
         // 追加機能（歌詞の文字化など）は本体のプリキャッシュに入れず、導入した人だけ別の保存先に置く（app/addons.ts）
         globIgnores: ['addons/**'],
         // 追加機能のページ（addons/ 以下）を開いたときにアプリ本体の index.html を返さない
