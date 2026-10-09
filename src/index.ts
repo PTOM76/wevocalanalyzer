@@ -53,12 +53,18 @@ function getWorker() {
   return (worker = w)
 }
 
-/** Worker を止める（計算中のものは中止のエラーで終わる） */
-function abortAll(reason: unknown) {
+/**
+ * 要求 `id` を中止する。ほかの要求（比較の音声の解析など）がなければ Worker ごと止めて計算を打ち切り、
+ * あれば Worker は止めずに、その要求の結果を捨てる
+ */
+function abortRequest(id: number, reason: unknown) {
+  const p = pending.get(id)
+  if (!p) return
+  pending.delete(id)
+  p.reject(reason instanceof Error ? reason : new DOMException('Aborted', 'AbortError'))
+  if (pending.size) return
   worker?.terminate()
   worker = null
-  for (const p of pending.values()) p.reject(reason instanceof Error ? reason : new DOMException('Aborted', 'AbortError'))
-  pending.clear()
 }
 
 /** 全チャンネルの平均（モノラル） */
@@ -77,7 +83,7 @@ async function request(kind: AnalyzeRequest['kind'], clip: Clip, opts: AnalyzeOp
   const samples = mixDown(clip.channels)
   return new Promise<Uint8Array | Float32Array>((resolve, reject) => {
     pending.set(id, { resolve, reject, onProgress: opts.onProgress })
-    opts.signal?.addEventListener('abort', () => abortAll(opts.signal?.reason), { once: true })
+    opts.signal?.addEventListener('abort', () => abortRequest(id, opts.signal?.reason), { once: true })
     const req: AnalyzeRequest = { id, kind, samples, sampleRate: clip.sampleRate, ...params }
     getWorker().postMessage(req, [samples.buffer])
   })
