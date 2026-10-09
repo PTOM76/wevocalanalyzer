@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material'
 import type { Clip, Range } from 'wevocal-lib'
 import { useMemo } from 'react'
-import { analyzeF0Histogram, analyzeVibrato, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
+import { analyzeF0Histogram, analyzeVibrato, analyzeVoiceQuality, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
 import SpectrumPlot, { spectrumOf } from './SpectrumPlot'
 import F0HistogramPlot from './F0HistogramPlot'
@@ -25,6 +25,9 @@ interface Props {
   /** 選択範囲（あれば、その平均を出す） */
   selection: Range | null
 }
+
+/** 声の質を測る選択範囲の長さの上限（秒） */
+const VOICE_MAX_SEC = 10
 
 /** 1 行の値（名前と数値。色の印があればその前に出す） */
 function Value({ label, value, color }: { label: string; value: string; color?: string }) {
@@ -59,6 +62,12 @@ export default function AnalysisPanel(p: Props) {
   const sel1 = p.selection?.end ?? Infinity
   const hist = useMemo(() => (p.pitch ? analyzeF0Histogram(p.pitch, sel0, sel1) : null), [p.pitch, sel0, sel1])
   const ltas = useMemo(() => (p.spec ? spectrumOf(p.spec, 0, Infinity) : null), [p.spec])
+  // 声の質（長い範囲は重いので、VOICE_MAX_SEC まで）
+  const longSel = sel1 - sel0 > VOICE_MAX_SEC
+  const voice = useMemo(
+    () => (p.clip && p.pitch && p.selection && !longSel ? analyzeVoiceQuality(p.clip.channels, p.clip.sampleRate, p.pitch, sel0, sel1) : null),
+    [p.clip, p.pitch, p.selection, longSel, sel0, sel1],
+  )
   const lufs = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} LUFS`)
   const dbtp = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} dBTP`)
   const spectrum = useMemo(() => (p.spec ? spectrumOf(p.spec, s0, s1) : null), [p.spec, s0, s1])
@@ -97,6 +106,15 @@ export default function AnalysisPanel(p: Props) {
               <Value label={t('analysis.meanF0')} value={`${hz(r.f0)}（${r.note}）`} />
               <Value label={t('analysis.voiced')} value={`${Math.round(r.voicedRatio * 100)}%`} />
               <Value label={t('analysis.vibrato')} value={vib ? t('analysis.vibratoValue', { rate: vib.rate.toFixed(1), depth: Math.round(vib.depth) }) : t('analysis.vibratoNone')} />
+              {voice ? (
+                <>
+                  <Value label={t('analysis.jitter')} value={`${voice.jitter.toFixed(2)}%`} />
+                  <Value label={t('analysis.shimmer')} value={`${voice.shimmer.toFixed(2)}%`} />
+                  <Value label="HNR" value={`${voice.hnr.toFixed(1)} dB`} />
+                </>
+              ) : (
+                longSel && <Value label={t('analysis.voiceQuality')} value={t('analysis.voiceTooLong', { sec: VOICE_MAX_SEC })} />
+              )}
               <Value label={t('analysis.meanLevel')} value={db(meanLevel(p.selection!.start, p.selection!.end, p.level))} />
               {r.formants.map((f, i) => (
                 <Value key={i} label={t('analysis.meanFormant', { n: i + 1 })} value={hz(f)} color={FORMANT_COLORS[i]} />

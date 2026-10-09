@@ -31,6 +31,10 @@
   "analysis.f0Range": "音域",
   "analysis.f0Mode": "最多為 {note}",
   "analysis.ltas": "長時平均頻譜（整體）",
+  "analysis.jitter": "基頻抖動",
+  "analysis.shimmer": "振幅抖動",
+  "analysis.voiceQuality": "嗓音品質",
+  "analysis.voiceTooLong": "選取範圍不超過 {sec} 秒時顯示",
 
   "common.cancel": "取消",
   "common.stop": "停止",

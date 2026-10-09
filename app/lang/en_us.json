@@ -31,6 +31,10 @@
   "analysis.f0Range": "Range",
   "analysis.f0Mode": "most often {note}",
   "analysis.ltas": "Long-term average spectrum (whole file)",
+  "analysis.jitter": "Jitter",
+  "analysis.shimmer": "Shimmer",
+  "analysis.voiceQuality": "Voice quality",
+  "analysis.voiceTooLong": "Shown for selections up to {sec} s",
 
   "common.cancel": "Cancel",
   "common.stop": "Stop",

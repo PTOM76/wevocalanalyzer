@@ -31,6 +31,10 @@
   "analysis.f0Range": "음역",
   "analysis.f0Mode": "가장 많은 음 {note}",
   "analysis.ltas": "장시간 평균 스펙트럼(전체)",
+  "analysis.jitter": "지터",
+  "analysis.shimmer": "시머",
+  "analysis.voiceQuality": "음성 품질",
+  "analysis.voiceTooLong": "{sec}초 이하 범위에서 표시됩니다",
 
   "common.cancel": "취소",
   "common.stop": "정지",
