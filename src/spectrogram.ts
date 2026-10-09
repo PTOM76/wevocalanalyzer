@@ -41,7 +41,9 @@ export function renderSpectrogram(spec: Spectrogram, width: number, height: numb
   for (let y = 0; y < height; y++) rowAt[y] = Math.round(((height - 1 - y) / Math.max(1, height - 1)) * (rows - 1))
   for (let x = 0; x < width; x++) {
     const ka = Math.max(0, Math.floor((viewStart + (x / width) * viewDur) / spec.hopSec))
-    const kb = Math.min(spec.frames - 1, Math.max(ka, Math.floor((viewStart + ((x + 1) / width) * viewDur) / spec.hopSec)))
+    // 音声の頭より前（比較の音声をずらしたとき）は描かない
+    const end = Math.floor((viewStart + ((x + 1) / width) * viewDur) / spec.hopSec)
+    const kb = end < 0 ? -1 : Math.min(spec.frames - 1, Math.max(ka, end))
     col.fill(0)
     // フレームの中の段は並んでいるので、順に読む
     for (let k = ka; k <= kb; k++) {
