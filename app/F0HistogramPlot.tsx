@@ -8,7 +8,8 @@ import { midiName } from './lanes'
 
 const HEIGHT = 100
 
-export default function F0HistogramPlot({ hist }: { hist: F0Histogram }) {
+/** `compare` は比較の音声の分布（灰色の枠で重ねる。高さは割合でそろえる） */
+export default function F0HistogramPlot({ hist, compare = null }: { hist: F0Histogram; compare?: F0Histogram | null }) {
   const { pal, font } = usePalette()
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -32,12 +33,15 @@ export default function F0HistogramPlot({ hist }: { hist: F0Histogram }) {
     g.font = `10px ${font}`
     g.textBaseline = 'top'
     // 少なくとも 1 オクターブ分の幅を取り、両端に半音 1 つずつ余白を置く
-    const pad = Math.max(1, Math.ceil((12 - hist.counts.length) / 2))
-    const low = hist.low - pad
-    const n = hist.counts.length + pad * 2
+    const lo0 = Math.min(hist.low, compare?.low ?? Infinity)
+    const hi0 = Math.max(hist.low + hist.counts.length, compare ? compare.low + compare.counts.length : -Infinity)
+    const pad = Math.max(1, Math.ceil((12 - (hi0 - lo0)) / 2))
+    const low = lo0 - pad
+    const n = hi0 - lo0 + pad * 2
     const bw = width / n
     const plotH = HEIGHT - 12
-    const max = Math.max(...hist.counts)
+    // 割合で描く（A と比較の音声で長さが違っても比べられるように）
+    const max = Math.max(...hist.counts.map((c) => c / hist.total), ...(compare?.counts.map((c) => c / compare.total) ?? []))
     for (let i = 0; i < n; i++) {
       const m = low + i
       if (m % 12 === 0) {
@@ -48,11 +52,20 @@ export default function F0HistogramPlot({ hist }: { hist: F0Histogram }) {
       }
       const c = hist.counts[m - hist.low] ?? 0
       if (!c) continue
-      const h = (c / max) * (plotH - 2)
+      const h = (c / hist.total / max) * (plotH - 2)
       g.fillStyle = pal.primary.main
       g.fillRect(i * bw + 0.5, plotH - h, Math.max(1, bw - 1), h)
     }
-  }, [hist, width, pal, font])
+    if (compare) {
+      g.strokeStyle = alpha(pal.text.secondary, 0.9)
+      for (const [j, c] of compare.counts.entries()) {
+        if (!c) continue
+        const i = compare.low + j - low
+        const h = (c / compare.total / max) * (plotH - 2)
+        g.strokeRect(i * bw + 1, plotH - h + 0.5, Math.max(1, bw - 2), h)
+      }
+    }
+  }, [hist, compare, width, pal, font])
 
   return (
     <Box ref={boxRef} sx={{ width: '100%' }}>

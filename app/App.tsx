@@ -333,7 +333,7 @@ export default function App() {
       )}
     </Stack>
   )
-  const analysis = <AnalysisPanel clip={clip} lyrics={lyrics} spec={spec} pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
+  const analysis = <AnalysisPanel clip={clip} compare={compare} lyrics={lyrics} spec={spec} pitch={pitch} formants={formants} level={level} time={hover?.t ?? player.position} hoverHz={hover?.hz ?? null} hovering={hover !== null} selection={selection} />
   const jobLabel = (kind: string) => t(kind === 'lyrics' ? 'job.kind.lyrics' : kind === 'morae' ? 'job.kind.morae' : 'job.kind.analyze')
 
   return (

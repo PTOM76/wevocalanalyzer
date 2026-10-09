@@ -14,6 +14,7 @@ export { analyzeLoudness, type Loudness } from './loudness'
 export { analyzeVibrato, type Vibrato } from './vibrato'
 export { analyzeF0Histogram, type F0Histogram } from './f0Histogram'
 export { analyzeVoiceQuality, type VoiceQuality } from './voiceQuality'
+export { findOffset } from './align'
 import type { Loudness } from './loudness'
 export { renderSpectrogram } from './spectrogram'
 

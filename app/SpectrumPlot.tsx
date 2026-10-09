@@ -26,7 +26,8 @@ export function spectrumOf(spec: Spectrogram, start: number, end: number): Float
 }
 
 /** スペクトルのグラフ（横は対数の周波数、縦は dB）。`formants`（Hz）を色の縦線で示す */
-export default function SpectrumPlot({ spec, values, formants }: { spec: Spectrogram; values: Float32Array; formants: number[] }) {
+/** `compare` は比較の音声のスペクトル（同じ段の並び。灰色の線で下に描く） */
+export default function SpectrumPlot({ spec, values, formants, compare = null }: { spec: Spectrogram; values: Float32Array; formants: number[]; compare?: Float32Array | null }) {
   const { pal, font } = usePalette()
   const boxRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -70,16 +71,20 @@ export default function SpectrumPlot({ spec, values, formants }: { spec: Spectro
       g.fillStyle = FORMANT_COLORS[i]
       g.fillRect(Math.round(xOf(hz)), 0, 1, HEIGHT - 12)
     })
-    g.strokeStyle = pal.primary.main
-    g.lineWidth = 1.5
-    g.beginPath()
-    for (let r = 0; r < values.length; r++) {
-      const x = (r / (values.length - 1)) * width
-      if (r === 0) g.moveTo(x, yOf(values[r]))
-      else g.lineTo(x, yOf(values[r]))
+    const stroke = (v: Float32Array, color: string, lw: number) => {
+      g.strokeStyle = color
+      g.lineWidth = lw
+      g.beginPath()
+      for (let r = 0; r < v.length; r++) {
+        const x = (r / (v.length - 1)) * width
+        if (r === 0) g.moveTo(x, yOf(v[r]))
+        else g.lineTo(x, yOf(v[r]))
+      }
+      g.stroke()
     }
-    g.stroke()
-  }, [spec, values, formants, width, pal, font])
+    if (compare) stroke(compare, alpha(pal.text.secondary, 0.8), 1)
+    stroke(values, pal.primary.main, 1.5)
+  }, [spec, values, formants, compare, width, pal, font])
 
   return (
     <Box ref={boxRef} sx={{ width: '100%' }}>

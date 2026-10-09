@@ -234,5 +234,12 @@
   "labels.delete": "刪除",
 
   "compare.legend": "比較：{name}",
-  "compare.original": "{name}（處理前）"
+  "compare.original": "{name}（處理前）",
+  "compare.offset": "偏移（秒）",
+  "compare.align": "自動對齊",
+  "compare.f0": "比較的 F0",
+  "compare.diff": "差（A − 比較）",
+  "compare.meanF0": "比較的平均 F0",
+  "compare.meanDiff": "平均差",
+  "compare.cents": "{c} 音分"
 }

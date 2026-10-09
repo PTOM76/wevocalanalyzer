@@ -234,5 +234,12 @@
   "labels.delete": "Delete",
 
   "compare.legend": "Compare: {name}",
-  "compare.original": "{name} (original)"
+  "compare.original": "{name} (original)",
+  "compare.offset": "Offset (s)",
+  "compare.align": "Auto Align",
+  "compare.f0": "Comparison F0",
+  "compare.diff": "Difference (A − comparison)",
+  "compare.meanF0": "Comparison mean F0",
+  "compare.meanDiff": "Mean difference",
+  "compare.cents": "{c} cents"
 }

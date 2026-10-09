@@ -234,5 +234,12 @@
   "labels.delete": "삭제",
 
   "compare.legend": "비교: {name}",
-  "compare.original": "{name}(가공 전)"
+  "compare.original": "{name}(가공 전)",
+  "compare.offset": "오프셋(초)",
+  "compare.align": "자동 정렬",
+  "compare.f0": "비교 F0",
+  "compare.diff": "차이(A − 비교)",
+  "compare.meanF0": "비교 평균 F0",
+  "compare.meanDiff": "평균 차이",
+  "compare.cents": "{c} 센트"
 }

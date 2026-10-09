@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import type { Clip, Range } from 'wevocal-lib'
 import { useMemo } from 'react'
 import { analyzeF0Histogram, analyzeVibrato, analyzeVoiceQuality, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
@@ -6,11 +6,16 @@ import type { LyricsSegment } from '../src/lyricsTypes'
 import SpectrumPlot, { spectrumOf } from './SpectrumPlot'
 import F0HistogramPlot from './F0HistogramPlot'
 import { useT } from './i18n'
+import { Value } from './PanelValue'
+import CompareSection from './CompareSection'
+import type { Compare } from './useCompare'
 import { useLoudness } from './useLoudness'
 import { FORMANT_COLORS, levelAt, midiName, lyricSegmentAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
 
 interface Props {
   clip: Clip | null
+  /** 比較の音声（開いていなければ source が null） */
+  compare: Compare
   spec: Spectrogram | null
   lyrics: LyricsSegment[] | null
   pitch: Pitch | null
@@ -28,19 +33,6 @@ interface Props {
 
 /** 声の質を測る選択範囲の長さの上限（秒） */
 const VOICE_MAX_SEC = 10
-
-/** 1 行の値（名前と数値。色の印があればその前に出す） */
-function Value({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <Stack direction="row" sx={{ alignItems: 'center', gap: 1, fontSize: 13 }}>
-      {color && <Box sx={{ width: 10, height: 10, bgcolor: color, borderRadius: 0.5 }} />}
-      <Typography sx={{ fontSize: 13, color: 'text.secondary', minWidth: 72 }}>{label}</Typography>
-      <Typography className="selectable" sx={{ fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>
-        {value}
-      </Typography>
-    </Stack>
-  )
-}
 
 /** 解析の欄: 時刻の F0、音名、F1〜F3 と、選択範囲の平均（表示の切り替えはツールバーとメニュー） */
 export default function AnalysisPanel(p: Props) {
@@ -62,6 +54,14 @@ export default function AnalysisPanel(p: Props) {
   const sel1 = p.selection?.end ?? Infinity
   const hist = useMemo(() => (p.pitch ? analyzeF0Histogram(p.pitch, sel0, sel1) : null), [p.pitch, sel0, sel1])
   const ltas = useMemo(() => (p.spec ? spectrumOf(p.spec, 0, Infinity) : null), [p.spec])
+  // 比較の音声の同じグラフ（スペクトルは標本化周波数が同じときだけ。段の周波数が違うため）
+  const cs = p.compare.source
+  const cb = p.compare.analysis
+  const off = cs?.offset ?? 0
+  const bSpec = cs && cb.spec && p.spec && cb.spec.maxHz === p.spec.maxHz ? cb.spec : null
+  const bSpectrum = useMemo(() => (bSpec ? spectrumOf(bSpec, s0 - off, s1 - off) : null), [bSpec, s0, s1, off])
+  const bLtas = useMemo(() => (bSpec ? spectrumOf(bSpec, 0, Infinity) : null), [bSpec])
+  const bHist = useMemo(() => (cs && cb.pitch ? analyzeF0Histogram(cb.pitch, sel0 - off, sel1 - off) : null), [cs, cb.pitch, sel0, sel1, off])
   // 声の質（長い範囲は重いので、VOICE_MAX_SEC まで）
   const longSel = sel1 - sel0 > VOICE_MAX_SEC
   const voice = useMemo(
@@ -127,6 +127,7 @@ export default function AnalysisPanel(p: Props) {
           <Value label={t('analysis.truePeak')} value={dbtp(part?.truePeak)} />
         </Stack>
       )}
+      <CompareSection compare={p.compare} pitch={p.pitch} level={p.level} time={p.time} selection={p.selection} />
       {p.clip && (
         <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
           <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t('analysis.whole')}</Typography>
@@ -137,7 +138,7 @@ export default function AnalysisPanel(p: Props) {
       {p.spec && spectrum && (
         <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
           <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t(p.selection ? 'analysis.spectrumSelection' : 'analysis.spectrumAt')}</Typography>
-          <SpectrumPlot spec={p.spec} values={spectrum} formants={(p.selection ? r?.formants : v.formants) ?? []} />
+          <SpectrumPlot spec={p.spec} values={spectrum} formants={(p.selection ? r?.formants : v.formants) ?? []} compare={bSpectrum} />
         </Stack>
       )}
       {hist && (
@@ -147,13 +148,13 @@ export default function AnalysisPanel(p: Props) {
             label={t('analysis.f0Range')}
             value={`${midiName(hist.low)}〜${midiName(hist.low + hist.counts.length - 1)}（${t('analysis.f0Mode', { note: midiName(hist.low + hist.counts.indexOf(Math.max(...hist.counts))) })}）`}
           />
-          <F0HistogramPlot hist={hist} />
+          <F0HistogramPlot hist={hist} compare={bHist} />
         </Stack>
       )}
       {p.spec && ltas && (
         <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
           <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t('analysis.ltas')}</Typography>
-          <SpectrumPlot spec={p.spec} values={ltas} formants={[]} />
+          <SpectrumPlot spec={p.spec} values={ltas} formants={[]} compare={bLtas} />
         </Stack>
       )}
     </Stack>

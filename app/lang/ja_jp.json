@@ -234,5 +234,12 @@
   "labels.delete": "削除",
 
   "compare.legend": "比較: {name}",
-  "compare.original": "{name}（加工前）"
+  "compare.original": "{name}（加工前）",
+  "compare.offset": "ずらす量（秒）",
+  "compare.align": "自動でそろえる",
+  "compare.f0": "比較の F0",
+  "compare.diff": "差（A − 比較）",
+  "compare.meanF0": "比較の平均 F0",
+  "compare.meanDiff": "平均の差",
+  "compare.cents": "{c} セント"
 }
