@@ -1,7 +1,7 @@
 {
   "name": "wevocalanalyzer",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "声の解析（スペクトログラム、F0、フォルマント）をする Web ツール兼ライブラリ。ブラウザで動き、音声を外部に送らない",
   "license": "MIT",
