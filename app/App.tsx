@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Box, Button, Divider, MenuItem, Select, Snackbar, Stack, Typography, useColorScheme } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCirclePlay, faFolderOpen, faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons'
+import { faCirclePlay, faFolderOpen, faPause, faPlay, faRightLeft, faStop } from '@fortawesome/free-solid-svg-icons'
 import {
   AppHeader, BottomBar, DesktopLayout, FULL_HEIGHT, JobGauge, LicensesDialog, MobileLayout, PevenLabels, StatusBar, StatusItem, StatusSpacer,
   WindowModeContext, autoWindowMode, setUiScale, startJob, useAddonInstall, useFileDrop, useFilePicker, useMobileLayout, useShortcuts,
@@ -16,7 +16,7 @@ import { useCompare } from './useCompare'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
 import AnalysisPanel from './AnalysisPanel'
 import { i18n, LangContext, resolveLang, setLang, t } from './i18n'
-import { resolveKeymap } from './keymap'
+import { keyLabelOf, resolveKeymap } from './keymap'
 import { licenseEntries } from './licenses'
 import { analysisCsv, downloadAnalysisCsv, downloadLabels, downloadLyricsSrt } from './exportCsv'
 import LabelsDialog from './LabelsDialog'
@@ -79,7 +79,9 @@ export default function App() {
   const [hover, setHover] = useState<Hover | null>(null)
   // 選択範囲（1 つだけ）。別のファイルを開いたら外す
   const [selection, setSelection] = useState<Range | null>(null)
-  const player = usePlayer(clip)
+  // 比較の音声（B）
+  const compare = useCompare(settings, setError)
+  const player = usePlayer(clip, compare.source)
   const view = useWaveformView(player.duration, player.livePosition, player.playing, settings.follow, '', settings.wheelZoom)
   const keymap = resolveKeymap(settings.keymap)
 
@@ -94,8 +96,6 @@ export default function App() {
     lyricsAbort.current?.abort()
   }, [clip])
   const { spec, pitch, formants, level } = useAnalysis(clip, settings, setError)
-  // 比較の音声（B）
-  const compare = useCompare(settings, setError)
   const openCompare = (file: File) =>
     compare.openFile(file).catch((e) => setError(t('error.open', { message: e instanceof WvspError ? t('error.wvspInvalid') : e instanceof Error ? e.message : String(e) })))
 
@@ -234,6 +234,7 @@ export default function App() {
     seekEnd: has ? () => seekTo(player.duration) : undefined,
     open: picker.open,
     addLabel: has ? addLabel : undefined,
+    switchSource: compare.source ? player.switchSource : undefined,
   })
 
   const menus = appMenus(
@@ -241,7 +242,7 @@ export default function App() {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
       open: picker.open, hasLyrics: !!lyrics, hasLabels: labels.length > 0,
-      comparing: !!compare.source, openCompare: comparePicker.open, closeCompare: compare.close,
+      comparing: !!compare.source, listenCompare: player.listenAlt, switchSource: player.switchSource, openCompare: comparePicker.open, closeCompare: compare.close,
       compareOriginal: projectTracks[trackIndex] && projectTracks[trackIndex].original !== projectTracks[trackIndex].clip ? () => compare.setClip(t('compare.original', { name: projectTracks[trackIndex].name }), projectTracks[trackIndex].original) : undefined,
       compareTracks: projectTracks.map((tr) => ({ name: tr.name, onClick: () => compare.setClip(tr.name, tr.clip) })).filter((_, i) => i !== trackIndex), addLabel, editLabels: () => setLabelsOpen(true), exportTextGrid: () => downloadLabels(name, labels, player.duration, 'textgrid'), exportLabelText: () => downloadLabels(name, labels, player.duration, 'txt'), exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
@@ -257,6 +258,7 @@ export default function App() {
       <SmallButton title={t(player.playing ? 'play.pause' : 'play.play')} icon={player.playing ? faPause : faPlay} disabled={!has} onClick={player.toggle} />
       <SmallButton title={t('common.stop')} icon={faStop} disabled={!has} onClick={player.stop} />
       <SmallButton title={t('play.playSelection')} icon={faCirclePlay} disabled={!selection} onClick={playSelection} />
+      {compare.source && <SmallButton title={[t('play.listenCompare'), keyLabelOf(keymap, 'switchSource')].filter(Boolean).join(' ')} icon={faRightLeft} pressed={player.listenAlt} onClick={player.switchSource} />}
     </>
   )
   // プロジェクトのトラックを選ぶ欄（トラックが 2 本以上のときだけ）

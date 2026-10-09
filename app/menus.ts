@@ -29,6 +29,9 @@ export interface MenuActions {
   exportSrt: () => void
   /** 比較の音声を開いているか、開く、閉じる。加工前の音（.wvsp）、ほかのトラックと比べる */
   comparing: boolean
+  /** 比較の音声を鳴らしているか、A と B を切り替える */
+  listenCompare: boolean
+  switchSource: () => void
   openCompare: () => void
   closeCompare: () => void
   compareOriginal?: () => void
@@ -143,6 +146,7 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
         { label: t(a.playing ? 'play.pause' : 'play.play'), shortcut: key('playPause'), disabled: !a.hasClip, onClick: a.togglePlay },
         { label: t('common.stop'), disabled: !a.hasClip, onClick: a.stop },
         { label: t('play.playSelection'), shortcut: key('playSelection'), disabled: !a.hasSelection, onClick: a.playSelection },
+        { label: t('play.listenCompare'), shortcut: key('switchSource'), checked: a.listenCompare, disabled: !a.comparing, onClick: a.switchSource },
         { divider: true },
         { label: t('play.toStart'), shortcut: key('seekStart'), disabled: !a.hasClip, onClick: a.seekStart },
         { label: t('play.toEnd'), shortcut: key('seekEnd'), disabled: !a.hasClip, onClick: a.seekEnd },

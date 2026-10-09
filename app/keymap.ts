@@ -7,7 +7,7 @@ import type { MessageKey } from './i18n'
  */
 export { keyLabelOf } from 'pevenmui'
 
-export type ActionId = 'playPause' | 'playSelection' | 'selectAll' | 'clearSelection' | 'seekBack' | 'seekForward' | 'seekBackFine' | 'seekForwardFine' | 'seekStart' | 'seekEnd' | 'open' | 'addLabel'
+export type ActionId = 'playPause' | 'playSelection' | 'selectAll' | 'clearSelection' | 'seekBack' | 'seekForward' | 'seekBackFine' | 'seekForwardFine' | 'seekStart' | 'seekEnd' | 'open' | 'addLabel' | 'switchSource'
 
 /** 操作の一覧（設定の画面に出す順）。名前は訳文キー */
 export const ACTIONS: (Omit<KeyAction<ActionId>, 'label'> & { label: MessageKey })[] = [
@@ -22,6 +22,7 @@ export const ACTIONS: (Omit<KeyAction<ActionId>, 'label'> & { label: MessageKey 
   { id: 'selectAll', label: 'edit.selectAll', keys: ['Ctrl+KeyA'] },
   { id: 'clearSelection', label: 'edit.clearSelection', keys: ['Escape'] },
   { id: 'open', label: 'menu.open', keys: ['Ctrl+KeyO'] },
+  { id: 'switchSource', label: 'play.listenCompare', keys: ['Tab'] },
   { id: 'addLabel', label: 'menu.addLabel', keys: ['Ctrl+KeyB'] },
 ]
 
