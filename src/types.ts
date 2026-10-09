@@ -64,6 +64,8 @@ export interface MoraRange {
   mora: string
   /** 境目がはっきりしているか（偽なら確認の画面で色を変える） */
   sure: boolean
+  /** 中身が読みと合うか（偽なら、ほかの母音に近いか、長すぎていくつかの音が入っている） */
+  vowelOk?: boolean
 }
 
 /** Worker へ送るもの */

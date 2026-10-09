@@ -33,6 +33,10 @@ const N_FFT: usize = 1024;
 const HIGH_HZ: f32 = 3000.0;
 /// 長さのばらつきの重み（平均との比の対数の 2 乗に掛ける。歌は音の長さが大きく違うので弱くする）
 const LENGTH_WEIGHT: f32 = 0.15;
+/// 母音が違うとみなす差（読みの母音との距離と、一番近い母音との距離の差）
+const WRONG_VOWEL_MARGIN: f32 = 1.0;
+/// 区間の平均のこれだけ倍より長い音は、いくつかの音が入っているとみなす
+const TOO_LONG_RATIO: f32 = 3.0;
 /// 母音の合い方の重み
 const VOWEL_WEIGHT: f32 = 0.8;
 
@@ -46,6 +50,8 @@ pub struct Mora {
     pub end: f32,
     /// 境目がはっきりしているか（偽なら確認の画面で色を変える）
     pub sure: bool,
+    /// 母音が読みと合うか（偽なら、ほかの母音のほうがはっきり近い。い の所に え が入ったものなど）
+    pub vowel_ok: bool,
 }
 
 /// 10ms ごとの特徴
@@ -152,6 +158,41 @@ impl Sums {
     }
 }
 
+/// フレーム `a..b` の後半の F1、F2 と、母音 `target`（0〜4）の目安との距離。母音を見られるフレームがなければ None
+fn vowel_dist(s: &Sums, a: usize, b: usize, target: usize) -> Option<f32> {
+    part_dist(s, a + (b - a) * 2 / 5, b, target)
+}
+
+/// フレーム `tail..b` の F1、F2 と、母音 `target` の目安との距離
+fn part_dist(s: &Sums, tail: usize, b: usize, target: usize) -> Option<f32> {
+    let voiced = s.voiced[b] - s.voiced[tail];
+    if voiced < 1.0 {
+        return None;
+    }
+    // F1、F2 は対数の平均（オクターブ）で見る。F2 は個人差が大きいので甘くする
+    let l1 = (s.f1[b] - s.f1[tail]) / voiced;
+    let l2 = (s.f2[b] - s.f2[tail]) / voiced;
+    let (t1, t2) = VOWEL_FORMANTS[target];
+    Some(((l1 - t1.log2()) / 0.5).powi(2) + ((l2 - t2.log2()) / 0.7).powi(2))
+}
+
+/// フレーム `a..b` の母音が、読みの母音 `target` よりほかの母音にはっきり近いか。
+/// 中ほどと終わりを別々に見る（え の所に ね、ー、い まで入ったものは、終わりが い になる）
+fn wrong_vowel(s: &Sums, a: usize, b: usize, target: u8) -> bool {
+    if target > 4 {
+        return false;
+    }
+    let third = (b - a) / 3;
+    [(a + third, a + 2 * third), (a + 2 * third, b)].iter().any(|&(lo, hi)| {
+        if hi <= lo {
+            return false;
+        }
+        let Some(d) = part_dist(s, lo, hi, target as usize) else { return false };
+        let best = (0..5).filter_map(|v| part_dist(s, lo, hi, v)).fold(f32::MAX, f32::min);
+        d - best > WRONG_VOWEL_MARGIN
+    })
+}
+
 /// フレーム `a..b` が、印 `code` の一音にどれだけ合うか（0〜1）。`prev_vowel` は前の音の母音（ー のため）
 fn mora_fit(s: &Sums, a: usize, b: usize, code: u8, prev_vowel: u8, loud: f32) -> f32 {
     let vowel = code & VOWEL_MASK;
@@ -167,15 +208,10 @@ fn mora_fit(s: &Sums, a: usize, b: usize, code: u8, prev_vowel: u8, loud: f32) -
         N => ratio * (0.5 + ((loud - mean_db) / 20.0).clamp(0.0, 0.5)),
         _ => {
             let target = if vowel == LONG { prev_vowel } else { vowel };
-            if target > 4 || voiced < 1.0 {
+            if target > 4 {
                 return 0.3;
             }
-            // F1、F2 は対数の平均（オクターブ）で見る。F2 は個人差が大きいので甘くする
-            let l1 = (s.f1[b] - s.f1[tail]) / voiced;
-            let l2 = (s.f2[b] - s.f2[tail]) / voiced;
-            let (t1, t2) = VOWEL_FORMANTS[target as usize];
-            let d = ((l1 - t1.log2()) / 0.5).powi(2) + ((l2 - t2.log2()) / 0.7).powi(2);
-            (-d).exp()
+            vowel_dist(s, a, b, target as usize).map_or(0.3, |d| (-d).exp())
         }
     }
 }
@@ -202,7 +238,7 @@ pub fn segment(x: &[f32], sample_rate: f32, codes: &[u8]) -> Vec<Mora> {
     // 分けきれないときは均等に分け、確かでない印を付ける
     if e - s < n * MIN_FRAMES {
         let len = (e - s) as f32 / n as f32;
-        return (0..n).map(|i| Mora { start: to_sec(s) + to_sec(1) * len * i as f32, end: to_sec(s) + to_sec(1) * len * (i + 1) as f32, sure: false }).collect();
+        return (0..n).map(|i| Mora { start: to_sec(s) + to_sec(1) * len * i as f32, end: to_sec(s) + to_sec(1) * len * (i + 1) as f32, sure: false, vowel_ok: true }).collect();
     }
     let score = boundary_scores(&f);
     let loud = median(f.db[s..e].to_vec());
@@ -213,6 +249,13 @@ pub fn segment(x: &[f32], sample_rate: f32, codes: &[u8]) -> Vec<Mora> {
         let v = codes[i - 1] & VOWEL_MASK;
         prev_vowel[i] = if v == LONG { prev_vowel[i - 1] } else { v };
     }
+    // 子音がなく、前と同じ母音の音（ね の後の え、ー）。音の境目がないので、境目の点は数えず、長さで分ける
+    let held: Vec<bool> = (0..n)
+        .map(|i| {
+            let v = codes[i] & VOWEL_MASK;
+            i > 0 && (v == LONG || (codes[i] >> CONSONANT_SHIFT == C_NONE && v <= 4 && v == prev_vowel[i]))
+        })
+        .collect();
     // best[i][k]: i 個の音を s..k に収めたときの一番よい点。from に一つ前の境目を覚える
     let width = e - s + 1;
     let mut best = vec![f32::NEG_INFINITY; (n + 1) * width];
@@ -237,7 +280,7 @@ pub fn segment(x: &[f32], sample_rate: f32, codes: &[u8]) -> Vec<Mora> {
                 let length_cost = LENGTH_WEIGHT * (len / avg).ln().powi(2);
                 let fit = VOWEL_WEIGHT * mora_fit(&sums, s + j, s + k, codes[i - 1], prev_vowel[i - 1], loud);
                 // 境目の点（最初の音の始まりは区間の端なので数えない）
-                let edge = if i > 1 { score[s + j] } else { 0.0 };
+                let edge = if i > 1 && !held[i - 1] { score[s + j] } else { 0.0 };
                 let v = prev + edge + fit - length_cost;
                 if v > best[i * width + k] {
                     best[i * width + k] = v;
@@ -260,6 +303,12 @@ pub fn segment(x: &[f32], sample_rate: f32, codes: &[u8]) -> Vec<Mora> {
             end: to_sec(s + bounds[i + 1]),
             // 境目の点が低いものは確かでない
             sure: i == 0 || score[s + bounds[i]] >= 0.25,
+            vowel_ok: {
+                let v = codes[i] & VOWEL_MASK;
+                let len = (bounds[i + 1] - bounds[i]) as f32;
+                // ー は前の音を伸ばすので長くてよい
+                (v == LONG || len <= avg * TOO_LONG_RATIO) && !wrong_vowel(&sums, s + bounds[i], s + bounds[i + 1], if v == LONG { prev_vowel[i] } else { v })
+            },
         })
         .collect()
 }
@@ -340,6 +389,41 @@ mod tests {
         assert!((m[1].start - 0.30).abs() < 0.05, "{:?}", m);
     }
 
+    /// 読みは「い」でも「え」の音なら、母音が合わない印を付ける
+    #[test]
+    fn marks_wrong_vowel() {
+        let mut x = vowel(0.3, 200.0, 800.0, 1250.0);
+        x.extend(vec![0.0; (0.05 * SR) as usize]);
+        x.extend(vowel(0.3, 200.0, 500.0, 1900.0));
+        let m = segment(&x, SR, &[0, 1]);
+        assert!(m[0].vowel_ok, "{:?}", m);
+        assert!(!m[1].vowel_ok, "{:?}", m);
+    }
+
+    /// え の所に え、い と続く音が入ったら、母音が合わない印を付ける
+    #[test]
+    fn marks_mixed_vowels() {
+        let mut x = vowel(0.3, 200.0, 800.0, 1250.0);
+        x.extend(vec![0.0; (0.05 * SR) as usize]);
+        x.extend(vowel(0.2, 200.0, 500.0, 1900.0));
+        x.extend(vowel(0.2, 200.0, 320.0, 2300.0));
+        let m = segment(&x, SR, &[0, 3]);
+        assert!(!m[1].vowel_ok, "{:?}", m);
+    }
+
+    /// ね、え のように同じ母音が続くと音の境目がないので、伸ばした母音を分け合い、ね が一瞬にならない
+    #[test]
+    fn same_vowel_shares_length() {
+        // ね の子音（鼻音: 弱く、F1 が低い）から え を伸ばす
+        let mut x: Vec<f32> = vowel(0.06, 200.0, 250.0, 1200.0).iter().map(|v| v * 0.3).collect();
+        x.extend(vowel(0.9, 200.0, 500.0, 1900.0));
+        x.extend(vec![0.0; (0.05 * SR) as usize]);
+        x.extend(vowel(0.3, 200.0, 320.0, 2300.0));
+        let m = segment(&x, SR, &[code(3, C_NASAL), 3, 1]);
+        assert!(m[0].end - m[0].start > 0.25, "{:?}", m);
+        assert!(m[1].end - m[1].start > 0.25, "{:?}", m);
+    }
+
     /// 長い区間（20 秒、80 音）でもすぐ終わり、すべての音が区間の中に並ぶ
     #[test]
     fn long_segment_is_fast() {
@@ -362,6 +446,7 @@ mod tests {
     fn too_many_morae_split_evenly() {
         let x = vowel(0.1, 200.0, 800.0, 1250.0);
         let m = segment(&x, SR, &[0, 0, 0, 0, 0]);
+        assert!(m.iter().all(|m| m.vowel_ok));
         assert_eq!(m.len(), 5);
         assert!(m.iter().all(|m| !m.sure));
     }

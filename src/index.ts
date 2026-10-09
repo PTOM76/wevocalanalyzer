@@ -113,7 +113,7 @@ export async function analyzeFormants(clip: Clip, opts: FormantOptions = {}): Pr
 export async function segmentMorae(clip: Clip, morae: string[], opts: AnalyzeOptions = {}): Promise<MoraRange[]> {
   if (!morae.length) return []
   const out = (await request('mora', clip, opts, { codes: morae.map(moraCode) })) as Float32Array
-  return Array.from({ length: out.length / 3 }, (_, i) => ({ start: out[i * 3], end: out[i * 3 + 1], mora: morae[i], sure: out[i * 3 + 2] > 0 }))
+  return Array.from({ length: out.length / 4 }, (_, i) => ({ start: out[i * 4], end: out[i * 4 + 1], mora: morae[i], sure: out[i * 4 + 2] > 0, vowelOk: out[i * 4 + 3] > 0 }))
 }
 
 /** Whisper の区間の端はずれやすいので、前後をこれだけ広げて境目を探す（秒） */

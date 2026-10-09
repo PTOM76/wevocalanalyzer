@@ -85,7 +85,7 @@ pub unsafe extern "C" fn analyze_formants(input: *const f32, frames: usize, samp
 }
 
 /// モノラル音声（歌の 1 区間）を一音ずつに分け、音の数を返す。`codes` は一音ずつの印（`mora::VOWEL_MASK` などの値を f32 にしたもの）。
-/// 結果は音ごとに 3 つ（始まり、終わり（秒）、確かか 1/0）で、`output_ptr` で取得する。
+/// 結果は音ごとに 4 つ（始まり、終わり（秒）、確かか 1/0、母音が合うか 1/0）で、`output_ptr` で取得する。
 ///
 /// # Safety
 /// `input` は `frames` 個、`codes` は `count` 個の有効な f32 を指していること。
@@ -95,7 +95,7 @@ pub unsafe extern "C" fn segment_morae(input: *const f32, frames: usize, sample_
     let c: Vec<u8> = std::slice::from_raw_parts(codes, count).iter().map(|&v| v as u8).collect();
     let out = mora::segment(x, sample_rate, &c);
     let n = out.len();
-    OUTPUT.with(|o| *o.borrow_mut() = out.iter().flat_map(|m| [m.start, m.end, if m.sure { 1.0 } else { 0.0 }]).collect());
+    OUTPUT.with(|o| *o.borrow_mut() = out.iter().flat_map(|m| [m.start, m.end, if m.sure { 1.0 } else { 0.0 }, if m.vowel_ok { 1.0 } else { 0.0 }]).collect());
     n
 }
 

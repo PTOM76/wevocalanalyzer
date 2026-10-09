@@ -44,7 +44,7 @@ function analyze(dsp: DspExports, req: AnalyzeRequest): Uint8Array | Float32Arra
       try {
         new Float32Array(dsp.memory.buffer, c, codes.length).set(codes)
         const count = dsp.segment_morae(input, n, req.sampleRate, c, codes.length)
-        return new Float32Array(dsp.memory.buffer, dsp.output_ptr(), count * 3).slice()
+        return new Float32Array(dsp.memory.buffer, dsp.output_ptr(), count * 4).slice()
       } finally {
         dsp.free_f32(c, codes.length)
       }
