@@ -133,7 +133,10 @@ export async function findMoraeInLyrics(clip: Clip, segments: LyricsSegment[], o
     // 前の区間の終わりより前には広げない（同じ音を 2 回数えないため）
     const from = Math.max(0, s.start - MORA_MARGIN_SEC, out.length ? out[out.length - 1].end : 0)
     const a = Math.floor(from * clip.sampleRate)
-    const b = Math.min(len, Math.ceil((s.end + MORA_MARGIN_SEC) * clip.sampleRate))
+    // 次の区間の始まりより後ろには広げない（区間の時刻がずれて重なると、次の区間が入る余地がなくなるため）
+    const next = segments[i + 1]?.start ?? Infinity
+    const to = Math.min(s.end + MORA_MARGIN_SEC, next > from ? next : Infinity)
+    const b = Math.min(len, Math.ceil(to * clip.sampleRate))
     if (b <= a) continue
     const part = { sampleRate: clip.sampleRate, channels: clip.channels.map((c) => c.subarray(a, b)) }
     for (const m of await segmentMorae(part, morae, { signal: opts.signal })) out.push({ ...m, start: m.start + from, end: m.end + from })
