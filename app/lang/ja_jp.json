@@ -20,6 +20,9 @@
   "analysis.spectrumSelection": "スペクトル（選択範囲の平均）",
   "analysis.unvoiced": "無声区間",
   "analysis.voiced": "有声率",
+  "analysis.loudness": "ラウドネス",
+  "analysis.truePeak": "トゥルーピーク",
+  "analysis.whole": "全体",
 
   "common.cancel": "キャンセル",
   "common.stop": "停止",

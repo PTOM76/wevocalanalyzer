@@ -10,6 +10,8 @@ import type { LyricsSegment } from './lyricsTypes'
 export type { AnalyzeOptions, FormantOptions, Formants, Level, MoraRange, Pitch, PitchOptions, Spectrogram, SpectrogramOptions } from './types'
 export { moraCode, readingOf, splitMora, toHiragana } from './reading'
 export { analyzeLevel, LEVEL_FLOOR_DB } from './level'
+export { analyzeLoudness, type Loudness } from './loudness'
+import type { Loudness } from './loudness'
 export { renderSpectrogram } from './spectrogram'
 
 /** ライブラリの版（追加機能のマニフェストと合わせる） */
@@ -128,4 +130,31 @@ export async function findMoraeInLyrics(clip: Clip, segments: LyricsSegment[], o
     opts.onProgress?.((i + 1) / segments.length)
   }
   return out
+}
+
+/** start〜end（秒）のラウドネスとトゥルーピーク。Worker で計算し、中止したら止める */
+export function measureLoudness(clip: Clip, start: number, end: number, signal?: AbortSignal): Promise<Loudness> {
+  const sr = clip.sampleRate
+  const a = Math.max(0, Math.floor(start * sr))
+  const b = Math.max(a, Math.ceil(end * sr))
+  const channels = clip.channels.map((c) => c.slice(a, b))
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason)
+    const w = new Worker(new URL('./loudnessWorker.ts', import.meta.url), { type: 'module' })
+    const stop = () => {
+      w.terminate()
+      reject(signal?.reason)
+    }
+    signal?.addEventListener('abort', stop, { once: true })
+    w.onmessage = (e: MessageEvent<Loudness>) => {
+      signal?.removeEventListener('abort', stop)
+      w.terminate()
+      resolve(e.data)
+    }
+    w.onerror = (e) => {
+      w.terminate()
+      reject(new Error(e.message || 'loudness worker error'))
+    }
+    w.postMessage({ sampleRate: sr, channels }, channels.map((c) => c.buffer))
+  })
 }

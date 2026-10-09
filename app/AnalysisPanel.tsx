@@ -1,13 +1,15 @@
 import { Box, Stack, Typography } from '@mui/material'
-import type { Range } from 'wevocal-lib'
+import type { Clip, Range } from 'wevocal-lib'
 import { useMemo } from 'react'
 import type { Formants, Level, Pitch, Spectrogram } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
 import SpectrumPlot, { spectrumOf } from './SpectrumPlot'
 import { useT } from './i18n'
+import { useLoudness } from './useLoudness'
 import { FORMANT_COLORS, levelAt, lyricSegmentAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
 
 interface Props {
+  clip: Clip | null
   spec: Spectrogram | null
   lyrics: LyricsSegment[] | null
   pitch: Pitch | null
@@ -47,6 +49,11 @@ export default function AnalysisPanel(p: Props) {
   const lyric = lyricSegmentAt(p.time, p.lyrics)
   // スペクトル: 選択範囲があればその平均、なければその時点
   const [s0, s1] = p.selection ? [p.selection.start, p.selection.end] : [p.time, p.time]
+  const dur = p.clip ? (p.clip.channels[0]?.length ?? 0) / p.clip.sampleRate : null
+  const whole = useLoudness(p.clip, 0, dur)
+  const part = useLoudness(p.clip, p.selection?.start ?? null, p.selection?.end ?? null)
+  const lufs = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} LUFS`)
+  const dbtp = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} dBTP`)
   const spectrum = useMemo(() => (p.spec ? spectrumOf(p.spec, s0, s1) : null), [p.spec, s0, s1])
   return (
     <Stack sx={{ p: 1.5, gap: 1.5 }}>
@@ -90,6 +97,15 @@ export default function AnalysisPanel(p: Props) {
           ) : (
             <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{t('analysis.unvoiced')}</Typography>
           )}
+          <Value label={t('analysis.loudness')} value={lufs(part?.lufs)} />
+          <Value label={t('analysis.truePeak')} value={dbtp(part?.truePeak)} />
+        </Stack>
+      )}
+      {p.clip && (
+        <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t('analysis.whole')}</Typography>
+          <Value label={t('analysis.loudness')} value={lufs(whole?.lufs)} />
+          <Value label={t('analysis.truePeak')} value={dbtp(whole?.truePeak)} />
         </Stack>
       )}
       {p.spec && spectrum && (

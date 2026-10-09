@@ -20,6 +20,9 @@
   "analysis.spectrumSelection": "频谱（选区平均）",
   "analysis.unvoiced": "清音段",
   "analysis.voiced": "浊音率",
+  "analysis.loudness": "响度",
+  "analysis.truePeak": "真峰值",
+  "analysis.whole": "整体",
 
   "common.cancel": "取消",
   "common.stop": "停止",

@@ -20,6 +20,9 @@
   "analysis.spectrumSelection": "Spectrum (selection average)",
   "analysis.unvoiced": "Unvoiced",
   "analysis.voiced": "Voiced ratio",
+  "analysis.loudness": "Loudness",
+  "analysis.truePeak": "True peak",
+  "analysis.whole": "Whole file",
 
   "common.cancel": "Cancel",
   "common.stop": "Stop",

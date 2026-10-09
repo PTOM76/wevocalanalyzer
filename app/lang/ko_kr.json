@@ -20,6 +20,9 @@
   "analysis.spectrumSelection": "스펙트럼(선택 범위 평균)",
   "analysis.unvoiced": "무성 구간",
   "analysis.voiced": "유성률",
+  "analysis.loudness": "라우드니스",
+  "analysis.truePeak": "트루 피크",
+  "analysis.whole": "전체",
 
   "common.cancel": "취소",
   "common.stop": "정지",
