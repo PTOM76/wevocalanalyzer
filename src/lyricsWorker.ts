@@ -4,7 +4,7 @@ import ortMjs from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url'
 import ortWasm from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url'
 import { loadTokenizer } from './kuromojiDict'
 import type { LyricsRequest, LyricsMessage, LyricsSegment } from './lyricsTypes'
-import { readingOf } from './reading'
+import { collapseRepeats, readingOf } from './reading'
 
 // ONNX Runtime の wasm は、追加機能に一緒に入れたものを使う（指定しないと transformers.js は外部の CDN から読み込み、オフラインで使えない）
 const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown } }
@@ -68,7 +68,7 @@ self.onmessage = async (e: MessageEvent<LyricsRequest>) => {
     })
     // 区間は [始まり, 終わり]（最後の区間は終わりが null のことがある）と文字
     const result = (Array.isArray(out) ? out[0] : out) as { chunks?: { timestamp: [number, number | null]; text: string }[] }
-    const segments = (result.chunks ?? []).map((c) => ({ start: c.timestamp[0], end: c.timestamp[1] ?? c.timestamp[0], text: c.text.trim() })).filter((s) => s.text)
+    const segments = (result.chunks ?? []).map((c) => ({ start: c.timestamp[0], end: c.timestamp[1] ?? c.timestamp[0], text: collapseRepeats(c.text.trim()) })).filter((s) => s.text)
     // 読みを付けられなくても（辞書を取れないなど）、文字化の結果は返す
     post({ kind: 'done', segments: await addReadings(segments, req.dicPath).catch(() => segments) })
   } catch (err) {

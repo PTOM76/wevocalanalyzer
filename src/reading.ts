@@ -33,6 +33,14 @@ export function readingOf(tokens: ReadingToken[]): string {
   return toHiragana(out)
 }
 
+/** 同じ並び（1〜4 字）が 4 回以上続くものの上限 */
+const MAX_REPEAT = 3
+
+/** 同じ字や語が何百回も続く所（Whisper の繰り返しの誤り。うおぉぉぉ… など）を MAX_REPEAT 回までにする */
+export function collapseRepeats(text: string): string {
+  return text.replace(/(.{1,4}?)\1{3,}/gsu, (_, p: string) => p.repeat(MAX_REPEAT))
+}
+
 /** 前の音にくっつく小さい字（きゃ、ふぁ など） */
 const SMALL = new Set([...'ゃゅょぁぃぅぇぉゎャュョァィゥェォヮ'])
 
@@ -44,7 +52,7 @@ const SMALL_VOWEL = new Set([...'ぁぃぅぇぉァィゥェォ'])
 /** 読みを一音（モーラ）ずつに分ける。拗音（きゃ）は 1 つ、っ・ん・ー もそれぞれ 1 つ。かな以外は捨てる */
 export function splitMora(reading: string): string[] {
   const morae: string[] = []
-  for (const c of reading) {
+  for (const c of collapseRepeats(reading)) {
     if (!isKana(c)) continue
     const prev = morae[morae.length - 1]
     // くっつけるのは、1 字の音の後ろだけ（おぉぉぉ が 1 音にならないように）
