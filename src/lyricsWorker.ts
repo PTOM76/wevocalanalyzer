@@ -19,10 +19,11 @@ async function load(req: LyricsRequest) {
   const key = `${req.model}|${req.device}`
   if (loaded?.key === key) return loaded.asr
   // モデルは追加機能の保存先から（Service Worker が返す）。無いファイル（CPU 用の量子化したものなど）だけ Hugging Face から取る。
-  // transformers.js 自身の保存先には置かない（追加機能と二重になり、設定から削除できないため）
-  env.allowLocalModels = true
+  // そのときは transformers.js 自身の保存先には置かない（追加機能と二重になり、設定から削除できないため）。
+  // Service Worker が動いていなければ保存先を読めないので、Hugging Face から取って transformers.js の保存先に置く（毎回取り直さないように）
+  env.allowLocalModels = req.fromAddon
   env.localModelPath = req.modelBase
-  env.useBrowserCache = false
+  env.useBrowserCache = !req.fromAddon
   // WebGPU はエンコーダーを fp32、デコーダーを 4bit に量子化したもの（transformers.js の例と同じ）。CPU は 8bit
   const dtype = req.device === 'webgpu' ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8'
   const asr = (await pipeline('automatic-speech-recognition', `onnx-community/whisper-${req.model}`, {

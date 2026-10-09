@@ -37,6 +37,8 @@ export interface LyricsRequest {
   dicPath: string
   /** モデルの追加機能（whisper-<大きさ>）の場所。この下の onnx-community/whisper-<大きさ>/ から読む */
   modelBase: string
+  /** Service Worker が動いていて、追加機能の保存先から読めるか（開発サーバーなどでは偽） */
+  fromAddon: boolean
 }
 
 /** Worker から返るもの */

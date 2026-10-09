@@ -75,7 +75,9 @@ export async function transcribeLyrics(clip: Clip, o: LyricsOptions): Promise<Ly
     const dicPath = new URL('./dict/', import.meta.url).pathname
     // モデルは追加機能 whisper-<大きさ>（この追加機能の隣のフォルダー。scripts/whisperAddons.mjs）
     const modelBase = new URL(`../whisper-${o.model}/`, import.meta.url).href
-    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples, dicPath, modelBase }
+    // 追加機能の保存先は Service Worker が返す。動いていないとき（開発サーバーなど）は読めないので、Worker は transformers.js の保存先を使う
+    const fromAddon = !!navigator.serviceWorker?.controller
+    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples, dicPath, modelBase, fromAddon }
     w.postMessage(req, [samples.buffer])
   })
 }
