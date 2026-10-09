@@ -124,6 +124,10 @@
   "menu.editLabels": "라벨 목록…",
   "menu.exportTextGrid": "라벨을 TextGrid로 내보내기…",
   "menu.exportLabelText": "라벨을 텍스트로 내보내기…",
+  "menu.openCompare": "비교할 오디오 열기…",
+  "menu.compareOriginal": "가공 전 소리와 비교",
+  "menu.compareTrack": "다른 트랙과 비교",
+  "menu.closeCompare": "비교 닫기",
 
   "play.pause": "일시정지",
   "play.play": "재생",
@@ -226,5 +230,8 @@
   "labels.title": "라벨 목록",
   "labels.empty": "라벨이 없습니다",
   "labels.pick": "이 범위 선택",
-  "labels.delete": "삭제"
+  "labels.delete": "삭제",
+
+  "compare.legend": "비교: {name}",
+  "compare.original": "{name}(가공 전)"
 }

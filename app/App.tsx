@@ -12,6 +12,7 @@ import { AUDIO_ACCEPT, decodeFile, isWvspFile, readWvsp, WVSP_EXT, WvspError, ty
 import { ZOOM_STEP, useWaveformView } from 'wevocal-lib/react'
 import { findMoraeInLyrics, type MoraRange } from '../src/index'
 import { useAnalysis } from './useAnalysis'
+import { useCompare } from './useCompare'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
 import AnalysisPanel from './AnalysisPanel'
 import { i18n, LangContext, resolveLang, setLang, t } from './i18n'
@@ -50,7 +51,7 @@ export default function App() {
   const [clip, setClip] = useState<Clip | null>(null)
   const [name, setName] = useState('')
   // WeVocalSynth のプロジェクト（.wvsp）を開いたときのトラック（加工後の音）。トラックが 2 本以上なら、ツールバーで選ぶ
-  const [projectTracks, setProjectTracks] = useState<{ name: string; clip: Clip }[]>([])
+  const [projectTracks, setProjectTracks] = useState<{ name: string; clip: Clip; original: Clip }[]>([])
   const [trackIndex, setTrackIndex] = useState(0)
   const [error, setError] = useState('')
   const [toast, setToast] = useState<string | null>(null)
@@ -93,6 +94,10 @@ export default function App() {
     lyricsAbort.current?.abort()
   }, [clip])
   const { spec, pitch, formants, level } = useAnalysis(clip, settings, setError)
+  // 比較の音声（B）
+  const compare = useCompare(settings, setError)
+  const openCompare = (file: File) =>
+    compare.openFile(file).catch((e) => setError(t('error.open', { message: e instanceof WvspError ? t('error.wvspInvalid') : e instanceof Error ? e.message : String(e) })))
 
   const open = async (file: File) => {
     try {
@@ -100,7 +105,7 @@ export default function App() {
       if (isWvspFile(file)) {
         // プロジェクトは、編集していたトラックの加工後の音を開く
         const p = await readWvsp(file)
-        const list = p.tracks.map((tr) => ({ name: tr.info.name, clip: tr.edited }))
+        const list = p.tracks.map((tr) => ({ name: tr.info.name, clip: tr.edited, original: tr.original }))
         setProjectTracks(list)
         setTrackIndex(p.active)
         setClip(list[p.active].clip)
@@ -124,6 +129,7 @@ export default function App() {
   configureFileAccess({ rememberFolder: true, startFolder: 'music', recentFiles: false, pickerMode: 'auto' })
   // 音声ファイルのほか、WeVocalSynth のプロジェクト（.wvsp）も開ける
   const picker = useFilePicker(`${AUDIO_ACCEPT},${WVSP_EXT}`, (f) => void open(f), t('file.audioType'))
+  const comparePicker = useFilePicker(`${AUDIO_ACCEPT},${WVSP_EXT}`, (f) => void openCompare(f), t('file.audioType'))
   useFileDrop((f) => void open(f))
 
   // 再生位置の移動（WeVocalSynth の useSeek と同じ量。少しずつは 0.1 秒）。画面の外に出たら表示範囲を動かす
@@ -234,7 +240,10 @@ export default function App() {
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
-      open: picker.open, hasLyrics: !!lyrics, hasLabels: labels.length > 0, addLabel, editLabels: () => setLabelsOpen(true), exportTextGrid: () => downloadLabels(name, labels, player.duration, 'textgrid'), exportLabelText: () => downloadLabels(name, labels, player.duration, 'txt'), exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
+      open: picker.open, hasLyrics: !!lyrics, hasLabels: labels.length > 0,
+      comparing: !!compare.source, openCompare: comparePicker.open, closeCompare: compare.close,
+      compareOriginal: projectTracks[trackIndex] && projectTracks[trackIndex].original !== projectTracks[trackIndex].clip ? () => compare.setClip(t('compare.original', { name: projectTracks[trackIndex].name }), projectTracks[trackIndex].original) : undefined,
+      compareTracks: projectTracks.map((tr) => ({ name: tr.name, onClick: () => compare.setClip(tr.name, tr.clip) })).filter((_, i) => i !== trackIndex), addLabel, editLabels: () => setLabelsOpen(true), exportTextGrid: () => downloadLabels(name, labels, player.duration, 'textgrid'), exportLabelText: () => downloadLabels(name, labels, player.duration, 'txt'), exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -288,6 +297,7 @@ export default function App() {
       level={level}
       lyrics={lyrics}
       labels={labels}
+      compare={compare.source && { name: compare.source.name, analysis: compare.analysis, offset: compare.source.offset }}
       morae={morae}
       lanes={settings.lanes}
       weights={settings.laneWeights}
@@ -331,6 +341,7 @@ export default function App() {
           <Box sx={{ height: FULL_HEIGHT, display: 'flex', flexDirection: 'column', overflow: 'hidden', bgcolor: 'background.default' }}>
             <AppHeader icon={<AppIcon size={16} />} menus={menus} />
             {picker.input}
+            {comparePicker.input}
             {mobile ? (
               <MobileLayout
                 editor={editor}

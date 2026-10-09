@@ -124,6 +124,10 @@
   "menu.editLabels": "ラベルの一覧…",
   "menu.exportTextGrid": "ラベルを TextGrid で書き出す…",
   "menu.exportLabelText": "ラベルをテキストで書き出す…",
+  "menu.openCompare": "比較する音声を開く…",
+  "menu.compareOriginal": "加工前の音と比較する",
+  "menu.compareTrack": "ほかのトラックと比較する",
+  "menu.closeCompare": "比較を閉じる",
 
   "play.pause": "一時停止",
   "play.play": "再生",
@@ -226,5 +230,8 @@
   "labels.title": "ラベルの一覧",
   "labels.empty": "ラベルはありません",
   "labels.pick": "この範囲を選択",
-  "labels.delete": "削除"
+  "labels.delete": "削除",
+
+  "compare.legend": "比較: {name}",
+  "compare.original": "{name}（加工前）"
 }

@@ -27,6 +27,12 @@ export interface MenuActions {
   hasReadings: boolean
   splitMorae: () => void
   exportSrt: () => void
+  /** 比較の音声を開いているか、開く、閉じる。加工前の音（.wvsp）、ほかのトラックと比べる */
+  comparing: boolean
+  openCompare: () => void
+  closeCompare: () => void
+  compareOriginal?: () => void
+  compareTracks: { name: string; onClick: () => void }[]
   /** ラベルがあるか、付ける、一覧で直す、書き出す */
   hasLabels: boolean
   addLabel: () => void
@@ -86,6 +92,11 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       accessKey: 'F',
       entries: [
         { label: t('menu.open'), shortcut: key('open'), onClick: a.open },
+        { label: t('menu.openCompare'), disabled: !a.hasClip, onClick: a.openCompare },
+        ...(a.compareOriginal ? [{ label: t('menu.compareOriginal'), onClick: a.compareOriginal }] : []),
+        ...(a.compareTracks.length ? [{ label: t('menu.compareTrack'), submenu: a.compareTracks.map((tr) => ({ label: tr.name, onClick: tr.onClick })) }] : []),
+        { label: t('menu.closeCompare'), disabled: !a.comparing, onClick: a.closeCompare },
+        { divider: true },
         { label: t(a.hasSelection ? 'menu.exportCsvSelection' : 'menu.exportCsv'), disabled: !a.hasResults, onClick: a.exportCsv },
         { label: t('menu.exportSrt'), disabled: !a.hasLyrics, onClick: a.exportSrt },
         { label: t('menu.exportTextGrid'), disabled: !a.hasLabels, onClick: a.exportTextGrid },

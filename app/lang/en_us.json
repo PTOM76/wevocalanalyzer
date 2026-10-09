@@ -124,6 +124,10 @@
   "menu.editLabels": "Labels…",
   "menu.exportTextGrid": "Export Labels as TextGrid…",
   "menu.exportLabelText": "Export Labels as Text…",
+  "menu.openCompare": "Open Audio to Compare…",
+  "menu.compareOriginal": "Compare with Original",
+  "menu.compareTrack": "Compare with Track",
+  "menu.closeCompare": "Close Comparison",
 
   "play.pause": "Pause",
   "play.play": "Play",
@@ -226,5 +230,8 @@
   "labels.title": "Labels",
   "labels.empty": "No labels",
   "labels.pick": "Select this range",
-  "labels.delete": "Delete"
+  "labels.delete": "Delete",
+
+  "compare.legend": "Compare: {name}",
+  "compare.original": "{name} (original)"
 }

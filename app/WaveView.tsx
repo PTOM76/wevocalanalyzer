@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Stack } from '@mui/material'
 import { canvasPixelRatio, usePalette } from 'pevenmui'
-import { computePeaks, drawPlayhead, drawRuler, drawSelection, drawWave, prepareCanvas, RULER_HEIGHT, SELECTION_DARK, SELECTION_LIGHT, type Clip, type Range, type WaveColors } from 'wevocal-lib'
+import { alpha, computePeaks, drawPlayhead, drawRuler, drawSelection, drawWave, prepareCanvas, RULER_HEIGHT, SELECTION_DARK, SELECTION_LIGHT, type Clip, type Range, type WaveColors } from 'wevocal-lib'
 import { Minimap, useEdgeScroll, useRangeEdges, useTouchGestures, type EdgeDrag, type useWaveformView } from 'wevocal-lib/react'
 import type { Formants, Level, Pitch, Spectrogram } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
 import type { Label } from '../src/labels'
 import { drawLabels } from './labelLane'
+import type { Analysis } from './useAnalysis'
+import { drawCompareLegend } from './compareLane'
 import type { MoraRange } from '../src/types'
 import { useT } from './i18n'
 import { cropSpec, drawFormants, drawHarmonics, drawLevel, drawLyrics, drawPitch, drawSpec, pitchHzAt, pitchRange, specHzAt, type FreqRange } from './lanes'
@@ -28,6 +30,8 @@ interface Props {
   /** 歌詞（文字化していなければ null） */
   lyrics: LyricsSegment[] | null
   labels: Label[]
+  /** 比較の音声の解析と、ずらす量（秒）。F0 と強さの帯に線を重ねる */
+  compare: { name: string; analysis: Analysis; offset: number } | null
   /** 一音ずつの範囲（歌詞の帯の下半分に描く） */
   morae: MoraRange[] | null
   /** 出す帯と高さの比。境目のドラッグで比を変える */
@@ -83,7 +87,8 @@ export default function WaveView(p: Props) {
 
   const rects = useMemo(() => layoutLanes(p.lanes, p.weights, size.h), [p.lanes, p.weights, size.h])
   const rectOf = (lane: LaneRect['lane']) => rects.find((r) => r.lane === lane) ?? null
-  const range = useMemo(() => (p.pitch ? pitchRange(p.pitch) : null), [p.pitch])
+  const cmpPitch = p.compare?.analysis.pitch ?? null
+  const range = useMemo(() => (p.pitch ? pitchRange(p.pitch, cmpPitch) : null), [p.pitch, cmpPitch])
   const spec = useMemo(() => (p.spec ? cropSpec(p.spec, p.freqRange) : null), [p.spec, p.freqRange])
   const peaks = useMemo(() => (size.w > 0 ? computePeaks(clip, size.w, v.view) : null), [clip, size.w, v.view])
   const localY = (clientY: number) => clientY - canvasRef.current!.getBoundingClientRect().top
@@ -118,6 +123,8 @@ export default function WaveView(p: Props) {
     g.textBaseline = 'middle'
     const analyzing = t('analysis.analyzing')
     drawRuler({ g, width: size.w, view: v.view, colors, waveH: 0 })
+    // 比較の音声は、ずらした表示範囲で薄い色の線にする
+    const overlay = <T,>(data: T | null) => (data && p.compare ? { data, view: { ...v.view, start: v.view.start - p.compare.offset }, color: alpha(colors.textSecondary, 0.8) } : null)
     for (const r of rects) {
       const box = { g, width: size.w, view: v.view, top: r.top, h: r.h }
       if (r.lane === 'wave') drawWave({ g, width: size.w, view: v.view, colors, waveH: r.h }, peaks)
@@ -125,12 +132,13 @@ export default function WaveView(p: Props) {
         drawSpec(box, spec, colors.divider, colors.textSecondary, analyzing)
         if (p.showHarmonics && spec && p.pitch) drawHarmonics(box, spec, p.pitch)
         if (p.showFormants && spec && p.formants && p.pitch) drawFormants(box, spec, p.formants, p.pitch)
-      } else if (r.lane === 'f0') drawPitch(box, p.pitch, range, pal.secondary.main, colors.divider, colors.textSecondary, analyzing)
-      else if (r.lane === 'level') drawLevel(box, p.level, pal.primary.main, colors.divider, colors.textSecondary)
+      } else if (r.lane === 'f0') drawPitch(box, p.pitch, range, pal.secondary.main, colors.divider, colors.textSecondary, analyzing, overlay(cmpPitch))
+      if ((r.lane === 'f0' || r.lane === 'level') && p.compare) drawCompareLegend(box, t('compare.legend', { name: p.compare.name }), alpha(colors.textSecondary, 0.8), colors.textSecondary)
+      else if (r.lane === 'level') drawLevel(box, p.level, pal.primary.main, colors.divider, colors.textSecondary, overlay(p.compare?.analysis.level ?? null))
       else if (r.lane === 'labels') drawLabels(box, p.labels, pal.secondary.main, colors.divider, colors.text, t('labels.none'))
       else drawLyrics(box, p.lyrics, pal.primary.main, colors.divider, colors.text, t('lyrics.none'), p.morae, pal.warning.main)
     }
-  }, [peaks, spec, p.pitch, p.formants, p.level, p.lyrics, p.labels, p.morae, range, p.showFormants, p.showHarmonics, rects, size, v.view, colors, pal, font, t])
+  }, [peaks, spec, p.pitch, p.formants, p.level, p.lyrics, p.labels, p.compare, p.morae, range, cmpPitch, p.showFormants, p.showHarmonics, rects, size, v.view, colors, pal, font, t])
 
   // 選択範囲と再生位置の線。重ねた別の Canvas に描き、再生中は毎フレーム動かす（帯を描き直さない）
   useEffect(() => {

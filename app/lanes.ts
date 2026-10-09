@@ -68,10 +68,10 @@ export function drawFormants(b: LaneBox, spec: Spectrogram, formants: Formants, 
 }
 
 /** ピッチの帯の縦軸（MIDI ノート番号）。有声部分の範囲に余白を足し、最低 1 オクターブにする */
-export function pitchRange(pitch: Pitch): [number, number] {
+export function pitchRange(...pitches: (Pitch | null)[]): [number, number] {
   let lo = Infinity
   let hi = -Infinity
-  for (const hz of pitch.data) {
+  for (const pitch of pitches) for (const hz of pitch?.data ?? []) {
     if (hz <= 0) continue
     const m = hzToMidi(hz)
     if (m < lo) lo = m
@@ -88,22 +88,18 @@ export function pitchRange(pitch: Pitch): [number, number] {
   return [lo, hi]
 }
 
-/** ピッチの帯: C の音名の線と、F0 の線（無声で途切れる） */
-export function drawPitch(b: LaneBox, pitch: Pitch | null, range: [number, number] | null, line: string, divider: string, text: string, analyzing: string) {
-  if (frame(b, divider, text, pitch && range ? null : analyzing) || !pitch || !range) return
-  const { g, width, view, top, h } = b
-  const [lo, hi] = range
-  const y = (m: number) => top + h - ((m - lo) / (hi - lo)) * h
-  g.fillStyle = text
-  for (let m = Math.ceil(lo); m <= hi; m++) {
-    if (m % 12 !== 0) continue
-    g.fillStyle = alpha(divider, 0.8)
-    g.fillRect(0, Math.round(y(m)), width, 1)
-    g.fillStyle = text
-    g.fillText(`${NOTE_NAMES[m % 12]}${m / 12 - 1}`, 4, y(m) - 6)
-  }
+/** 比較の音声の線（`view` は比較の音声の時刻にずらした表示範囲） */
+export interface Overlay<T> {
+  data: T
+  view: View
+  color: string
+}
+
+/** F0 の線（無声で途切れる）。`y` は MIDI ノート番号から帯の中の高さ */
+function strokePitch(b: LaneBox, pitch: Pitch, view: View, y: (m: number) => number, line: string, lineWidth: number) {
+  const { g, width } = b
   g.strokeStyle = line
-  g.lineWidth = 2
+  g.lineWidth = lineWidth
   g.lineJoin = 'round'
   g.beginPath()
   let drawing = false
@@ -123,6 +119,24 @@ export function drawPitch(b: LaneBox, pitch: Pitch | null, range: [number, numbe
   }
   g.stroke()
   g.lineWidth = 1
+}
+
+/** ピッチの帯: C の音名の線と、F0 の線（無声で途切れる） */
+export function drawPitch(b: LaneBox, pitch: Pitch | null, range: [number, number] | null, line: string, divider: string, text: string, analyzing: string, compare: Overlay<Pitch> | null = null) {
+  if (frame(b, divider, text, pitch && range ? null : analyzing) || !pitch || !range) return
+  const { g, width, view, top, h } = b
+  const [lo, hi] = range
+  const y = (m: number) => top + h - ((m - lo) / (hi - lo)) * h
+  g.fillStyle = text
+  for (let m = Math.ceil(lo); m <= hi; m++) {
+    if (m % 12 !== 0) continue
+    g.fillStyle = alpha(divider, 0.8)
+    g.fillRect(0, Math.round(y(m)), width, 1)
+    g.fillStyle = text
+    g.fillText(`${NOTE_NAMES[m % 12]}${m / 12 - 1}`, 4, y(m) - 6)
+  }
+  if (compare) strokePitch(b, compare.data, compare.view, y, compare.color, 1.5)
+  strokePitch(b, pitch, view, y, line, 2)
 }
 
 /** 時刻 `t` のピッチ（Hz、無声は 0）とフォルマント（Hz の配列） */
@@ -226,19 +240,11 @@ export const pitchHzAt = (range: [number, number], top: number, h: number, y: nu
 /** 強さの帯の縦軸の下限（dB）。上限は 0dBFS */
 const LEVEL_MIN_DB = -60
 
-/** 強さの帯: -20dB ごとの線と、強さの線 */
-export function drawLevel(b: LaneBox, level: Level | null, line: string, divider: string, text: string) {
-  if (frame(b, divider, text, null) || !level) return
-  const { g, width, view, top, h } = b
-  const y = (db: number) => top + h - ((Math.max(LEVEL_MIN_DB, db) - LEVEL_MIN_DB) / -LEVEL_MIN_DB) * h
-  for (const db of [-20, -40]) {
-    g.fillStyle = alpha(divider, 0.8)
-    g.fillRect(0, Math.round(y(db)), width, 1)
-    g.fillStyle = text
-    g.fillText(`${db} dB`, 4, y(db) - 6)
-  }
+/** 強さの線。`y` は dB から帯の中の高さ */
+function strokeLevel(b: LaneBox, level: Level, view: View, y: (db: number) => number, line: string, lineWidth: number) {
+  const { g, width } = b
   g.strokeStyle = line
-  g.lineWidth = 1.5
+  g.lineWidth = lineWidth
   g.beginPath()
   const k0 = Math.max(0, Math.floor(view.start / level.hopSec))
   const k1 = Math.min(level.data.length - 1, Math.ceil((view.start + view.dur) / level.hopSec))
@@ -250,6 +256,21 @@ export function drawLevel(b: LaneBox, level: Level | null, line: string, divider
   }
   g.stroke()
   g.lineWidth = 1
+}
+
+/** 強さの帯: -20dB ごとの線と、強さの線 */
+export function drawLevel(b: LaneBox, level: Level | null, line: string, divider: string, text: string, compare: Overlay<Level> | null = null) {
+  if (frame(b, divider, text, null) || !level) return
+  const { g, width, view, top, h } = b
+  const y = (db: number) => top + h - ((Math.max(LEVEL_MIN_DB, db) - LEVEL_MIN_DB) / -LEVEL_MIN_DB) * h
+  for (const db of [-20, -40]) {
+    g.fillStyle = alpha(divider, 0.8)
+    g.fillRect(0, Math.round(y(db)), width, 1)
+    g.fillStyle = text
+    g.fillText(`${db} dB`, 4, y(db) - 6)
+  }
+  if (compare) strokeLevel(b, compare.data, compare.view, y, compare.color, 1)
+  strokeLevel(b, level, view, y, line, 1.5)
 }
 
 /** 時刻 `t` の強さ（dB）。範囲の外なら null */

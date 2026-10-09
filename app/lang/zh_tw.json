@@ -124,6 +124,10 @@
   "menu.editLabels": "標籤列表…",
   "menu.exportTextGrid": "將標籤匯出為 TextGrid…",
   "menu.exportLabelText": "將標籤匯出為文字…",
+  "menu.openCompare": "開啟要比較的音訊…",
+  "menu.compareOriginal": "與處理前的聲音比較",
+  "menu.compareTrack": "與其他音軌比較",
+  "menu.closeCompare": "關閉比較",
 
   "play.pause": "暫停",
   "play.play": "播放",
@@ -226,5 +230,8 @@
   "labels.title": "標籤列表",
   "labels.empty": "沒有標籤",
   "labels.pick": "選取此範圍",
-  "labels.delete": "刪除"
+  "labels.delete": "刪除",
+
+  "compare.legend": "比較：{name}",
+  "compare.original": "{name}（處理前）"
 }
