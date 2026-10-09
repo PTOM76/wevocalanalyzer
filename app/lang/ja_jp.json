@@ -66,6 +66,7 @@
   "lane.lyrics": "歌詞",
   "lane.spec": "スペクトログラム",
   "lane.wave": "波形",
+  "lane.labels": "ラベル",
 
   "licenses.app": "本体",
   "licenses.audio": "音声の読み込みと解析（FFT、F0 推定など）",
@@ -118,6 +119,11 @@
   "menu.view": "表示",
   "menu.editLyrics": "歌詞と読みを編集…",
   "menu.splitMorae": "一音ずつに分ける",
+  "menu.addLabel": "選択範囲にラベルを付ける",
+  "menu.addPointLabel": "再生位置にラベルを付ける",
+  "menu.editLabels": "ラベルの一覧…",
+  "menu.exportTextGrid": "ラベルを TextGrid で書き出す…",
+  "menu.exportLabelText": "ラベルをテキストで書き出す…",
 
   "play.pause": "一時停止",
   "play.play": "再生",
@@ -214,5 +220,11 @@
 
   "lyricsEdit.title": "歌詞と読みの編集",
   "lyricsEdit.help": "読みはひらがなで入力します。一音ずつの切り出しは、この読みをもとに行います",
-  "lyricsEdit.text": "歌詞"
+  "lyricsEdit.text": "歌詞",
+
+  "labels.none": "ラベルはありません（「ツール」→「ラベルを付ける」）",
+  "labels.title": "ラベルの一覧",
+  "labels.empty": "ラベルはありません",
+  "labels.pick": "この範囲を選択",
+  "labels.delete": "削除"
 }

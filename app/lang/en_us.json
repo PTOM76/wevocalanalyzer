@@ -66,6 +66,7 @@
   "lane.lyrics": "Lyrics",
   "lane.spec": "Spectrogram",
   "lane.wave": "Waveform",
+  "lane.labels": "Labels",
 
   "licenses.app": "This app",
   "licenses.audio": "Audio decoding and analysis (FFT, F0 estimation, etc.)",
@@ -118,6 +119,11 @@
   "menu.view": "View",
   "menu.editLyrics": "Edit lyrics and readings…",
   "menu.splitMorae": "Split into single sounds",
+  "menu.addLabel": "Add Label to Selection",
+  "menu.addPointLabel": "Add Label at Playhead",
+  "menu.editLabels": "Labels…",
+  "menu.exportTextGrid": "Export Labels as TextGrid…",
+  "menu.exportLabelText": "Export Labels as Text…",
 
   "play.pause": "Pause",
   "play.play": "Play",
@@ -214,5 +220,11 @@
 
   "lyricsEdit.title": "Edit lyrics and readings",
   "lyricsEdit.help": "Enter readings in hiragana. Cutting into single sounds uses these readings",
-  "lyricsEdit.text": "Lyrics"
+  "lyricsEdit.text": "Lyrics",
+
+  "labels.none": "No labels (Tools → Add Label)",
+  "labels.title": "Labels",
+  "labels.empty": "No labels",
+  "labels.pick": "Select this range",
+  "labels.delete": "Delete"
 }

@@ -5,6 +5,8 @@ import { computePeaks, drawPlayhead, drawRuler, drawSelection, drawWave, prepare
 import { Minimap, useEdgeScroll, useRangeEdges, useTouchGestures, type EdgeDrag, type useWaveformView } from 'wevocal-lib/react'
 import type { Formants, Level, Pitch, Spectrogram } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
+import type { Label } from '../src/labels'
+import { drawLabels } from './labelLane'
 import type { MoraRange } from '../src/types'
 import { useT } from './i18n'
 import { cropSpec, drawFormants, drawHarmonics, drawLevel, drawLyrics, drawPitch, drawSpec, pitchHzAt, pitchRange, specHzAt, type FreqRange } from './lanes'
@@ -25,6 +27,7 @@ interface Props {
   level: Level | null
   /** 歌詞（文字化していなければ null） */
   lyrics: LyricsSegment[] | null
+  labels: Label[]
   /** 一音ずつの範囲（歌詞の帯の下半分に描く） */
   morae: MoraRange[] | null
   /** 出す帯と高さの比。境目のドラッグで比を変える */
@@ -124,9 +127,10 @@ export default function WaveView(p: Props) {
         if (p.showFormants && spec && p.formants && p.pitch) drawFormants(box, spec, p.formants, p.pitch)
       } else if (r.lane === 'f0') drawPitch(box, p.pitch, range, pal.secondary.main, colors.divider, colors.textSecondary, analyzing)
       else if (r.lane === 'level') drawLevel(box, p.level, pal.primary.main, colors.divider, colors.textSecondary)
+      else if (r.lane === 'labels') drawLabels(box, p.labels, pal.secondary.main, colors.divider, colors.text, t('labels.none'))
       else drawLyrics(box, p.lyrics, pal.primary.main, colors.divider, colors.text, t('lyrics.none'), p.morae, pal.warning.main)
     }
-  }, [peaks, spec, p.pitch, p.formants, p.level, p.lyrics, p.morae, range, p.showFormants, p.showHarmonics, rects, size, v.view, colors, pal, font, t])
+  }, [peaks, spec, p.pitch, p.formants, p.level, p.lyrics, p.labels, p.morae, range, p.showFormants, p.showHarmonics, rects, size, v.view, colors, pal, font, t])
 
   // 選択範囲と再生位置の線。重ねた別の Canvas に描き、再生中は毎フレーム動かす（帯を描き直さない）
   useEffect(() => {

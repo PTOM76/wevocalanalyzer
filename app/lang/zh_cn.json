@@ -66,6 +66,7 @@
   "lane.lyrics": "歌词",
   "lane.spec": "频谱图",
   "lane.wave": "波形",
+  "lane.labels": "标签",
 
   "licenses.app": "本体",
   "licenses.audio": "音频的读取与分析（FFT、F0 估计等）",
@@ -118,6 +119,11 @@
   "menu.view": "视图",
   "menu.editLyrics": "编辑歌词和读音…",
   "menu.splitMorae": "逐音切分",
+  "menu.addLabel": "为选区添加标签",
+  "menu.addPointLabel": "在播放位置添加标签",
+  "menu.editLabels": "标签列表…",
+  "menu.exportTextGrid": "将标签导出为 TextGrid…",
+  "menu.exportLabelText": "将标签导出为文本…",
 
   "play.pause": "暂停",
   "play.play": "播放",
@@ -214,5 +220,11 @@
 
   "lyricsEdit.title": "编辑歌词和读音",
   "lyricsEdit.help": "读音请用平假名输入。逐音切分会以此读音为准",
-  "lyricsEdit.text": "歌词"
+  "lyricsEdit.text": "歌词",
+
+  "labels.none": "没有标签（工具 → 添加标签）",
+  "labels.title": "标签列表",
+  "labels.empty": "没有标签",
+  "labels.pick": "选择此范围",
+  "labels.delete": "删除"
 }

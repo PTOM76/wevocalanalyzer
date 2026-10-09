@@ -27,6 +27,12 @@ export interface MenuActions {
   hasReadings: boolean
   splitMorae: () => void
   exportSrt: () => void
+  /** ラベルがあるか、付ける、一覧で直す、書き出す */
+  hasLabels: boolean
+  addLabel: () => void
+  editLabels: () => void
+  exportTextGrid: () => void
+  exportLabelText: () => void
   transcribe: () => void
   /** 解析の結果（F0 など）があるか。CSV に書き出せるか */
   hasResults: boolean
@@ -82,6 +88,8 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
         { label: t('menu.open'), shortcut: key('open'), onClick: a.open },
         { label: t(a.hasSelection ? 'menu.exportCsvSelection' : 'menu.exportCsv'), disabled: !a.hasResults, onClick: a.exportCsv },
         { label: t('menu.exportSrt'), disabled: !a.hasLyrics, onClick: a.exportSrt },
+        { label: t('menu.exportTextGrid'), disabled: !a.hasLabels, onClick: a.exportTextGrid },
+        { label: t('menu.exportLabelText'), disabled: !a.hasLabels, onClick: a.exportLabelText },
         ...(mobile ? [] : [{ divider: true as const }, { label: t('menu.settings'), onClick: a.showSettings }]),
       ],
     },
@@ -133,6 +141,9 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
         { label: t('menu.lyrics'), disabled: !a.hasClip, onClick: a.transcribe },
         { label: t('menu.editLyrics'), disabled: !a.hasLyrics, onClick: a.editLyrics },
         { label: t('menu.splitMorae'), disabled: !a.hasReadings, onClick: a.splitMorae },
+        { divider: true },
+        { label: t(a.hasSelection ? 'menu.addLabel' : 'menu.addPointLabel'), shortcut: key('addLabel'), disabled: !a.hasClip, onClick: a.addLabel },
+        { label: t('menu.editLabels'), disabled: !a.hasLabels, onClick: a.editLabels },
       ],
     },
     help,

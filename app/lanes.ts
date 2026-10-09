@@ -19,7 +19,7 @@ const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 
 const hzToMidi = (hz: number) => 69 + 12 * Math.log2(hz / 440)
 
 /** 帯の上の区切り線と、解析中の文字 */
-function frame(b: LaneBox, divider: string, text: string, waiting: string | null) {
+export function frame(b: LaneBox, divider: string, text: string, waiting: string | null) {
   b.g.fillStyle = divider
   b.g.fillRect(0, b.top, b.width, 1)
   if (waiting === null) return false

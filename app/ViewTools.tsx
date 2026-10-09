@@ -1,7 +1,7 @@
 import { Divider, IconButton, Tooltip } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { faAnglesRight, faBars, faChartArea, faCircleDot, faFont, faExpand, faMagnifyingGlassMinus, faMagnifyingGlassPlus, faMusic, faVolumeHigh, faWaveSquare } from '@fortawesome/free-solid-svg-icons'
+import { faAnglesRight, faBars, faChartArea, faCircleDot, faFont, faExpand, faMagnifyingGlassMinus, faMagnifyingGlassPlus, faMusic, faTag, faVolumeHigh, faWaveSquare } from '@fortawesome/free-solid-svg-icons'
 import type { WheelZoom } from 'wevocal-lib/react'
 import { useT, type MessageKey } from './i18n'
 import { LANES, type Lane, type LaneFlags } from './layout'
@@ -46,6 +46,7 @@ export const LANE_INFO: Record<Lane, { label: MessageKey; icon: IconDefinition }
   f0: { label: 'analysis.f0', icon: faMusic },
   level: { label: 'lane.level', icon: faVolumeHigh },
   lyrics: { label: 'lane.lyrics', icon: faFont },
+  labels: { label: 'lane.labels', icon: faTag },
 }
 
 /** 表示のツール（拡大縮小、追従、帯の表示、フォルマント）。PC はツールバー、スマホは波形のすぐ下に置く */

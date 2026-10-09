@@ -7,7 +7,7 @@ import type { MessageKey } from './i18n'
  */
 export { keyLabelOf } from 'pevenmui'
 
-export type ActionId = 'playPause' | 'playSelection' | 'selectAll' | 'clearSelection' | 'seekBack' | 'seekForward' | 'seekBackFine' | 'seekForwardFine' | 'seekStart' | 'seekEnd' | 'open'
+export type ActionId = 'playPause' | 'playSelection' | 'selectAll' | 'clearSelection' | 'seekBack' | 'seekForward' | 'seekBackFine' | 'seekForwardFine' | 'seekStart' | 'seekEnd' | 'open' | 'addLabel'
 
 /** 操作の一覧（設定の画面に出す順）。名前は訳文キー */
 export const ACTIONS: (Omit<KeyAction<ActionId>, 'label'> & { label: MessageKey })[] = [
@@ -22,6 +22,7 @@ export const ACTIONS: (Omit<KeyAction<ActionId>, 'label'> & { label: MessageKey 
   { id: 'selectAll', label: 'edit.selectAll', keys: ['Ctrl+KeyA'] },
   { id: 'clearSelection', label: 'edit.clearSelection', keys: ['Escape'] },
   { id: 'open', label: 'menu.open', keys: ['Ctrl+KeyO'] },
+  { id: 'addLabel', label: 'menu.addLabel', keys: ['Ctrl+KeyB'] },
 ]
 
 /** 設定に保存する、既定から変えた割り当て（空の配列はキーなし） */

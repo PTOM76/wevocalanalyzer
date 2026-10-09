@@ -66,6 +66,7 @@
   "lane.lyrics": "歌詞",
   "lane.spec": "頻譜圖",
   "lane.wave": "波形",
+  "lane.labels": "標籤",
 
   "licenses.app": "本體",
   "licenses.audio": "音訊的讀取與分析（FFT、F0 估計等）",
@@ -118,6 +119,11 @@
   "menu.view": "檢視",
   "menu.editLyrics": "編輯歌詞和讀音…",
   "menu.splitMorae": "逐音切分",
+  "menu.addLabel": "為選取範圍新增標籤",
+  "menu.addPointLabel": "在播放位置新增標籤",
+  "menu.editLabels": "標籤列表…",
+  "menu.exportTextGrid": "將標籤匯出為 TextGrid…",
+  "menu.exportLabelText": "將標籤匯出為文字…",
 
   "play.pause": "暫停",
   "play.play": "播放",
@@ -214,5 +220,11 @@
 
   "lyricsEdit.title": "編輯歌詞和讀音",
   "lyricsEdit.help": "讀音請用平假名輸入。逐音切分會以此讀音為準",
-  "lyricsEdit.text": "歌詞"
+  "lyricsEdit.text": "歌詞",
+
+  "labels.none": "沒有標籤（工具 → 新增標籤）",
+  "labels.title": "標籤列表",
+  "labels.empty": "沒有標籤",
+  "labels.pick": "選取此範圍",
+  "labels.delete": "刪除"
 }

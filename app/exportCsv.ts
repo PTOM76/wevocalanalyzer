@@ -1,6 +1,7 @@
 import { downloadBlob, type Range } from 'wevocal-lib'
 import type { Formants, Level, Pitch } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
+import { toLabelText, toTextGrid, type Label } from '../src/labels'
 
 /**
  * 解析の結果を CSV にする（10ms ごとに 1 行。時刻、F0、F1〜F3、強さ）。範囲があればその中だけ。
@@ -37,6 +38,13 @@ const srtTime = (sec: number) => {
   const ms = Math.round(sec * 1000)
   const p = (n: number, w = 2) => String(n).padStart(w, '0')
   return `${p(Math.floor(ms / 3600000))}:${p(Math.floor(ms / 60000) % 60)}:${p(Math.floor(ms / 1000) % 60)},${p(ms % 1000, 3)}`
+}
+
+/** ラベルを書き出す（TextGrid か、タブ区切りのテキスト）。名前は「元のファイル名_labels.TextGrid」など */
+export function downloadLabels(fileName: string, labels: Label[], duration: number, format: 'textgrid' | 'txt') {
+  const base = fileName.replace(/\.[^.]+$/, '') || 'labels'
+  const body = format === 'textgrid' ? toTextGrid(labels, duration) : toLabelText(labels)
+  downloadBlob(new Blob([body], { type: 'text/plain' }), `${base}_labels.${format === 'textgrid' ? 'TextGrid' : 'txt'}`)
 }
 
 /** 歌詞を SRT（字幕の形式）で保存する。名前は「元のファイル名_lyrics.srt」 */

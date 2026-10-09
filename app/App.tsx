@@ -16,7 +16,9 @@ import AnalysisPanel from './AnalysisPanel'
 import { i18n, LangContext, resolveLang, setLang, t } from './i18n'
 import { resolveKeymap } from './keymap'
 import { licenseEntries } from './licenses'
-import { analysisCsv, downloadAnalysisCsv, downloadLyricsSrt } from './exportCsv'
+import { analysisCsv, downloadAnalysisCsv, downloadLabels, downloadLyricsSrt } from './exportCsv'
+import LabelsDialog from './LabelsDialog'
+import type { Label } from '../src/labels'
 import type { LyricsSegment } from '../src/lyricsTypes'
 import { addons, type LyricsAddon } from './addons'
 import LyricsDialog from './LyricsDialog'
@@ -69,6 +71,9 @@ export default function App() {
   }
   const [lyricsOpen, setLyricsOpen] = useState(false)
   const [lyricsEditOpen, setLyricsEditOpen] = useState(false)
+  // ラベル（注釈）と、その一覧のダイアログ
+  const [labels, setLabels] = useState<Label[]>([])
+  const [labelsOpen, setLabelsOpen] = useState(false)
   const lyricsAbort = useRef<AbortController | null>(null)
   // スペクトログラムで見る周波数の範囲（縦の拡大。null なら全体）
   const [freqRange, setFreqRange] = useState<FreqRange | null>(null)
@@ -87,6 +92,7 @@ export default function App() {
     setSelection(null)
     setFreqRange(null)
     setLyrics(null)
+    setLabels([])
     lyricsAbort.current?.abort()
     setLevel(clip ? analyzeLevel(clip) : null)
   }, [clip])
@@ -222,6 +228,13 @@ export default function App() {
       .catch((e) => !ac.signal.aborted && setToast(t('lyrics.failed', { message: e instanceof Error ? e.message : String(e) })))
       .finally(job.end)
   }
+  // 選択範囲（なければ再生位置の点）にラベルを付け、帯を出して一覧を開く（文字はそこで入れる）
+  const addLabel = () => {
+    const at = selection ?? { start: player.position, end: player.position }
+    setLabels((l) => [...l, { ...at, text: '' }])
+    if (!settings.lanes.labels) updateSettings({ lanes: { ...settings.lanes, labels: true } })
+    setLabelsOpen(true)
+  }
   const playSelection = () => selection && player.playRange(selection.start, selection.end)
   const selectAll = () => setSelection({ start: 0, end: player.duration })
   useShortcuts(keymap, {
@@ -236,13 +249,14 @@ export default function App() {
     seekStart: has ? () => seekTo(0) : undefined,
     seekEnd: has ? () => seekTo(player.duration) : undefined,
     open: picker.open,
+    addLabel: has ? addLabel : undefined,
   })
 
   const menus = appMenus(
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
       follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
-      open: picker.open, hasLyrics: !!lyrics, exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
+      open: picker.open, hasLyrics: !!lyrics, hasLabels: labels.length > 0, addLabel, editLabels: () => setLabelsOpen(true), exportTextGrid: () => downloadLabels(name, labels, player.duration, 'textgrid'), exportLabelText: () => downloadLabels(name, labels, player.duration, 'txt'), exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -295,6 +309,7 @@ export default function App() {
       formants={formants}
       level={level}
       lyrics={lyrics}
+      labels={labels}
       morae={morae}
       lanes={settings.lanes}
       weights={settings.laneWeights}
@@ -395,6 +410,16 @@ export default function App() {
             allowCpu={settings.lyricsCpu}
             onChange={updateSettings}
             onRun={(d) => void runLyrics(d)}
+          />
+          <LabelsDialog
+            open={labelsOpen}
+            onClose={() => setLabelsOpen(false)}
+            labels={labels}
+            onSave={setLabels}
+            onPick={(l) => {
+              if (l.end > l.start) setSelection({ start: l.start, end: l.end })
+              seekTo(l.start)
+            }}
           />
           {lyrics && <LyricsEditDialog open={lyricsEditOpen} onClose={() => setLyricsEditOpen(false)} lyrics={lyrics} onSave={setLyrics} />}
           {addonInstall.dialog}
