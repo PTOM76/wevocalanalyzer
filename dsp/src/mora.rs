@@ -22,6 +22,9 @@ pub const C_NASAL: u8 = 3;
 
 /// 一音の最短（フレーム）
 const MIN_FRAMES: usize = 4;
+/// 一音の最長（フレーム）。平均の MAX_LEN_RATIO 倍か、これの大きいほう。上限がないと計算が区間の長さの 2 乗で増え、無音や隣の音まで一音に入りやすい
+const MAX_FRAMES: usize = 300;
+const MAX_LEN_RATIO: f32 = 4.0;
 /// 声のある所とみなす強さ（区間の最大から dB）
 const ACTIVE_DB: f32 = 35.0;
 /// FFT の大きさ（特徴を出すとき）
@@ -126,31 +129,52 @@ fn boundary_scores(f: &Features) -> Vec<f32> {
         .collect()
 }
 
+/// 一音の合い方をすぐ求めるための累積和（強さ、母音を見られるフレームの数、F1、F2 の対数）
+struct Sums {
+    db: Vec<f32>,
+    voiced: Vec<f32>,
+    f1: Vec<f32>,
+    f2: Vec<f32>,
+}
+
+impl Sums {
+    fn new(f: &Features) -> Self {
+        let n = f.db.len();
+        let mut s = Sums { db: vec![0.0; n + 1], voiced: vec![0.0; n + 1], f1: vec![0.0; n + 1], f2: vec![0.0; n + 1] };
+        for k in 0..n {
+            let ok = f.voiced[k] && f.f1[k] > 0.0 && f.f2[k] > 0.0;
+            s.db[k + 1] = s.db[k] + f.db[k];
+            s.voiced[k + 1] = s.voiced[k] + if ok { 1.0 } else { 0.0 };
+            s.f1[k + 1] = s.f1[k] + if ok { f.f1[k].log2() } else { 0.0 };
+            s.f2[k + 1] = s.f2[k] + if ok { f.f2[k].log2() } else { 0.0 };
+        }
+        s
+    }
+}
+
 /// フレーム `a..b` が、印 `code` の一音にどれだけ合うか（0〜1）。`prev_vowel` は前の音の母音（ー のため）
-fn mora_fit(f: &Features, a: usize, b: usize, code: u8, prev_vowel: u8, loud: f32) -> f32 {
+fn mora_fit(s: &Sums, a: usize, b: usize, code: u8, prev_vowel: u8, loud: f32) -> f32 {
     let vowel = code & VOWEL_MASK;
     // 母音は一音の後半（子音を除いた所）で見る
     let tail = a + (b - a) * 2 / 5;
-    let voiced: Vec<usize> = (tail..b).filter(|&k| f.voiced[k] && f.f1[k] > 0.0 && f.f2[k] > 0.0).collect();
-    let mean_db = (a..b).map(|k| f.db[k]).sum::<f32>() / (b - a) as f32;
+    let voiced = s.voiced[b] - s.voiced[tail];
+    let ratio = voiced / (b - tail) as f32;
+    let mean_db = (s.db[b] - s.db[a]) / (b - a) as f32;
     match vowel {
         // っ: 弱いか無声
-        Q => ((loud - mean_db) / 25.0).clamp(0.0, 1.0).max(1.0 - voiced.len() as f32 / (b - tail) as f32),
+        Q => ((loud - mean_db) / 25.0).clamp(0.0, 1.0).max(1.0 - ratio),
         // ん: 有声で、やや弱い（鼻に抜ける）
-        N => {
-            let v = voiced.len() as f32 / (b - tail) as f32;
-            v * (0.5 + ((loud - mean_db) / 20.0).clamp(0.0, 0.5))
-        }
+        N => ratio * (0.5 + ((loud - mean_db) / 20.0).clamp(0.0, 0.5)),
         _ => {
             let target = if vowel == LONG { prev_vowel } else { vowel };
-            if target > 4 || voiced.is_empty() {
+            if target > 4 || voiced < 1.0 {
                 return 0.3;
             }
-            let f1 = median(voiced.iter().map(|&k| f.f1[k]).collect());
-            let f2 = median(voiced.iter().map(|&k| f.f2[k]).collect());
+            // F1、F2 は対数の平均（オクターブ）で見る。F2 は個人差が大きいので甘くする
+            let l1 = (s.f1[b] - s.f1[tail]) / voiced;
+            let l2 = (s.f2[b] - s.f2[tail]) / voiced;
             let (t1, t2) = VOWEL_FORMANTS[target as usize];
-            // 対数の差（オクターブ）で見る。F2 は個人差が大きいので甘くする
-            let d = ((f1 / t1).log2() / 0.5).powi(2) + ((f2 / t2).log2() / 0.7).powi(2);
+            let d = ((l1 - t1.log2()) / 0.5).powi(2) + ((l2 - t2.log2()) / 0.7).powi(2);
             (-d).exp()
         }
     }
@@ -194,7 +218,9 @@ pub fn segment(x: &[f32], sample_rate: f32, codes: &[u8]) -> Vec<Mora> {
     let mut best = vec![f32::NEG_INFINITY; (n + 1) * width];
     let mut from = vec![0usize; (n + 1) * width];
     best[0] = 0.0;
-    let max_len = width;
+    let sums = Sums::new(&f);
+    // 全体が n 個の最長に収まらないときは、収まるまで広げる
+    let max_len = MAX_FRAMES.max((avg * MAX_LEN_RATIO) as usize).max((width - 1).div_ceil(n) + 1).min(width);
     for i in 1..=n {
         for k in (i * MIN_FRAMES)..width {
             // 残りの音が入る余地を残す
@@ -209,7 +235,7 @@ pub fn segment(x: &[f32], sample_rate: f32, codes: &[u8]) -> Vec<Mora> {
                 }
                 let len = (k - j) as f32;
                 let length_cost = LENGTH_WEIGHT * (len / avg).ln().powi(2);
-                let fit = VOWEL_WEIGHT * mora_fit(&f, s + j, s + k, codes[i - 1], prev_vowel[i - 1], loud);
+                let fit = VOWEL_WEIGHT * mora_fit(&sums, s + j, s + k, codes[i - 1], prev_vowel[i - 1], loud);
                 // 境目の点（最初の音の始まりは区間の端なので数えない）
                 let edge = if i > 1 { score[s + j] } else { 0.0 };
                 let v = prev + edge + fit - length_cost;
@@ -312,6 +338,23 @@ mod tests {
         x.extend(vowel(0.3, 200.0, 800.0, 1250.0));
         let m = segment(&x, SR, &[0, code(0, C_FRICATIVE)]);
         assert!((m[1].start - 0.30).abs() < 0.05, "{:?}", m);
+    }
+
+    /// 長い区間（20 秒、80 音）でもすぐ終わり、すべての音が区間の中に並ぶ
+    #[test]
+    fn long_segment_is_fast() {
+        let mut x = Vec::new();
+        for i in 0..80 {
+            let (f1, f2) = VOWEL_FORMANTS[i % 5];
+            x.extend(vowel(0.22, 200.0, f1, f2));
+            x.extend(vec![0.0; (0.03 * SR) as usize]);
+        }
+        let codes: Vec<u8> = (0..80).map(|i| (i % 5) as u8).collect();
+        let t = std::time::Instant::now();
+        let m = segment(&x, SR, &codes);
+        assert_eq!(m.len(), 80);
+        assert!(m.windows(2).all(|w| w[0].end <= w[1].start + 1e-4), "{:?}", m);
+        assert!(t.elapsed().as_secs_f32() < 5.0, "{:?}", t.elapsed());
     }
 
     /// 音が足りないときは均等に分け、確かでない印を付ける
