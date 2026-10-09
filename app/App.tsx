@@ -10,7 +10,8 @@ import { UpdatePrompt, checkForUpdate, promptUpdate } from 'pevenmui/pwa'
 import { configureFileAccess } from 'pevenmui/web'
 import { AUDIO_ACCEPT, decodeFile, isWvspFile, readWvsp, WVSP_EXT, WvspError, type Clip, type Range } from 'wevocal-lib'
 import { ZOOM_STEP, useWaveformView } from 'wevocal-lib/react'
-import { analyzeFormants, analyzeLevel, analyzePitch, analyzeSpectrogram, findMoraeInLyrics, type Formants, type MoraRange, type Level, type Pitch, type Spectrogram } from '../src/index'
+import { findMoraeInLyrics, type MoraRange } from '../src/index'
+import { useAnalysis } from './useAnalysis'
 import AboutDialog, { APP_BUILD, AppIcon } from './AboutDialog'
 import AnalysisPanel from './AnalysisPanel'
 import { i18n, LangContext, resolveLang, setLang, t } from './i18n'
@@ -57,10 +58,6 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   // 設定を開いたまま、もう一度「設定」を押したら、別の窓で開いている設定画面を手前に出す
   const [settingsFocus, setSettingsFocus] = useState(0)
-  const [spec, setSpec] = useState<Spectrogram | null>(null)
-  const [pitch, setPitch] = useState<Pitch | null>(null)
-  const [formants, setFormants] = useState<Formants | null>(null)
-  const [level, setLevel] = useState<Level | null>(null)
   // 歌詞（文字化していなければ null）と、文字化のダイアログ
   const [lyrics, setLyricsState] = useState<LyricsSegment[] | null>(null)
   // 一音ずつの範囲（歌詞と読みから求める。歌詞が変わったら消す）
@@ -87,34 +84,15 @@ export default function App() {
 
   // 追加機能を選んだフォルダーに保存するか（試験的。PevenMUI の追加機能の仕組みに渡す）
   useEffect(() => addons.folder.setEnabled(settings.addonFolder), [settings.addonFolder])
-  // 別のファイルを開いたら、選択と縦の拡大を戻し、強さを計算する（軽いのでその場で）
+  // 別のファイルを開いたら、選択と縦の拡大、歌詞、ラベルを戻す
   useEffect(() => {
     setSelection(null)
     setFreqRange(null)
     setLyrics(null)
     setLabels([])
     lyricsAbort.current?.abort()
-    setLevel(clip ? analyzeLevel(clip) : null)
   }, [clip])
-  // スペクトログラム、F0、フォルマントの順に計算する（Worker で。別のファイルを開くか解析の設定を変えたら中止して計算し直す）。
-  // 進み具合は 1 本のゲージにまとめる（重さの目安で 4 : 3 : 3 に割る）
-  useEffect(() => {
-    setSpec(null)
-    setPitch(null)
-    setFormants(null)
-    if (!clip) return
-    const ac = new AbortController()
-    const job = startJob('analyze', t('job.kind.analyze'), () => ac.abort())
-    const part = (from: number, span: number) => ({ signal: ac.signal, onProgress: (p: number) => job.update(from + p * span) })
-    void (async () => {
-      setSpec(await analyzeSpectrogram(clip, { ...part(0, 0.4), window: settings.specWindow }))
-      setPitch(await analyzePitch(clip, { ...part(0.4, 0.3), minHz: settings.f0Min, maxHz: settings.f0Max }))
-      setFormants(await analyzeFormants(clip, { ...part(0.7, 0.3), ceiling: settings.formantCeiling }))
-    })()
-      .catch((e) => !ac.signal.aborted && setError(String(e)))
-      .finally(job.end)
-    return () => ac.abort()
-  }, [clip, settings.specWindow, settings.f0Min, settings.f0Max, settings.formantCeiling])
+  const { spec, pitch, formants, level } = useAnalysis(clip, settings, setError)
 
   const open = async (file: File) => {
     try {
