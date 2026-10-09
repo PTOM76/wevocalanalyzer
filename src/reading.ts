@@ -36,12 +36,20 @@ export function readingOf(tokens: ReadingToken[]): string {
 /** 前の音にくっつく小さい字（きゃ、ふぁ など） */
 const SMALL = new Set([...'ゃゅょぁぃぅぇぉゎャュョァィゥェォヮ'])
 
+/** 小さい字がくっつかない字（母音、ん、っ、ー、小さい字）。おぉ のような伸ばしは ー にする */
+const NO_ATTACH = new Set([...'あいうえおんっーアイウエオンッ', ...SMALL])
+/** 小さい母音（伸ばしとして ー にできるもの） */
+const SMALL_VOWEL = new Set([...'ぁぃぅぇぉァィゥェォ'])
+
 /** 読みを一音（モーラ）ずつに分ける。拗音（きゃ）は 1 つ、っ・ん・ー もそれぞれ 1 つ。かな以外は捨てる */
 export function splitMora(reading: string): string[] {
   const morae: string[] = []
   for (const c of reading) {
     if (!isKana(c)) continue
-    if (SMALL.has(c) && morae.length) morae[morae.length - 1] += c
+    const prev = morae[morae.length - 1]
+    // くっつけるのは、1 字の音の後ろだけ（おぉぉぉ が 1 音にならないように）
+    if (SMALL.has(c) && prev && prev.length === 1 && !NO_ATTACH.has(prev)) morae[morae.length - 1] += c
+    else if (SMALL_VOWEL.has(c) && prev) morae.push('ー')
     else morae.push(c)
   }
   return morae
