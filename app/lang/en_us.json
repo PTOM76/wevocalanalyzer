@@ -67,6 +67,8 @@
   "lane.spec": "Spectrogram",
   "lane.wave": "Waveform",
   "lane.labels": "Labels",
+  "lane.cwave": "Waveform (comparison)",
+  "lane.cspec": "Spectrogram (comparison)",
 
   "licenses.app": "This app",
   "licenses.audio": "Audio decoding and analysis (FFT, F0 estimation, etc.)",
@@ -241,5 +243,8 @@
   "compare.diff": "Difference (A − comparison)",
   "compare.meanF0": "Comparison mean F0",
   "compare.meanDiff": "Mean difference",
-  "compare.cents": "{c} cents"
+  "compare.cents": "{c} cents",
+  "compare.overlay": "Overlay Comparison Waveform",
+  "compare.specDiff": "Show Spectrogram Difference",
+  "compare.diffLegend": "Difference: orange = A louder, blue = {name} louder"
 }

@@ -67,6 +67,8 @@
   "lane.spec": "頻譜圖",
   "lane.wave": "波形",
   "lane.labels": "標籤",
+  "lane.cwave": "波形（比較）",
+  "lane.cspec": "頻譜圖（比較）",
 
   "licenses.app": "本體",
   "licenses.audio": "音訊的讀取與分析（FFT、F0 估計等）",
@@ -241,5 +243,8 @@
   "compare.diff": "差（A − 比較）",
   "compare.meanF0": "比較的平均 F0",
   "compare.meanDiff": "平均差",
-  "compare.cents": "{c} 音分"
+  "compare.cents": "{c} 音分",
+  "compare.overlay": "在波形上疊加比較音訊",
+  "compare.specDiff": "以與比較的差顯示頻譜圖",
+  "compare.diffLegend": "差：橙色為 A 較強，藍色為 {name} 較強"
 }

@@ -142,11 +142,13 @@ export default function App() {
   const center = view.view.start + view.view.dur / 2
   const zoomIn = () => view.zoomAround(ZOOM_STEP, center)
   const zoomOut = () => view.zoomAround(1 / ZOOM_STEP, center)
-  const toggleSet = (k: 'follow' | 'showFormants' | 'showHarmonics') => updateSettings({ [k]: !settings[k] })
+  const toggleSet = (k: 'follow' | 'showFormants' | 'showHarmonics' | 'compareOverlay' | 'specDiff') => updateSettings({ [k]: !settings[k] })
+  // 出す帯。比較の帯は比較を開いているときだけ
+  const lanes = compare.source ? settings.lanes : { ...settings.lanes, cwave: false, cspec: false }
   // 帯の表示の切り替え（1 つは必ず残す）
   const toggleLane = (lane: Lane) => {
     const next = { ...settings.lanes, [lane]: !settings.lanes[lane] }
-    if (Object.values(next).some(Boolean)) updateSettings({ lanes: next })
+    if (Object.values({ ...lanes, [lane]: !lanes[lane] }).some(Boolean)) updateSettings({ lanes: next })
   }
   // スペクトログラムの縦の拡大。メニューからは今の範囲の真ん中（対数の周波数軸）を中心にする
   const fullFreq: FreqRange | null = spec ? [spec.minHz, spec.maxHz] : null
@@ -240,11 +242,11 @@ export default function App() {
   const menus = appMenus(
     {
       keymap, wheelZoom: settings.wheelZoom, hasClip: has, hasSelection: !!selection, playing: player.playing, zoomed: view.zoomed, canZoomIn: view.canZoomIn,
-      follow: settings.follow, lanes: settings.lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
+      follow: settings.follow, lanes, freqZoomed: !!freqRange, showFormants: settings.showFormants, showHarmonics: settings.showHarmonics,
       open: picker.open, hasLyrics: !!lyrics, hasLabels: labels.length > 0,
       comparing: !!compare.source, listenCompare: player.listenAlt, switchSource: player.switchSource, openCompare: comparePicker.open, closeCompare: compare.close,
       compareOriginal: projectTracks[trackIndex] && projectTracks[trackIndex].original !== projectTracks[trackIndex].clip ? () => compare.setClip(t('compare.original', { name: projectTracks[trackIndex].name }), projectTracks[trackIndex].original) : undefined,
-      compareTracks: projectTracks.map((tr) => ({ name: tr.name, onClick: () => compare.setClip(tr.name, tr.clip) })).filter((_, i) => i !== trackIndex), addLabel, editLabels: () => setLabelsOpen(true), exportTextGrid: () => downloadLabels(name, labels, player.duration, 'textgrid'), exportLabelText: () => downloadLabels(name, labels, player.duration, 'txt'), exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'),
+      compareTracks: projectTracks.map((tr) => ({ name: tr.name, onClick: () => compare.setClip(tr.name, tr.clip) })).filter((_, i) => i !== trackIndex), addLabel, editLabels: () => setLabelsOpen(true), exportTextGrid: () => downloadLabels(name, labels, player.duration, 'textgrid'), exportLabelText: () => downloadLabels(name, labels, player.duration, 'txt'), exportSrt: () => lyrics && downloadLyricsSrt(name, lyrics), transcribe: () => setLyricsOpen(true), editLyrics: () => setLyricsEditOpen(true), hasReadings: !!lyrics?.some((s) => s.reading), splitMorae: runMorae, hasResults: !!pitch, exportCsv: () => pitch && downloadAnalysisCsv(name, analysisCsv(pitch, formants, level, selection)), showSettings: openSettings, toggleLane, freqZoomIn: () => freqZoom(null, FREQ_ZOOM_STEP), freqZoomOut: () => freqZoom(null, 1 / FREQ_ZOOM_STEP), freqZoomReset: () => setFreqRange(null), toggleFormants: () => toggleSet('showFormants'), toggleHarmonics: () => toggleSet('showHarmonics'), compareOverlay: settings.compareOverlay, specDiff: settings.specDiff, toggleCompareOverlay: () => toggleSet('compareOverlay'), toggleSpecDiff: () => toggleSet('specDiff'),
       zoomIn, zoomOut, showAll: view.showAll, toggleFollow: () => toggleSet('follow'), togglePlay: player.toggle, stop: player.stop, playSelection, selectAll, clearSelection: () => setSelection(null),
       seekStart: () => seekTo(0), seekEnd: () => seekTo(player.duration),
       showShortcuts: () => setDialog('shortcuts'), checkUpdate, showLicenses: () => setDialog('licenses'), showAbout: () => setDialog('about'),
@@ -282,7 +284,8 @@ export default function App() {
       onShowAll={view.showAll}
       follow={settings.follow}
       onFollowChange={(follow) => updateSettings({ follow })}
-      lanes={settings.lanes}
+      lanes={lanes}
+      comparing={!!compare.source}
       onLaneToggle={toggleLane}
       showFormants={settings.showFormants}
       onShowFormantsChange={(showFormants) => updateSettings({ showFormants })}
@@ -299,9 +302,11 @@ export default function App() {
       level={level}
       lyrics={lyrics}
       labels={labels}
-      compare={compare.source && { name: compare.source.name, analysis: compare.analysis, offset: compare.source.offset }}
+      compare={compare.source && { name: compare.source.name, clip: compare.source.clip, analysis: compare.analysis, offset: compare.source.offset }}
       morae={morae}
-      lanes={settings.lanes}
+      lanes={lanes}
+      compareOverlay={settings.compareOverlay}
+      specDiff={settings.specDiff}
       weights={settings.laneWeights}
       onWeightsChange={(laneWeights) => updateSettings({ laneWeights })}
       showFormants={settings.showFormants}

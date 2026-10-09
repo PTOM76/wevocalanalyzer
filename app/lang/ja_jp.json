@@ -67,6 +67,8 @@
   "lane.spec": "スペクトログラム",
   "lane.wave": "波形",
   "lane.labels": "ラベル",
+  "lane.cwave": "波形（比較）",
+  "lane.cspec": "スペクトログラム（比較）",
 
   "licenses.app": "本体",
   "licenses.audio": "音声の読み込みと解析（FFT、F0 推定など）",
@@ -241,5 +243,8 @@
   "compare.diff": "差（A − 比較）",
   "compare.meanF0": "比較の平均 F0",
   "compare.meanDiff": "平均の差",
-  "compare.cents": "{c} セント"
+  "compare.cents": "{c} セント",
+  "compare.overlay": "波形に比較の音声を重ねる",
+  "compare.specDiff": "スペクトログラムを比較との差で表示する",
+  "compare.diffLegend": "差: 橙は A が強い、青は {name} が強い"
 }

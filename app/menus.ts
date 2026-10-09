@@ -2,7 +2,7 @@ import type { MenuGroup } from 'pevenmui'
 import type { WheelZoom } from 'wevocal-lib/react'
 import { t } from './i18n'
 import { keyLabelOf, type ActionId, type Keymap } from './keymap'
-import { LANES, type Lane, type LaneFlags } from './layout'
+import { COMPARE_LANES, LANES, type Lane, type LaneFlags } from './layout'
 import { LANE_INFO } from './ViewTools'
 import { openExternal, USER_GUIDE_URL } from './links'
 
@@ -20,6 +20,11 @@ export interface MenuActions {
   freqZoomed: boolean
   showFormants: boolean
   showHarmonics: boolean
+  /** 比較の音声の波形を重ねるか、スペクトログラムを差で表示するか */
+  compareOverlay: boolean
+  specDiff: boolean
+  toggleCompareOverlay: () => void
+  toggleSpecDiff: () => void
   open: () => void
   /** 歌詞を文字化したか（SRT に書き出せるか）、書き出す、文字化のダイアログを開く */
   hasLyrics: boolean
@@ -119,9 +124,15 @@ export function appMenus(a: MenuActions, mobile: boolean): MenuGroup[] {
       label: t('menu.view'),
       accessKey: 'V',
       entries: [
-        ...LANES.map((l) => ({ label: t(LANE_INFO[l].label), checked: a.lanes[l], disabled: !a.hasClip || (a.lanes[l] && LANES.filter((x) => a.lanes[x]).length === 1), onClick: () => a.toggleLane(l) })),
+        ...LANES.filter((l) => a.comparing || !COMPARE_LANES.includes(l)).map((l) => ({ label: t(LANE_INFO[l].label), checked: a.lanes[l], disabled: !a.hasClip || (a.lanes[l] && LANES.filter((x) => a.lanes[x]).length === 1), onClick: () => a.toggleLane(l) })),
         { label: t('analysis.formants'), checked: a.showFormants, disabled: !a.hasClip || !a.lanes.spec, onClick: a.toggleFormants },
         { label: t('analysis.harmonics'), checked: a.showHarmonics, disabled: !a.hasClip || !a.lanes.spec, onClick: a.toggleHarmonics },
+        ...(a.comparing
+          ? [
+              { label: t('compare.overlay'), checked: a.compareOverlay, disabled: !a.lanes.wave, onClick: a.toggleCompareOverlay },
+              { label: t('compare.specDiff'), checked: a.specDiff, disabled: !a.lanes.spec, onClick: a.toggleSpecDiff },
+            ]
+          : []),
         { divider: true },
         { label: t('wave.zoomIn'), shortcut: a.wheelZoom === 'wheel' ? 'Wheel' : 'Ctrl+Wheel', disabled: !a.hasClip || !a.canZoomIn, onClick: a.zoomIn },
         { label: t('wave.zoomOut'), disabled: !a.hasClip || !a.zoomed, onClick: a.zoomOut },

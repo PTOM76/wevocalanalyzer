@@ -26,6 +26,9 @@ export interface Settings {
   laneWeights: LaneWeights
   /** フォルマントをスペクトログラムに重ねる、F0 の倍音（調波）の線を重ねる */
   showFormants: boolean
+  /** 比較の音声の波形を A の波形の後ろに薄く重ねるか、スペクトログラムを A − 比較の差で表示するか */
+  compareOverlay: boolean
+  specDiff: boolean
   showHarmonics: boolean
   /** 解析の設定: F0 を探す範囲（Hz）、フォルマントの最高周波数（Hz）、スペクトログラムの窓の長さ（サンプル） */
   f0Min: number
@@ -44,7 +47,7 @@ export interface Settings {
   addonFolder: boolean
 }
 
-export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false, lyrics: false, labels: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2, lyrics: 1.5, labels: 1 }, showFormants: true, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, lyricsModel: 'base', lyricsLanguage: null, lyricsCpu: false, dialogWindow: 'auto', devUpdates: false, addonFolder: false }
+export const DEFAULT_SETTINGS: Settings = { theme: 'system', language: 'auto', uiScale: 1, wheelZoom: 'ctrl', keymap: {}, follow: true, lanes: { wave: true, spec: true, f0: false, level: false, lyrics: false, labels: false, cwave: true, cspec: false }, laneWeights: { wave: 3, spec: 5, f0: 3, level: 2, lyrics: 1.5, labels: 1, cwave: 2, cspec: 3 }, showFormants: true, compareOverlay: true, specDiff: false, showHarmonics: false, f0Min: 60, f0Max: 1000, formantCeiling: 5500, specWindow: 2048, lyricsModel: 'base', lyricsLanguage: null, lyricsCpu: false, dialogWindow: 'auto', devUpdates: false, addonFolder: false }
 
 const KEY = app.key('settings')
 

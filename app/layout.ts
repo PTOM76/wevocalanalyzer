@@ -1,8 +1,10 @@
 import { RULER_HEIGHT } from 'wevocal-lib'
 
 /** 帯の種類。上からこの順に並べる（波形は wevocal-lib の描画が目盛りのすぐ下を前提にしているので、いつも一番上） */
-export type Lane = 'wave' | 'spec' | 'f0' | 'level' | 'lyrics' | 'labels'
-export const LANES: Lane[] = ['wave', 'spec', 'f0', 'level', 'lyrics', 'labels']
+export type Lane = 'wave' | 'spec' | 'f0' | 'level' | 'lyrics' | 'labels' | 'cwave' | 'cspec'
+export const LANES: Lane[] = ['wave', 'spec', 'f0', 'level', 'lyrics', 'labels', 'cwave', 'cspec']
+/** 比較の音声の帯（比較を開いているときだけ出す） */
+export const COMPARE_LANES: Lane[] = ['cwave', 'cspec']
 
 /** 帯ごとの表示と、高さの比 */
 export type LaneFlags = Record<Lane, boolean>

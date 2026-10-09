@@ -67,6 +67,8 @@
   "lane.spec": "스펙트로그램",
   "lane.wave": "파형",
   "lane.labels": "라벨",
+  "lane.cwave": "파형(비교)",
+  "lane.cspec": "스펙트로그램(비교)",
 
   "licenses.app": "본체",
   "licenses.audio": "오디오 읽기와 분석(FFT, F0 추정 등)",
@@ -241,5 +243,8 @@
   "compare.diff": "차이(A − 비교)",
   "compare.meanF0": "비교 평균 F0",
   "compare.meanDiff": "평균 차이",
-  "compare.cents": "{c} 센트"
+  "compare.cents": "{c} 센트",
+  "compare.overlay": "파형에 비교 오디오 겹치기",
+  "compare.specDiff": "스펙트로그램을 비교와의 차이로 표시",
+  "compare.diffLegend": "차이: 주황은 A가 강함, 파랑은 {name}이 강함"
 }
