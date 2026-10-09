@@ -13,24 +13,26 @@ export function findOffset(a: Level, b: Level, maxSec = 10): number {
   const xa = prep(a)
   const xb = prep(b)
   const maxLag = Math.round(maxSec / hop)
+  // 重なりが短いと、たまたま両方鳴っている所だけで高く出るので、短い方の半分以上重なるずれだけを見る
+  const minOverlap = Math.max(50, Math.floor(Math.min(xa.length, xb.length) / 2))
   let best = 0
   let bestScore = -Infinity
   for (let lag = -maxLag; lag <= maxLag; lag++) {
-    // a[k] と b[k − lag] を比べる。重なりの長さで割って、端のずれに有利にならないようにする
-    let sum = 0
-    let n = 0
+    // a[k] と b[k − lag] の重なりの中の相関係数
     const k0 = Math.max(0, lag)
     const k1 = Math.min(xa.length, xb.length + lag)
+    if (k1 - k0 < minOverlap) continue
+    let ab = 0, aa = 0, bb = 0
     for (let k = k0; k < k1; k++) {
-      sum += xa[k] * xb[k - lag]
-      n++
+      ab += xa[k] * xb[k - lag]
+      aa += xa[k] * xa[k]
+      bb += xb[k - lag] * xb[k - lag]
     }
-    if (n < 50) continue
-    const score = sum / n
+    const score = aa > 0 && bb > 0 ? ab / Math.sqrt(aa * bb) : -Infinity
     if (score > bestScore) {
       bestScore = score
       best = lag
     }
   }
-  return best * hop
+  return Math.round(best * hop * 100) / 100
 }

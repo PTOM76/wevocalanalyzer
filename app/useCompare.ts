@@ -37,7 +37,7 @@ export function useCompare(o: AnalysisOptions, onError: (message: string) => voi
       } else setClip(file.name, await decodeFile(file))
     },
     setClip,
-    setOffset: (offset) => setSource((s) => (s ? { ...s, offset } : s)),
+    setOffset: (offset) => setSource((s) => (s ? { ...s, offset: Math.round(offset * 100) / 100 } : s)),
     close: () => setSource(null),
   }
 }
