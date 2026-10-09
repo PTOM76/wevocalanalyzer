@@ -33,6 +33,8 @@ export interface LyricsRequest {
   /** 言語（transformers.js の名前。'japanese' など）。null なら自動で判定する */
   language: string | null
   samples: Float32Array
+  /** CPU（wasm）で使うスレッドの数（0 は自動。`lyricsThreads`） */
+  threads: number
   /** kuromoji の辞書のフォルダー（URL のパス。kuromoji は URL の // を潰すので、スキームを付けない） */
   dicPath: string
   /** モデルの追加機能（whisper-<大きさ>）の場所。この下の onnx-community/whisper-<大きさ>/ から読む */
@@ -47,3 +49,14 @@ export type LyricsMessage =
   | { kind: 'transcribe' }
   | { kind: 'done'; segments: LyricsSegment[] }
   | { kind: 'error'; error: string }
+
+/**
+ * CPU（wasm）で使うスレッドの数。cross-origin isolation でなければ 1。0（自動）は 4 と（コアの数 − 1）の小さい方で、iOS は 1。
+ * 明示しないと、isolation のとき ONNX Runtime が自分で増やす（WeVocalExtractor の resolveThreads と同じ決め方）
+ */
+export function lyricsThreads(threads = 0): number {
+  if (typeof SharedArrayBuffer === 'undefined' || !globalThis.crossOriginIsolated) return 1
+  if (threads > 0) return threads
+  const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
+  return ios ? 1 : Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 1) - 1))
+}

@@ -7,7 +7,7 @@ import type { LyricsRequest, LyricsMessage, LyricsSegment } from './lyricsTypes'
 import { collapseRepeats, readingOf } from './reading'
 
 // ONNX Runtime の wasm は、追加機能に一緒に入れたものを使う（指定しないと transformers.js は外部の CDN から読み込み、オフラインで使えない）
-const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown } }
+const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown; numThreads?: number } }
 if (onnx.wasm) onnx.wasm.wasmPaths = { mjs: ortMjs, wasm: ortWasm }
 
 const post = (m: LyricsMessage) => (self as unknown as Worker).postMessage(m)
@@ -18,6 +18,8 @@ let loaded: { key: string; asr: AutomaticSpeechRecognitionPipeline } | null = nu
 async function load(req: LyricsRequest) {
   const key = `${req.model}|${req.device}`
   if (loaded?.key === key) return loaded.asr
+  // スレッドの数（ONNX Runtime の最初の準備のときだけ効く。変えても、Worker を作り直すまでは前の数のまま）
+  if (onnx.wasm) onnx.wasm.numThreads = req.threads
   // モデルは追加機能の保存先から（Service Worker が返す）。無いファイル（CPU 用の量子化したものなど）だけ Hugging Face から取る。
   // そのときは transformers.js 自身の保存先には置かない（追加機能と二重になり、設定から削除できないため）。
   // Service Worker が動いていなければ保存先を読めないので、Hugging Face から取って transformers.js の保存先に置く（毎回取り直さないように）

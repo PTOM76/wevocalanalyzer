@@ -5,6 +5,7 @@
  */
 import type { Clip } from 'wevocal-lib'
 import type { LyricsMessage, LyricsModel, LyricsRequest, LyricsSegment } from './lyricsTypes'
+import { lyricsThreads } from './lyricsTypes'
 
 export { hasWebGpu, LYRICS_MODEL_MB, type LyricsModel, type LyricsSegment } from './lyricsTypes'
 
@@ -17,6 +18,8 @@ export interface LyricsOptions {
   device: 'webgpu' | 'wasm'
   /** 言語（'japanese'、'english' など）。null なら自動で判定する */
   language: string | null
+  /** CPU（wasm）で使うスレッドの数（0 か省くと自動） */
+  threads?: number
   /** モデルの取得の進み具合（0〜1） */
   onDownload?: (p: number) => void
   /** 取得が終わり、認識を始めたとき（認識の進み具合は分からない） */
@@ -77,7 +80,7 @@ export async function transcribeLyrics(clip: Clip, o: LyricsOptions): Promise<Ly
     const modelBase = new URL(`../whisper-${o.model}/`, import.meta.url).href
     // 追加機能の保存先は Service Worker が返す。動いていないとき（開発サーバーなど）は読めないので、Worker は transformers.js の保存先を使う
     const fromAddon = !!navigator.serviceWorker?.controller
-    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples, dicPath, modelBase, fromAddon }
+    const req: LyricsRequest = { model: o.model, device: o.device, language: o.language, samples, threads: lyricsThreads(o.threads), dicPath, modelBase, fromAddon }
     w.postMessage(req, [samples.buffer])
   })
 }
