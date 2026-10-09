@@ -23,6 +23,9 @@
   "analysis.loudness": "라우드니스",
   "analysis.truePeak": "트루 피크",
   "analysis.whole": "전체",
+  "analysis.vibrato": "비브라토",
+  "analysis.vibratoValue": "{rate} Hz, ±{depth} 센트",
+  "analysis.vibratoNone": "없음",
 
   "common.cancel": "취소",
   "common.stop": "정지",

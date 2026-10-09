@@ -23,6 +23,9 @@
   "analysis.loudness": "響度",
   "analysis.truePeak": "真峰值",
   "analysis.whole": "整體",
+  "analysis.vibrato": "顫音",
+  "analysis.vibratoValue": "{rate} Hz，±{depth} 音分",
+  "analysis.vibratoNone": "無",
 
   "common.cancel": "取消",
   "common.stop": "停止",

@@ -11,6 +11,7 @@ export type { AnalyzeOptions, FormantOptions, Formants, Level, MoraRange, Pitch,
 export { moraCode, readingOf, splitMora, toHiragana } from './reading'
 export { analyzeLevel, LEVEL_FLOOR_DB } from './level'
 export { analyzeLoudness, type Loudness } from './loudness'
+export { analyzeVibrato, type Vibrato } from './vibrato'
 import type { Loudness } from './loudness'
 export { renderSpectrogram } from './spectrogram'
 

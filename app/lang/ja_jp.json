@@ -23,6 +23,9 @@
   "analysis.loudness": "ラウドネス",
   "analysis.truePeak": "トゥルーピーク",
   "analysis.whole": "全体",
+  "analysis.vibrato": "ビブラート",
+  "analysis.vibratoValue": "{rate} Hz、±{depth} セント",
+  "analysis.vibratoNone": "なし",
 
   "common.cancel": "キャンセル",
   "common.stop": "停止",

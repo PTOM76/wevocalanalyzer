@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material'
 import type { Clip, Range } from 'wevocal-lib'
 import { useMemo } from 'react'
-import type { Formants, Level, Pitch, Spectrogram } from '../src/index'
+import { analyzeVibrato, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
 import SpectrumPlot, { spectrumOf } from './SpectrumPlot'
 import { useT } from './i18n'
@@ -52,6 +52,7 @@ export default function AnalysisPanel(p: Props) {
   const dur = p.clip ? (p.clip.channels[0]?.length ?? 0) / p.clip.sampleRate : null
   const whole = useLoudness(p.clip, 0, dur)
   const part = useLoudness(p.clip, p.selection?.start ?? null, p.selection?.end ?? null)
+  const vib = p.selection && p.pitch ? analyzeVibrato(p.pitch, p.selection.start, p.selection.end) : null
   const lufs = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} LUFS`)
   const dbtp = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} dBTP`)
   const spectrum = useMemo(() => (p.spec ? spectrumOf(p.spec, s0, s1) : null), [p.spec, s0, s1])
@@ -89,6 +90,7 @@ export default function AnalysisPanel(p: Props) {
             <>
               <Value label={t('analysis.meanF0')} value={`${hz(r.f0)}（${r.note}）`} />
               <Value label={t('analysis.voiced')} value={`${Math.round(r.voicedRatio * 100)}%`} />
+              <Value label={t('analysis.vibrato')} value={vib ? t('analysis.vibratoValue', { rate: vib.rate.toFixed(1), depth: Math.round(vib.depth) }) : t('analysis.vibratoNone')} />
               <Value label={t('analysis.meanLevel')} value={db(meanLevel(p.selection!.start, p.selection!.end, p.level))} />
               {r.formants.map((f, i) => (
                 <Value key={i} label={t('analysis.meanFormant', { n: i + 1 })} value={hz(f)} color={FORMANT_COLORS[i]} />

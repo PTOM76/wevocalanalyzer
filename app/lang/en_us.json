@@ -23,6 +23,9 @@
   "analysis.loudness": "Loudness",
   "analysis.truePeak": "True peak",
   "analysis.whole": "Whole file",
+  "analysis.vibrato": "Vibrato",
+  "analysis.vibratoValue": "{rate} Hz, ±{depth} cents",
+  "analysis.vibratoNone": "None",
 
   "common.cancel": "Cancel",
   "common.stop": "Stop",
