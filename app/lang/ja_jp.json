@@ -26,6 +26,11 @@
   "analysis.vibrato": "ビブラート",
   "analysis.vibratoValue": "{rate} Hz、±{depth} セント",
   "analysis.vibratoNone": "なし",
+  "analysis.f0HistWhole": "F0 の分布（全体）",
+  "analysis.f0HistSelection": "F0 の分布（選択範囲）",
+  "analysis.f0Range": "音域",
+  "analysis.f0Mode": "最も多いのは {note}",
+  "analysis.ltas": "長時間平均スペクトル（全体）",
 
   "common.cancel": "キャンセル",
   "common.stop": "停止",

@@ -26,6 +26,11 @@
   "analysis.vibrato": "비브라토",
   "analysis.vibratoValue": "{rate} Hz, ±{depth} 센트",
   "analysis.vibratoNone": "없음",
+  "analysis.f0HistWhole": "F0 분포(전체)",
+  "analysis.f0HistSelection": "F0 분포(선택 범위)",
+  "analysis.f0Range": "음역",
+  "analysis.f0Mode": "가장 많은 음 {note}",
+  "analysis.ltas": "장시간 평균 스펙트럼(전체)",
 
   "common.cancel": "취소",
   "common.stop": "정지",

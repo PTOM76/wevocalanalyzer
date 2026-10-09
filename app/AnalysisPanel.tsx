@@ -1,12 +1,13 @@
 import { Box, Stack, Typography } from '@mui/material'
 import type { Clip, Range } from 'wevocal-lib'
 import { useMemo } from 'react'
-import { analyzeVibrato, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
+import { analyzeF0Histogram, analyzeVibrato, type Formants, type Level, type Pitch, type Spectrogram } from '../src/index'
 import type { LyricsSegment } from '../src/lyricsTypes'
 import SpectrumPlot, { spectrumOf } from './SpectrumPlot'
+import F0HistogramPlot from './F0HistogramPlot'
 import { useT } from './i18n'
 import { useLoudness } from './useLoudness'
-import { FORMANT_COLORS, levelAt, lyricSegmentAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
+import { FORMANT_COLORS, levelAt, midiName, lyricSegmentAt, meanLevel, noteOf, rangeStats, valuesAt } from './lanes'
 
 interface Props {
   clip: Clip | null
@@ -53,6 +54,11 @@ export default function AnalysisPanel(p: Props) {
   const whole = useLoudness(p.clip, 0, dur)
   const part = useLoudness(p.clip, p.selection?.start ?? null, p.selection?.end ?? null)
   const vib = p.selection && p.pitch ? analyzeVibrato(p.pitch, p.selection.start, p.selection.end) : null
+  // F0 の分布（選択範囲があればその中、なければ全体）と、全体の平均スペクトル（LTAS）
+  const sel0 = p.selection?.start ?? 0
+  const sel1 = p.selection?.end ?? Infinity
+  const hist = useMemo(() => (p.pitch ? analyzeF0Histogram(p.pitch, sel0, sel1) : null), [p.pitch, sel0, sel1])
+  const ltas = useMemo(() => (p.spec ? spectrumOf(p.spec, 0, Infinity) : null), [p.spec])
   const lufs = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} LUFS`)
   const dbtp = (x: number | null | undefined) => (x == null ? '—' : `${x.toFixed(1)} dBTP`)
   const spectrum = useMemo(() => (p.spec ? spectrumOf(p.spec, s0, s1) : null), [p.spec, s0, s1])
@@ -114,6 +120,22 @@ export default function AnalysisPanel(p: Props) {
         <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
           <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t(p.selection ? 'analysis.spectrumSelection' : 'analysis.spectrumAt')}</Typography>
           <SpectrumPlot spec={p.spec} values={spectrum} formants={(p.selection ? r?.formants : v.formants) ?? []} />
+        </Stack>
+      )}
+      {hist && (
+        <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t(p.selection ? 'analysis.f0HistSelection' : 'analysis.f0HistWhole')}</Typography>
+          <Value
+            label={t('analysis.f0Range')}
+            value={`${midiName(hist.low)}〜${midiName(hist.low + hist.counts.length - 1)}（${t('analysis.f0Mode', { note: midiName(hist.low + hist.counts.indexOf(Math.max(...hist.counts))) })}）`}
+          />
+          <F0HistogramPlot hist={hist} />
+        </Stack>
+      )}
+      {p.spec && ltas && (
+        <Stack sx={{ gap: 0.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t('analysis.ltas')}</Typography>
+          <SpectrumPlot spec={p.spec} values={ltas} formants={[]} />
         </Stack>
       )}
     </Stack>

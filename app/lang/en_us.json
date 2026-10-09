@@ -26,6 +26,11 @@
   "analysis.vibrato": "Vibrato",
   "analysis.vibratoValue": "{rate} Hz, ±{depth} cents",
   "analysis.vibratoNone": "None",
+  "analysis.f0HistWhole": "F0 distribution (whole file)",
+  "analysis.f0HistSelection": "F0 distribution (selection)",
+  "analysis.f0Range": "Range",
+  "analysis.f0Mode": "most often {note}",
+  "analysis.ltas": "Long-term average spectrum (whole file)",
 
   "common.cancel": "Cancel",
   "common.stop": "Stop",

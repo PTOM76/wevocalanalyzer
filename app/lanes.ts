@@ -133,12 +133,15 @@ export function valuesAt(t: number, pitch: Pitch | null, formants: Formants | nu
   return { f0, formants: f, note: f0 > 0 ? noteName(f0) : '' }
 }
 
+/** MIDI 番号の音名（例: A4） */
+export const midiName = (n: number) => `${NOTE_NAMES[((n % 12) + 12) % 12]}${Math.floor(n / 12) - 1}`
+
 /** 周波数の音名とずれ（例: A4 +12c） */
 function noteName(hz: number) {
   const m = hzToMidi(hz)
   const n = Math.round(m)
   const cents = Math.round((m - n) * 100)
-  return `${NOTE_NAMES[((n % 12) + 12) % 12]}${Math.floor(n / 12) - 1} ${cents >= 0 ? '+' : ''}${cents}c`
+  return `${midiName(n)} ${cents >= 0 ? '+' : ''}${cents}c`
 }
 
 /** 選択範囲の値: 有声区間の平均 F0（半音で平均）と音名、有声率、F1〜F3 の平均（Hz） */
