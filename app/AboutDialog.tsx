@@ -25,7 +25,7 @@ export default function AboutDialog({ open, onClose }: { open: boolean; onClose:
         [t('about.version'), <span className="selectable">{APP_BUILD}</span>],
         [t('about.author'), app.author],
         [
-          'GitHub',
+          'ソースコード',
           <Link className="selectable" href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
             {REPOSITORY_URL.replace('https://', '')}
           </Link>,
