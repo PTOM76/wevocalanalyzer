@@ -115,3 +115,17 @@ export async function exportMorae(clip: Clip, morae: MoraMark[], keepAll = false
   })
   return createZip(entries)
 }
+
+/**
+ * 追加機能の一覧（解析、歌詞の文字化とそのモデル。PevenMUI の AddonInfo の形）。名前は訳文のキーで、アプリの訳文に同じキーを置く。
+ * whisper のファイルは Hugging Face から取得して、追加機能の保存先に置く（scripts/whisperAddons.mjs）
+ */
+export const ANALYZER_ADDONS = [
+  // 解析（スペクトログラム、一音ずつの境目）
+  { id: 'analyzer', name: 'addon.analyzer' },
+  // 歌詞の文字化（src/lyrics.ts）
+  { id: 'analyzer-lyrics', name: 'addon.lyrics' },
+  { id: 'whisper-tiny', name: 'addon.whisperTiny', shortName: 'addon.whisperTinyShort', requires: ['analyzer-lyrics'] },
+  { id: 'whisper-base', name: 'addon.whisperBase', shortName: 'addon.whisperBaseShort', requires: ['analyzer-lyrics'] },
+  { id: 'whisper-small', name: 'addon.whisperSmall', shortName: 'addon.whisperSmallShort', requires: ['analyzer-lyrics'] },
+] as const
