@@ -55,6 +55,7 @@
   "job.kind.analyze": "解析中",
   "job.kind.lyrics": "歌詞の文字化",
   "job.kind.morae": "一音ずつに分けています",
+  "job.kind.update": "更新中",
 
   "key.seekBack": "再生位置を戻す",
   "key.seekBackFine": "再生位置を少し戻す",

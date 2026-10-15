@@ -55,6 +55,7 @@
   "job.kind.analyze": "분석 중",
   "job.kind.lyrics": "가사 받아쓰기",
   "job.kind.morae": "한 음씩 나누는 중",
+  "job.kind.update": "업데이트 중",
 
   "key.seekBack": "재생 위치 뒤로",
   "key.seekBackFine": "재생 위치 조금 뒤로",

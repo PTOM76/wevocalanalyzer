@@ -55,6 +55,7 @@
   "job.kind.analyze": "Analyzing",
   "job.kind.lyrics": "Lyrics transcription",
   "job.kind.morae": "Splitting into single sounds",
+  "job.kind.update": "Updating",
 
   "key.seekBack": "Move playhead back",
   "key.seekBackFine": "Move playhead back slightly",

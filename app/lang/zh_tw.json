@@ -55,6 +55,7 @@
   "job.kind.analyze": "正在分析",
   "job.kind.lyrics": "歌詞轉寫",
   "job.kind.morae": "正在逐音切分",
+  "job.kind.update": "正在更新",
 
   "key.seekBack": "播放位置後退",
   "key.seekBackFine": "播放位置稍微後退",
