@@ -15,7 +15,8 @@ export const ADDONS: AddonInfo<MessageKey>[] = [
   { id: 'whisper-small', name: 'addon.whisperSmall', shortName: 'addon.whisperSmallShort', requires: ['analyzer-lyrics'] },
 ]
 
-export const addons = createAddons({ appId: app.id, idb: createIdb(app.id), addons: ADDONS, base: import.meta.env.BASE_URL })
+// 選んだフォルダーの中の置き場所は WeVocal のアプリで共通（同じフォルダーを選べば、同じモデルを使う）
+export const addons = createAddons({ appId: app.id, idb: createIdb(app.id), addons: ADDONS, base: import.meta.env.BASE_URL, folderName: 'wevocal-addons' })
 
 /** 部品とフックが使う追加機能（main.tsx の AddonsContext に入れる） */
 export const addonsContext: AddonsContextValue = {

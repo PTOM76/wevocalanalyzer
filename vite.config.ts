@@ -77,7 +77,7 @@ export default defineConfig({
         // 追加機能のページ（addons/ 以下）を開いたときにアプリ本体の index.html を返さない
         navigateFallbackDenylist: [/\/addons\//],
         // 追加機能のファイルを保存先から返す（PevenMUI の pevenAddonsRoute）
-        runtimeCaching: [pevenAddonsRoute(APP_INFO.id)],
+        runtimeCaching: [pevenAddonsRoute(APP_INFO.id, 'wevocal-addons')],
       },
     }),
   ],
