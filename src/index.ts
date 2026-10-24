@@ -78,7 +78,7 @@ function mixDown(channels: Float32Array[]): Float32Array {
 }
 
 /** Worker で `kind` の解析をする（チャンネルは平均してから） */
-async function request(kind: AnalyzeRequest['kind'], clip: Clip, opts: AnalyzeOptions, params: Pick<AnalyzeRequest, 'window' | 'minHz' | 'maxHz' | 'ceiling' | 'codes'> = {}) {
+async function request(kind: AnalyzeRequest['kind'], clip: Clip, opts: AnalyzeOptions, params: Pick<AnalyzeRequest, 'window' | 'minHz' | 'maxHz' | 'voicedLimit' | 'silenceRms' | 'ceiling' | 'codes'> = {}) {
   opts.signal?.throwIfAborted()
   const id = nextId++
   const samples = mixDown(clip.channels)
@@ -98,7 +98,7 @@ export async function analyzeSpectrogram(clip: Clip, opts: SpectrogramOptions = 
 
 /** F0（ピッチ。YIN、10ms 間隔。wevocal-lib の F0 推定と同じもの） */
 export async function analyzePitch(clip: Clip, opts: PitchOptions = {}): Promise<Pitch> {
-  return { data: (await request('f0', clip, opts, { minHz: opts.minHz, maxHz: opts.maxHz })) as Float32Array, hopSec: HOP_SEC }
+  return { data: (await request('f0', clip, opts, { minHz: opts.minHz, maxHz: opts.maxHz, voicedLimit: opts.voicedLimit, silenceRms: opts.silenceRms })) as Float32Array, hopSec: HOP_SEC }
 }
 
 /** フォルマント F1〜F3（LPC、10ms 間隔）。無声区間にも値が入るので、表示するときは F0 で隠す */

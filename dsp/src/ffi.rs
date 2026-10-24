@@ -58,13 +58,14 @@ pub unsafe extern "C" fn analyze_spectrogram(input: *const f32, frames: usize, s
 }
 
 /// モノラル音声の F0 を推定し、値の個数を返す（`f0::HOP_SEC` 間隔、Hz、無声は 0）。結果は `output_ptr` で取得する。
+/// `voiced_limit` は有声とみなす谷の深さの上限、`silence_rms` は無音とみなす音量（`f0::Params`）
 ///
 /// # Safety
 /// `input` は `frames` 個の有効な f32 を指していること。
 #[no_mangle]
-pub unsafe extern "C" fn analyze_f0(input: *const f32, frames: usize, sample_rate: f32, min_hz: f32, max_hz: f32) -> usize {
+pub unsafe extern "C" fn analyze_f0(input: *const f32, frames: usize, sample_rate: f32, min_hz: f32, max_hz: f32, voiced_limit: f32, silence_rms: f32) -> usize {
     let x = std::slice::from_raw_parts(input, frames);
-    let params = f0::Params { min_hz, max_hz, ..Default::default() };
+    let params = f0::Params { min_hz, max_hz, voiced_limit, silence_rms };
     let out = f0::estimate_with(x, sample_rate, &params, &mut host_progress);
     let n = out.len();
     OUTPUT.with(|o| *o.borrow_mut() = out);

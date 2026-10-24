@@ -9,7 +9,7 @@ interface DspExports {
   alloc_f32(len: number): number
   free_f32(ptr: number, len: number): void
   analyze_spectrogram(input: number, frames: number, sampleRate: number, window: number): number
-  analyze_f0(input: number, frames: number, sampleRate: number, minHz: number, maxHz: number): number
+  analyze_f0(input: number, frames: number, sampleRate: number, minHz: number, maxHz: number, voicedLimit: number, silenceRms: number): number
   analyze_formants(input: number, frames: number, sampleRate: number, ceiling: number): number
   segment_morae(input: number, frames: number, sampleRate: number, codes: number, count: number): number
   output_u8_ptr(): number
@@ -49,7 +49,7 @@ function analyze(dsp: DspExports, req: AnalyzeRequest): Uint8Array | Float32Arra
         dsp.free_f32(c, codes.length)
       }
     }
-    const count = req.kind === 'f0' ? dsp.analyze_f0(input, n, req.sampleRate, req.minHz ?? 60, req.maxHz ?? 1000) : dsp.analyze_formants(input, n, req.sampleRate, req.ceiling ?? 5500)
+    const count = req.kind === 'f0' ? dsp.analyze_f0(input, n, req.sampleRate, req.minHz ?? 60, req.maxHz ?? 1000, req.voicedLimit ?? 0.35, req.silenceRms ?? 0.003) : dsp.analyze_formants(input, n, req.sampleRate, req.ceiling ?? 5500)
     return new Float32Array(dsp.memory.buffer, dsp.output_ptr(), count).slice()
   } finally {
     dsp.free_f32(input, n)

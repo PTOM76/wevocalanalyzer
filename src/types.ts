@@ -40,6 +40,10 @@ export interface PitchOptions extends AnalyzeOptions {
   /** 探す範囲（Hz）。既定は 60〜1000 */
   minHz?: number
   maxHz?: number
+  /** 有声とみなす谷の深さの上限（大きいほどゆるい）。既定は 0.35 */
+  voicedLimit?: number
+  /** これより小さい音量（RMS）は無音とみなす。既定は 0.003（約 -50dB） */
+  silenceRms?: number
 }
 
 /** フォルマントの設定 */
@@ -76,6 +80,8 @@ export interface AnalyzeRequest {
   window?: number
   minHz?: number
   maxHz?: number
+  voicedLimit?: number
+  silenceRms?: number
   ceiling?: number
   /** 一音ずつの印（mora のとき。reading.ts の moraCode） */
   codes?: number[]
