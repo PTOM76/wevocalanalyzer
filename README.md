@@ -4,8 +4,8 @@ WeVocalAnalyzerは、Webブラウザ上で音声を解析するためのツー�
 音声ファイルはサーバーへ送らず、処理はすべてブラウザ内で行う。<br />
 画面を持たないライブラリとしても使え、[WeVocalSynth](https://github.com/PTOM76/wevocalsynth) から追加機能として使う予定（今のところスペクトログラム）。
 
-## 今の状態
-WeVocalSynth と同じ部品（[PevenMUI](https://github.com/PTOM76/pevenmui) の画面の配置、[wevocal-lib](https://github.com/PTOM76/wevocal-lib) の波形とミニマップ）で組んだ土台。
+## できること
+WeVocalSynth と同じ部品（[PevenMUI](https://github.com/PTOM76/pevenmui) の画面の配置、[wevocal-lib](https://github.com/PTOM76/wevocal-lib) の波形とミニマップ）で組んでいる。
 
 | できること | 内容 |
 | --- | --- |
@@ -18,7 +18,7 @@ WeVocalSynth と同じ部品（[PevenMUI](https://github.com/PTOM76/pevenmui) �
 | 選択範囲 | ドラッグで選択、端で調整、範囲を試聴。範囲の F0 とフォルマントの平均 |
 | 操作 | 拡大、縮小、全体表示、追従。キーの割り当て、PC/スマホ（2 本指の拡大縮小）、ライト/ダーク、日本語/英語/韓国語/中国語、オフライン（PWA） |
 
-要件は [docs/REQUIREMENT.md](docs/REQUIREMENT.md)。
+使い方は [docs/MANUAL.md](docs/MANUAL.md)、要件は [docs/REQUIREMENT.md](docs/REQUIREMENT.md)。
 
 ## 構成
 | 場所 | 中身 |

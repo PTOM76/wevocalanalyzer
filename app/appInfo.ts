@@ -6,6 +6,6 @@ export const APP_INFO = {
   author: 'PitaQ',
   repository: 'https://github.com/PTOM76/wevocalanalyzer',
   // ユーザーガイド（ヘルプ → ユーザーガイド）。移転したらここだけを変える
-  guide: 'https://github.com/PTOM76/wevocalanalyzer#readme',
+  guide: 'https://github.com/PTOM76/wevocalanalyzer/blob/main/docs/MANUAL.md',
   lang: 'ja_jp',
 }

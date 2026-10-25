@@ -10,6 +10,7 @@
     "./lyrics": "./src/lyrics.ts"
   },
   "scripts": {
+    "docs:wiki": "node scripts/docs-to-dokuwiki.mjs",
     "build:wasm": "node scripts/build-wasm.mjs",
     "dev": "vite",
     "build": "tsc -p tsconfig.app.json && vite build && node scripts/build-addons.mjs",
