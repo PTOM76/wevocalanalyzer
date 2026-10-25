@@ -6,7 +6,7 @@
 ## 設計
 - [要件定義](REQUIREMENT.md)（何を目指し、どこまでできているか）
 
-## 開発する人向け
+## 開発者向け
 セットアップと使用できるコマンドは [README](../README.md#開発) と [todofile.json5](../todofile.json5)。
 
 ## wiki
